@@ -2,7 +2,6 @@ package main
 
 import (
 	"flag"
-	"fmt"
 	"go/parser"
 	"go/token"
 	"log"
@@ -14,11 +13,21 @@ func main() {
 	var fset token.FileSet
 	pkgs, err := parser.ParseDir(&fset, path, nil, 0)
 	checkUserErr(err)
-	fmt.Println(pkgs)
+
+	if len(pkgs) == 0 {
+		fatal("no packages found in ", path)
+	}
+	if len(pkgs) > 1 {
+		fatal(len(pkgs), " packages found in ", path)
+	}
 }
 
 func checkUserErr(err error) {
 	if err != nil {
-		log.Fatal(err)
+		fatal(err)
 	}
+}
+
+func fatal(msg ...interface{}) {
+	log.Fatal(msg...)
 }
