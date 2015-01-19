@@ -93,7 +93,7 @@ func (w *writer) genFuncDecl(n *ast.FuncDecl) {
 }
 
 func (w *writer) genMainDecl(n *ast.FuncDecl) {
-	w.open(PUBLIC, STATIC, FINAL, VOID, n.Name.Name)
+	w.open(PUBLIC, STATIC, FINAL, VOID, n.Name.Name, parens("String[] args"))
 	w.close()
 	w.putln()
 }
@@ -136,4 +136,17 @@ func (w *writer) error(n ast.Node, msg ...interface{}) {
 // return position of node using this writer's fileset
 func (w *writer) pos(n ast.Node) token.Position {
 	return w.fset.Position(n.Pos())
+}
+
+// prints parentisized argument list: "(elem[0], elem[1], ...)"
+func parens(elem ...interface{}) string {
+	str := "("
+	for i, e := range elem {
+		if i > 0 {
+			str += ", "
+		}
+		str += fmt.Sprint(e)
+	}
+	str += ")"
+	return str
 }
