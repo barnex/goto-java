@@ -109,8 +109,74 @@ func (w *writer) genBlockStmt(n *ast.BlockStmt) {
 	w.putln(LBRACE)
 	w.indent++
 
+	for _, n := range n.List {
+		w.genStmt(n)
+		w.putln(";")
+	}
+
 	w.indent--
 	w.putln(RBRACE)
+}
+
+func (w *writer) genStmt(n ast.Stmt) {
+	switch s := n.(type) {
+	default:
+		w.error(n, "cannot handle ", reflect.TypeOf(s))
+	case *ast.ExprStmt:
+		w.genExprStmt(s)
+	}
+}
+
+func (w *writer) genExprStmt(n *ast.ExprStmt) {
+	w.genExpr(n.X)
+}
+
+func (w *writer) genExpr(n ast.Expr) {
+	switch e := n.(type) {
+	default:
+		w.error(n, "cannot handle ", reflect.TypeOf(e))
+	case *ast.CallExpr:
+		w.genCallExpr(e)
+	case *ast.Ident:
+		w.genIdent(e)
+	case *ast.BasicLit:
+		w.genBasicLit(e)
+	}
+}
+
+func (w *writer) genCallExpr(n *ast.CallExpr) {
+	w.genExpr(n.Fun)
+
+	w.put("(")
+	for i, a := range n.Args {
+		if i != 0 {
+			w.put(",")
+		}
+		w.genExpr(a)
+	}
+	w.put(")")
+
+	if n.Ellipsis != 0 {
+		w.error(n, "cannot handle ellipsis")
+	}
+}
+
+var keywordMap = map[string]string{
+	"println": "System.out.println",
+}
+
+func (w *writer) genIdent(n *ast.Ident) {
+	name := n.Name
+	// translate name if keyword
+	if trans, ok := keywordMap[name]; ok {
+		name = trans
+	}
+	w.put(name)
+}
+
+func (w *writer) genBasicLit(n *ast.BasicLit) {
+	w.put(n.Value)
+	// TODO: translate backquotes, complex etc.
 }
 
 // fmt utils
@@ -121,17 +187,25 @@ func (w *writer) putln(tokens ...interface{}) {
 	w.needSpace = false
 }
 
+var noSpaceAround = map[string]bool{
+	";":  true,
+	"\n": true,
+	"(":  true,
+	")":  true,
+}
+
 func (w *writer) put(tokens ...interface{}) {
 	w.putIndent()
 	for _, t := range tokens {
-		if t == ";" || t == "\n" {
+		t := fmt.Sprint(t)
+		if noSpaceAround[t] {
 			w.needSpace = false
 		}
 		if w.needSpace {
 			fmt.Fprint(w.out, " ")
 		}
 		fmt.Fprint(w.out, t)
-		w.needSpace = true
+		w.needSpace = !noSpaceAround[t]
 	}
 }
 
