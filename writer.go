@@ -156,9 +156,14 @@ func (w *writer) putSpec(s ast.Spec) {
 }
 
 func (w *writer) putValueSpec(s *ast.ValueSpec) {
-	for _, n := range s.Names {
-		w.putExpr(s.Type)
-		w.putln(n.Name, "=", n.Obj.Data, ";")
+	w.putExpr(s.Type)
+	for i, n := range s.Names {
+		w.put(n.Name, "=", n.Obj.Data)
+		if i == len(s.Names)-1 {
+			w.put(";")
+		} else {
+			w.put(", ")
+		}
 	}
 }
 
@@ -245,6 +250,8 @@ var noSpaceAround = map[string]bool{
 	"\n": true,
 	"(":  true,
 	")":  true,
+	",":  true,
+	", ": true,
 }
 
 func (w *writer) put(tokens ...interface{}) {
