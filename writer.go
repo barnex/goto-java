@@ -126,6 +126,39 @@ func (w *writer) putStmt(n ast.Stmt) {
 		w.error(n, "cannot handle ", reflect.TypeOf(s))
 	case *ast.ExprStmt:
 		w.putExprStmt(s)
+	case *ast.DeclStmt:
+		w.putDeclStmt(s)
+	}
+}
+
+func (w *writer) putDeclStmt(d *ast.DeclStmt) {
+	switch d := d.Decl.(type) {
+	default:
+		w.error(d, "cannot handle ", reflect.TypeOf(d))
+	case *ast.GenDecl:
+		w.putGenDecl(d)
+	}
+}
+
+func (w *writer) putGenDecl(d *ast.GenDecl) {
+	for _, s := range d.Specs {
+		w.putSpec(s)
+	}
+}
+
+func (w *writer) putSpec(s ast.Spec) {
+	switch s := s.(type) {
+	default:
+		w.error(s, "cannot handle ", reflect.TypeOf(s))
+	case *ast.ValueSpec:
+		w.putValueSpec(s)
+	}
+}
+
+func (w *writer) putValueSpec(s *ast.ValueSpec) {
+	for _, n := range s.Names {
+		w.putExpr(s.Type)
+		w.putln(n.Name, "=", n.Obj.Data, ";")
 	}
 }
 
