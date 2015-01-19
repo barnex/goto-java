@@ -42,6 +42,8 @@ type writer struct {
 func (w *writer) parseFile(f *ast.File) {
 	w.pkg = f.Name.Name
 
+	//w.putDocComment(f.Doc)
+
 	for _, decl := range f.Decls {
 		switch n := decl.(type) {
 		default:
@@ -93,12 +95,26 @@ func (w *writer) genMembers() {
 }
 
 func (w *writer) putFuncDecl(n *ast.FuncDecl) {
+	w.putDoc(n.Doc)
 	if n.Name.Name == "main" {
 		w.putMainDecl(n)
 		return
 	}
 
 	panic("todo")
+}
+
+func (w *writer) putDoc(g *ast.CommentGroup) {
+	w.putComment(g) //TODO: translate to slashstarstar
+}
+
+func (w *writer) putComment(g *ast.CommentGroup) {
+	if g == nil {
+		return
+	}
+	for _, c := range g.List {
+		w.putln(c.Text)
+	}
 }
 
 func (w *writer) putMainDecl(n *ast.FuncDecl) {
@@ -113,7 +129,6 @@ func (w *writer) putBlockStmt(n *ast.BlockStmt) {
 
 	for _, n := range n.List {
 		w.putStmt(n)
-		w.putln(";")
 	}
 
 	w.indent--
@@ -163,10 +178,15 @@ func (w *writer) putValueSpec(s *ast.ValueSpec) {
 			w.put(", ")
 		}
 	}
+	w.put(";")
+	w.putComment(s.Comment)
+	w.putln()
 }
 
 func (w *writer) putExprStmt(n *ast.ExprStmt) {
 	w.putExpr(n.X)
+	//w.putComment(n.Comment)
+	w.putln(";")
 }
 
 func (w *writer) putExpr(n ast.Expr) {

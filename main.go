@@ -37,7 +37,7 @@ func handleFile(fname string) {
 
 	// read and parse file
 	fset := token.NewFileSet()
-	f, err := parser.ParseFile(fset, fname, nil, 0)
+	f, err := parser.ParseFile(fset, fname, nil, parser.ParseComments)
 	checkUserErr(err)
 
 	// print ast if requested
