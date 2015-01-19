@@ -1,11 +1,14 @@
 package main
 
 import (
+	"bufio"
 	"flag"
 	"go/ast"
 	"go/parser"
 	"go/token"
 	"log"
+	"os"
+	"path"
 )
 
 var (
@@ -31,6 +34,13 @@ func handleFile(fname string) {
 	if *flagPrint {
 		ast.Print(fset, f)
 	}
+
+	outFile := fname[:len(fname)-len(path.Ext(fname))] + ".java"
+	out_, err := os.Create(outFile)
+	checkUserErr(err)
+	defer out_.Close()
+	out := bufio.NewWriter(out_)
+	defer out.Flush()
 
 }
 
