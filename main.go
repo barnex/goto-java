@@ -10,7 +10,7 @@ import (
 )
 
 var (
-	flagPrint = flag.Bool("print", true, "Print ast")
+	flagPrint = flag.Bool("print", false, "Print ast")
 )
 
 func main() {

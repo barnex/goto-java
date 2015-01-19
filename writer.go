@@ -159,9 +159,7 @@ func (w *writer) putValueSpec(s *ast.ValueSpec) {
 	w.putExpr(s.Type)
 	for i, n := range s.Names {
 		w.put(n.Name, "=", n.Obj.Data)
-		if i == len(s.Names)-1 {
-			w.put(";")
-		} else {
+		if i != len(s.Names)-1 {
 			w.put(", ")
 		}
 	}
