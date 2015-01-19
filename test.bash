@@ -1,1 +1,1 @@
-go build && ./a3 test/
+go build && ./a3 test/*.go
