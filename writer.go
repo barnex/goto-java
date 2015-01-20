@@ -87,32 +87,32 @@ func (w *writer) genMembers() {
 		default:
 			panic("unhandled memeber type: " + reflect.TypeOf(m).String())
 		case *ast.FuncDecl:
-			w.genFuncDecl(m)
+			w.putFuncDecl(m)
 		}
 	}
 }
 
-func (w *writer) genFuncDecl(n *ast.FuncDecl) {
+func (w *writer) putFuncDecl(n *ast.FuncDecl) {
 	if n.Name.Name == "main" {
-		w.genMainDecl(n)
+		w.putMainDecl(n)
 		return
 	}
 
 	panic("todo")
 }
 
-func (w *writer) genMainDecl(n *ast.FuncDecl) {
+func (w *writer) putMainDecl(n *ast.FuncDecl) {
 	w.put(PUBLIC, STATIC, VOID, n.Name.Name, parens("String[] args"))
-	w.genBlockStmt(n.Body)
+	w.putBlockStmt(n.Body)
 	w.putln()
 }
 
-func (w *writer) genBlockStmt(n *ast.BlockStmt) {
+func (w *writer) putBlockStmt(n *ast.BlockStmt) {
 	w.putln(LBRACE)
 	w.indent++
 
 	for _, n := range n.List {
-		w.genStmt(n)
+		w.putStmt(n)
 		w.putln(";")
 	}
 
@@ -120,58 +120,58 @@ func (w *writer) genBlockStmt(n *ast.BlockStmt) {
 	w.putln(RBRACE)
 }
 
-func (w *writer) genStmt(n ast.Stmt) {
+func (w *writer) putStmt(n ast.Stmt) {
 	switch s := n.(type) {
 	default:
 		w.error(n, "cannot handle ", reflect.TypeOf(s))
 	case *ast.ExprStmt:
-		w.genExprStmt(s)
+		w.putExprStmt(s)
 	}
 }
 
-func (w *writer) genExprStmt(n *ast.ExprStmt) {
-	w.genExpr(n.X)
+func (w *writer) putExprStmt(n *ast.ExprStmt) {
+	w.putExpr(n.X)
 }
 
-func (w *writer) genExpr(n ast.Expr) {
+func (w *writer) putExpr(n ast.Expr) {
 	switch e := n.(type) {
 	default:
 		w.error(n, "cannot handle ", reflect.TypeOf(e))
 	case *ast.CallExpr:
-		w.genCallExpr(e)
+		w.putCallExpr(e)
 	case *ast.Ident:
-		w.genIdent(e)
+		w.putIdent(e)
 	case *ast.BasicLit:
-		w.genBasicLit(e)
+		w.putBasicLit(e)
 	case *ast.BinaryExpr:
-		w.genBinaryExpr(e)
+		w.putBinaryExpr(e)
 	case *ast.ParenExpr:
-		w.genParenExpr(e)
+		w.putParenExpr(e)
 	}
 }
 
-func (w *writer) genParenExpr(e *ast.ParenExpr) {
+func (w *writer) putParenExpr(e *ast.ParenExpr) {
 	w.put(LPAREN)
-	w.genExpr(e.X)
+	w.putExpr(e.X)
 	w.put(RPAREN)
 }
 
-func (w *writer) genBinaryExpr(b *ast.BinaryExpr) {
+func (w *writer) putBinaryExpr(b *ast.BinaryExpr) {
 	// TODO: check unsupported ops
-	w.genExpr(b.X)
+	w.putExpr(b.X)
 	w.put(b.Op)
-	w.genExpr(b.Y)
+	w.putExpr(b.Y)
 }
 
-func (w *writer) genCallExpr(n *ast.CallExpr) {
-	w.genExpr(n.Fun)
+func (w *writer) putCallExpr(n *ast.CallExpr) {
+	w.putExpr(n.Fun)
 
 	w.put("(")
 	for i, a := range n.Args {
 		if i != 0 {
 			w.put(",")
 		}
-		w.genExpr(a)
+		w.putExpr(a)
 	}
 	w.put(")")
 
@@ -185,7 +185,7 @@ var keywordMap = map[string]string{
 	"print":   "System.out.print",
 }
 
-func (w *writer) genIdent(n *ast.Ident) {
+func (w *writer) putIdent(n *ast.Ident) {
 	name := n.Name
 	// translate name if keyword
 	if trans, ok := keywordMap[name]; ok {
@@ -194,7 +194,7 @@ func (w *writer) genIdent(n *ast.Ident) {
 	w.put(name)
 }
 
-func (w *writer) genBasicLit(n *ast.BasicLit) {
+func (w *writer) putBasicLit(n *ast.BasicLit) {
 	w.put(n.Value)
 	// TODO: translate backquotes, complex etc.
 }
