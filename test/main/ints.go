@@ -1,5 +1,10 @@
 package main
 
 func main() {
-	print(42)
+	println(42)
+	println(1 + 1)
+	println(1 + 2*3)
+	println(1*2 + 3)
+	println(1*2 + 3 - 4/5*6)
+	println((1 + 1) * 2)
 }

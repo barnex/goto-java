@@ -20,6 +20,8 @@ const (
 	RBRACE  = "}"
 	STATIC  = "static"
 	VOID    = "void"
+	LPAREN  = "("
+	RPAREN  = ")"
 )
 
 type writer struct {
@@ -141,7 +143,24 @@ func (w *writer) genExpr(n ast.Expr) {
 		w.genIdent(e)
 	case *ast.BasicLit:
 		w.genBasicLit(e)
+	case *ast.BinaryExpr:
+		w.genBinaryExpr(e)
+	case *ast.ParenExpr:
+		w.genParenExpr(e)
 	}
+}
+
+func (w *writer) genParenExpr(e *ast.ParenExpr) {
+	w.put(LPAREN)
+	w.genExpr(e.X)
+	w.put(RPAREN)
+}
+
+func (w *writer) genBinaryExpr(b *ast.BinaryExpr) {
+	// TODO: check unsupported ops
+	w.genExpr(b.X)
+	w.put(b.Op)
+	w.genExpr(b.Y)
 }
 
 func (w *writer) genCallExpr(n *ast.CallExpr) {
