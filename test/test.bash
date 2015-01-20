@@ -1,7 +1,6 @@
-set -e
+#! /bin/bash
 
-(cd .. && go install)
-rm -f *.java *.class
+set -e
 
 (cd main && ./test.bash)
 

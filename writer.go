@@ -163,6 +163,7 @@ func (w *writer) genCallExpr(n *ast.CallExpr) {
 
 var keywordMap = map[string]string{
 	"println": "System.out.println",
+	"print":   "System.out.print",
 }
 
 func (w *writer) genIdent(n *ast.Ident) {
