@@ -88,23 +88,8 @@ func (w *writer) genCode() {
 
 func (w *writer) genMembers() {
 	for _, n := range w.classMembers {
-		switch m := n.(type) {
-		default:
-			panic("unhandled memeber type: " + reflect.TypeOf(m).String())
-		case *ast.FuncDecl:
-			w.putFuncDecl(m)
-		}
+		w.putDecl(n)
 	}
-}
-
-func (w *writer) putFuncDecl(n *ast.FuncDecl) {
-	w.putDoc(n.Doc)
-	if n.Name.Name == "main" {
-		w.putMainDecl(n)
-		return
-	}
-
-	panic("todo")
 }
 
 func (w *writer) putDoc(g *ast.CommentGroup) {
