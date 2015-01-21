@@ -14,4 +14,8 @@ func main(){
 
 	println(len(s4))
 	println(len(s4+s2))
+
+	println(s2[2:])
+	println(s2[:2])
+	println(s2[:len(s2+"")-1])
 }

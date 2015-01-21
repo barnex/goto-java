@@ -5,6 +5,7 @@ import (
 	"reflect"
 )
 
+// Generate code for expression
 func (w *writer) PutExpr(n ast.Expr) {
 	switch e := n.(type) {
 	default:
@@ -19,9 +20,12 @@ func (w *writer) PutExpr(n ast.Expr) {
 		w.PutBinaryExpr(e)
 	case *ast.ParenExpr:
 		w.PutParenExpr(e)
+	case *ast.SliceExpr:
+		w.PutSliceExpr(e)
 	}
 }
 
+// TODO: overlaps with builtin
 var keywordMap = map[string]string{
 	"println": "System.out.println",
 	"print":   "System.out.print",
@@ -34,6 +38,36 @@ func (w *writer) PutIdent(n *ast.Ident) {
 		name = trans
 	}
 	w.Put(name)
+}
+
+func (w *writer) PutSliceExpr(e *ast.SliceExpr) {
+	jType := w.javaTypeOf(e.X)
+	switch jType {
+	default:
+		w.error(e, "cannot slice type ", jType)
+	case "String":
+		w.putStringSlice(e)
+	}
+}
+
+// code for slicing a string
+func (w *writer) putStringSlice(e *ast.SliceExpr) {
+	w.Put(e.X, ".substring(")
+	if e.Low == nil {
+		w.Put(0)
+	} else {
+		w.PutExpr(e.Low)
+	}
+	w.Put(", ")
+
+	if e.High == nil {
+		w.Put("(")
+		w.PutExpr(e.X)
+		w.Put(").length()")
+	} else {
+		w.PutExpr(e.High)
+	}
+	w.Put(")")
 }
 
 func (w *writer) PutParenExpr(e *ast.ParenExpr) {
