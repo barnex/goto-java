@@ -65,7 +65,7 @@ func (w *writer) putValueSpec(s *ast.ValueSpec) {
 			}
 		}
 		w.put(";")
-		w.putComment(s.Comment)
+		w.putInlineComment(s.Comment)
 		w.putln()
 	} else {
 		// infered type
@@ -80,7 +80,7 @@ func (w *writer) putValueSpec(s *ast.ValueSpec) {
 			}
 			w.put(";")
 			if i == 0 {
-				w.putComment(s.Comment)
+				w.putInlineComment(s.Comment)
 			}
 			w.putln()
 		}
