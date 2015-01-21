@@ -92,19 +92,6 @@ func (w *writer) genMembers() {
 	}
 }
 
-func (w *writer) putDoc(g *ast.CommentGroup) {
-	w.putComment(g) //TODO: translate to slashstarstar
-}
-
-func (w *writer) putComment(g *ast.CommentGroup) {
-	if g == nil {
-		return
-	}
-	for _, c := range g.List {
-		w.putln(c.Text)
-	}
-}
-
 func (w *writer) putMainDecl(n *ast.FuncDecl) {
 	w.put(PUBLIC, STATIC, VOID, n.Name.Name, parens("String[] args"))
 	w.putBlockStmt(n.Body)
