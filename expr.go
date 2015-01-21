@@ -50,6 +50,11 @@ func (w *writer) putBinaryExpr(b *ast.BinaryExpr) {
 }
 
 func (w *writer) putCallExpr(n *ast.CallExpr) {
+	if isBuiltinExpr(n.Fun) {
+		w.putBuiltinCall(n)
+		return
+	}
+
 	w.putExpr(n.Fun)
 
 	w.put("(")

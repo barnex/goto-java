@@ -6,12 +6,17 @@ import (
 	"golang.org/x/tools/go/types"
 )
 
-func (w *writer) putTypeOf(n ast.Expr) {
+func (w *writer) typeOf(n ast.Expr) types.Type {
 	t := w.info.TypeOf(n)
 	if t == nil {
 		w.error(n, "cannot infer type")
 	}
-	w.put(w.typeConv(t))
+	return t
+
+}
+
+func (w *writer) putTypeOf(n ast.Expr) {
+	w.put(w.typeConv(w.typeOf(n)))
 }
 
 var typeMap = map[string]string{

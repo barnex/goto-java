@@ -49,21 +49,40 @@ func (w *writer) putSpec(s ast.Spec) {
 
 func (w *writer) putValueSpec(s *ast.ValueSpec) {
 
-	w.putTypeOf(s.Type)
+	if s.Type != nil {
+		// explicit type
+		w.put(w.typeConv(w.typeOf(s.Type)))
+		for i, n := range s.Names {
+			w.put(" ", n.Name, " = ")
+			if i < len(s.Values) {
+				w.putExpr(s.Values[i])
+			} else {
+				w.put(n.Obj.Data)
+			}
 
-	for i, n := range s.Names {
-		w.put(" ", n.Name, " = ")
-		if i < len(s.Values) {
-			w.putExpr(s.Values[i])
-		} else {
-			w.put(n.Obj.Data)
+			if i != len(s.Names)-1 {
+				w.put(", ")
+			}
 		}
+		w.put(";")
+		w.putComment(s.Comment)
+		w.putln()
+	} else {
+		// infered type
+		for i, n := range s.Names {
+			w.put(w.typeConv(w.typeOf(n)))
 
-		if i != len(s.Names)-1 {
-			w.put(", ")
+			w.put(" ", n.Name, " = ")
+			if i < len(s.Values) {
+				w.putExpr(s.Values[i])
+			} else {
+				w.put(n.Obj.Data)
+			}
+			w.put(";")
+			if i == 0 {
+				w.putComment(s.Comment)
+			}
+			w.putln()
 		}
 	}
-	w.put(";")
-	w.putComment(s.Comment)
-	w.putln()
 }
