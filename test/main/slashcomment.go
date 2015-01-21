@@ -4,8 +4,9 @@ package main
 
 // main doc comment line 1
 // main doc comment line 2
-func main(){
+func main() {
 	var i int // inline comment
+	print(i)
 }
 
 // stray comment
