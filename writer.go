@@ -12,20 +12,6 @@ import (
 	"golang.org/x/tools/go/types"
 )
 
-const (
-	CLASS   = "class"
-	EOL     = ";"
-	FINAL   = "final"
-	LBRACE  = "{"
-	PACKAGE = "package"
-	PUBLIC  = "public"
-	RBRACE  = "}"
-	STATIC  = "static"
-	VOID    = "void"
-	LPAREN  = "("
-	RPAREN  = ")"
-)
-
 type writer struct {
 	out        io.Writer
 	indent     int
@@ -39,8 +25,6 @@ type writer struct {
 	pkg          string
 	classMembers []ast.Decl
 }
-
-// parsing
 
 func (w *writer) parseFile(f *ast.File) {
 	w.pkg = f.Name.Name
@@ -57,8 +41,6 @@ func (w *writer) parseFile(f *ast.File) {
 	}
 }
 
-// code gen
-
 func (w *writer) initOut() {
 	if w.out != nil {
 		panic("already inited")
@@ -72,18 +54,18 @@ func (w *writer) initOut() {
 func (w *writer) genCode() {
 	w.initOut()
 
-	w.putln(PACKAGE, w.pkg, EOL)
+	w.putln("package", w.pkg, ";")
 	w.putln()
 
 	className := path.Base(w.fname)
-	w.putln(PUBLIC, FINAL, CLASS, className, LBRACE)
+	w.putln("public final class", className, "{")
 	w.putln()
 	w.indent++
 
 	w.genMembers()
 
 	w.indent--
-	w.putln(RBRACE)
+	w.putln("}")
 }
 
 func (w *writer) genMembers() {
@@ -93,14 +75,9 @@ func (w *writer) genMembers() {
 }
 
 func (w *writer) putMainDecl(n *ast.FuncDecl) {
-	w.put(PUBLIC, STATIC, VOID, n.Name.Name, parens("String[] args"))
+	w.put("public static void", n.Name.Name, "(String[] args)")
 	w.putBlockStmt(n.Body)
 	w.putln()
-}
-
-func (w *writer) putBasicLit(n *ast.BasicLit) {
-	w.put(n.Value)
-	// TODO: translate backquotes, complex etc.
 }
 
 // fmt utils

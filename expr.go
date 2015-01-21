@@ -37,9 +37,9 @@ func (w *writer) putIdent(n *ast.Ident) {
 }
 
 func (w *writer) putParenExpr(e *ast.ParenExpr) {
-	w.put(LPAREN)
+	w.put("(")
 	w.putExpr(e.X)
-	w.put(RPAREN)
+	w.put(")")
 }
 
 func (w *writer) putBinaryExpr(b *ast.BinaryExpr) {
@@ -64,4 +64,9 @@ func (w *writer) putCallExpr(n *ast.CallExpr) {
 	if n.Ellipsis != 0 {
 		w.error(n, "cannot handle ellipsis")
 	}
+}
+
+func (w *writer) putBasicLit(n *ast.BasicLit) {
+	w.put(n.Value)
+	// TODO: translate backquotes, complex etc.
 }

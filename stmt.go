@@ -17,7 +17,7 @@ func (w *writer) putStmt(n ast.Stmt) {
 }
 
 func (w *writer) putBlockStmt(n *ast.BlockStmt) {
-	w.putln(LBRACE)
+	w.putln("{")
 	w.indent++
 
 	for _, n := range n.List {
@@ -25,7 +25,7 @@ func (w *writer) putBlockStmt(n *ast.BlockStmt) {
 	}
 
 	w.indent--
-	w.putln(RBRACE)
+	w.putln("}")
 }
 
 func (w *writer) putDeclStmt(d *ast.DeclStmt) {
