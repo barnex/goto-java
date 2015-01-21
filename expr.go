@@ -50,7 +50,7 @@ func (w *writer) PutBinaryExpr(b *ast.BinaryExpr) {
 }
 
 func (w *writer) PutCallExpr(n *ast.CallExpr) {
-	if isBuiltinExpr(n.Fun) {
+	if IsBuiltinExpr(n.Fun) {
 		w.PutBuiltinCall(n)
 		return
 	}
