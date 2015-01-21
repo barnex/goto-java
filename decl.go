@@ -26,6 +26,12 @@ func (w *writer) putFuncDecl(n *ast.FuncDecl) {
 	panic("todo")
 }
 
+func (w *writer) putMainDecl(n *ast.FuncDecl) {
+	w.put("public static void", n.Name.Name, "(String[] args)")
+	w.putBlockStmt(n.Body)
+	w.putln()
+}
+
 func (w *writer) putGenDecl(d *ast.GenDecl) {
 	for _, s := range d.Specs {
 		w.putSpec(s)

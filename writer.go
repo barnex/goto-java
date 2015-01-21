@@ -5,82 +5,40 @@ import (
 	"go/ast"
 	"go/token"
 	"io"
-	"os"
-	"path"
-	"reflect"
 
 	"golang.org/x/tools/go/types"
 )
 
+// A writer takes AST nodes and outputs java source
 type writer struct {
 	out        io.Writer
 	indent     int
 	needIndent bool
 	needSpace  bool
-
-	fset *token.FileSet
+	fset       *token.FileSet
 	types.Info
-
-	fname        string // output file name for principal class (no extension)
-	pkg          string
-	classMembers []ast.Decl
 }
 
-func (w *writer) parseFile(f *ast.File) {
-	w.pkg = f.Name.Name
-
-	//w.putDocComment(f.Doc)
-
-	for _, decl := range f.Decls {
-		switch n := decl.(type) {
-		default:
-			w.error(f, "cannot handle ", reflect.TypeOf(decl))
-		case *ast.FuncDecl:
-			w.classMembers = append(w.classMembers, n)
-		}
-	}
+func NewWriter(out io.Writer) *writer {
+	return &writer{out: out}
 }
 
-func (w *writer) initOut() {
-	if w.out != nil {
-		panic("already inited")
-	}
-	out, err := os.Create(w.fname + ".java")
-	checkUserErr(err)
-	w.out = out
-	// TODO: buffer
-}
-
-func (w *writer) genCode() {
-	w.initOut()
-
-	w.putln("package", w.pkg, ";")
+// outputs a class with given name based on go file.
+func (w *writer) putClass(className string, f *ast.File) {
+	w.putln("package", f.Name.Name, ";")
 	w.putln()
 
-	className := path.Base(w.fname)
 	w.putln("public final class", className, "{")
 	w.putln()
 	w.indent++
 
-	w.genMembers()
+	for _, d := range f.Decls {
+		w.putDecl(d)
+	}
 
 	w.indent--
 	w.putln("}")
 }
-
-func (w *writer) genMembers() {
-	for _, n := range w.classMembers {
-		w.putDecl(n)
-	}
-}
-
-func (w *writer) putMainDecl(n *ast.FuncDecl) {
-	w.put("public static void", n.Name.Name, "(String[] args)")
-	w.putBlockStmt(n.Body)
-	w.putln()
-}
-
-// fmt utils
 
 func (w *writer) putln(tokens ...interface{}) {
 	w.put(append(tokens, "\n")...)
@@ -135,14 +93,14 @@ func (w *writer) pos(n ast.Node) token.Position {
 }
 
 // prints parentisized argument list: "(elem[0], elem[1], ...)"
-func parens(elem ...interface{}) string {
-	str := "("
-	for i, e := range elem {
-		if i > 0 {
-			str += ", "
-		}
-		str += fmt.Sprint(e)
-	}
-	str += ")"
-	return str
-}
+//func parens(elem ...interface{}) string {
+//	str := "("
+//	for i, e := range elem {
+//		if i > 0 {
+//			str += ", "
+//		}
+//		str += fmt.Sprint(e)
+//	}
+//	str += ")"
+//	return str
+//}
