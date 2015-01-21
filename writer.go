@@ -15,7 +15,7 @@ type writer struct {
 	indent     int
 	needIndent bool
 	fset       *token.FileSet
-	types.Info
+	info       types.Info
 }
 
 func NewWriter(out io.Writer) *writer {

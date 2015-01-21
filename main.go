@@ -70,6 +70,6 @@ func handleFile(fname string) {
 	defer out.Flush()
 
 	// transpile
-	w := &writer{out: out, fset: fset, Info: info}
+	w := &writer{out: out, fset: fset, info: info}
 	w.putClass(outFile, f)
 }

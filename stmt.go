@@ -2,6 +2,7 @@ package main
 
 import (
 	"go/ast"
+	"go/token"
 	"reflect"
 )
 
@@ -13,6 +14,8 @@ func (w *writer) putStmt(n ast.Stmt) {
 		w.putExprStmt(s)
 	case *ast.DeclStmt:
 		w.putDeclStmt(s)
+	case *ast.AssignStmt:
+		w.putAssignStmt(s)
 	}
 }
 
@@ -34,6 +37,29 @@ func (w *writer) putDeclStmt(d *ast.DeclStmt) {
 
 func (w *writer) putExprStmt(n *ast.ExprStmt) {
 	w.putExpr(n.X)
-	//w.putComment(n.Comment)
 	w.putln(";")
+	//w.putComment(n.Comment)
+}
+
+func (w *writer) putAssignStmt(n *ast.AssignStmt) {
+	if len(n.Lhs) != len(n.Rhs) {
+		w.error(n, "assignment count mismatch:", len(n.Lhs), "!=", len(n.Rhs))
+	}
+
+	tok := n.Tok.String()
+	if n.Tok == token.DEFINE {
+		tok = "="
+	}
+
+	for i := range n.Lhs {
+		typ := ""
+		if n.Tok == token.DEFINE {
+			typ = w.TypeOf(n.Rhs[i]) + " "
+		}
+		w.put(typ)
+		w.putExpr(n.Lhs[i])
+		w.put(tok)
+		w.putExpr(n.Rhs[i])
+		w.putln(";")
+	}
 }
