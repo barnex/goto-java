@@ -2,11 +2,14 @@ package main
 
 import (
 	"flag"
+	"fmt"
 	"go/ast"
 	"go/parser"
 	"go/token"
 	"log"
 	"path"
+
+	"golang.org/x/tools/go/types"
 )
 
 var (
@@ -39,6 +42,12 @@ func handleFile(fname string) {
 	fset := token.NewFileSet()
 	f, err := parser.ParseFile(fset, fname, nil, parser.ParseComments)
 	checkUserErr(err)
+
+	var config types.Config
+	var info types.Info
+	pkg, err := config.Check(fname, fset, []*ast.File{f}, &info)
+	checkUserErr(err)
+	fmt.Println(pkg)
 
 	// print ast if requested
 	if *flagPrint {
