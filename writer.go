@@ -14,7 +14,6 @@ type writer struct {
 	out        io.Writer
 	indent     int
 	needIndent bool
-	needSpace  bool
 	fset       *token.FileSet
 	types.Info
 }
@@ -25,10 +24,10 @@ func NewWriter(out io.Writer) *writer {
 
 // outputs a class with given name based on go file.
 func (w *writer) putClass(className string, f *ast.File) {
-	w.putln("package", f.Name.Name, ";")
+	w.putln("package ", f.Name.Name, ";")
 	w.putln()
 
-	w.putln("public final class", className, "{")
+	w.putln("public final class ", className, " {")
 	w.putln()
 	w.indent++
 
@@ -43,30 +42,12 @@ func (w *writer) putClass(className string, f *ast.File) {
 func (w *writer) putln(tokens ...interface{}) {
 	w.put(append(tokens, "\n")...)
 	w.needIndent = true
-	w.needSpace = false
-}
-
-var noSpaceAround = map[string]bool{
-	";":  true,
-	"\n": true,
-	"(":  true,
-	")":  true,
-	",":  true,
-	", ": true,
 }
 
 func (w *writer) put(tokens ...interface{}) {
 	w.putIndent()
 	for _, t := range tokens {
-		t := fmt.Sprint(t)
-		if noSpaceAround[t] {
-			w.needSpace = false
-		}
-		if w.needSpace {
-			fmt.Fprint(w.out, " ")
-		}
 		fmt.Fprint(w.out, t)
-		w.needSpace = !noSpaceAround[t]
 	}
 }
 
@@ -84,8 +65,6 @@ func (w *writer) putIndent() {
 func (w *writer) error(n ast.Node, msg ...interface{}) {
 	panic(fmt.Sprint(append([]interface{}{w.pos(n), ": "}, msg...)...))
 }
-
-// utils
 
 // return position of node using this writer's fileset
 func (w *writer) pos(n ast.Node) token.Position {

@@ -27,7 +27,7 @@ func (w *writer) putFuncDecl(n *ast.FuncDecl) {
 }
 
 func (w *writer) putMainDecl(n *ast.FuncDecl) {
-	w.put("public static void", n.Name.Name, "(String[] args)")
+	w.put("public static void ", n.Name.Name, "(String[] args)")
 	w.putBlockStmt(n.Body)
 	w.putln()
 }
@@ -51,7 +51,7 @@ func (w *writer) putValueSpec(s *ast.ValueSpec) {
 	w.putExpr(s.Type)
 
 	for i, n := range s.Names {
-		w.put(n.Name, "=")
+		w.put(" ", n.Name, " = ")
 		if i < len(s.Values) {
 			w.putExpr(s.Values[i])
 		} else {
