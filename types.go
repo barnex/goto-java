@@ -14,6 +14,17 @@ func (w *writer) putTypeOf(n ast.Expr) {
 	w.put(w.typeConv(t))
 }
 
+var typeMap = map[string]string{
+	"float32": "float",
+	"float64": "double",
+	"string":  "String",
+}
+
 func (w *writer) typeConv(t types.Type) string {
-	return t.String()
+	orig := t.String()
+	if conv, ok := typeMap[orig]; ok {
+		return conv
+	} else {
+		return orig
+	}
 }

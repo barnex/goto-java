@@ -3,9 +3,7 @@
 # test script for source files with main()
 # runs go and java sources and compares output
 
-rm -f *.txt
-rm -f *.java
-rm -f *.class
+./clean.bash
 
 a3 -print=false *.go
 javac *.java
