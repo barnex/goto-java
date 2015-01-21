@@ -46,17 +46,17 @@ func (w *writer) putAssignStmt(n *ast.AssignStmt) {
 		w.error(n, "assignment count mismatch:", len(n.Lhs), "!=", len(n.Rhs))
 	}
 
+	// translate := to =
 	tok := n.Tok.String()
 	if n.Tok == token.DEFINE {
 		tok = "="
 	}
 
 	for i := range n.Lhs {
-		typ := ""
 		if n.Tok == token.DEFINE {
-			typ = w.TypeOf(n.Rhs[i]) + " "
+			w.putTypeOf(n.Rhs[i])
+			w.put(" ")
 		}
-		w.put(typ)
 		w.putExpr(n.Lhs[i])
 		w.put(tok)
 		w.putExpr(n.Rhs[i])

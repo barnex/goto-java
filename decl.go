@@ -48,7 +48,8 @@ func (w *writer) putSpec(s ast.Spec) {
 }
 
 func (w *writer) putValueSpec(s *ast.ValueSpec) {
-	w.putExpr(s.Type)
+
+	w.putTypeOf(s.Type)
 
 	for i, n := range s.Names {
 		w.put(" ", n.Name, " = ")
