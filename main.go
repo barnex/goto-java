@@ -2,7 +2,6 @@ package main
 
 import (
 	"flag"
-	"fmt"
 	"go/ast"
 	"go/parser"
 	"go/token"
@@ -44,10 +43,16 @@ func handleFile(fname string) {
 	checkUserErr(err)
 
 	var config types.Config
-	var info types.Info
-	pkg, err := config.Check(fname, fset, []*ast.File{f}, &info)
+	info := types.Info{
+		Types:      make(map[ast.Expr]types.TypeAndValue),
+		Defs:       make(map[*ast.Ident]types.Object),
+		Uses:       make(map[*ast.Ident]types.Object),
+		Implicits:  make(map[ast.Node]types.Object),
+		Selections: make(map[*ast.SelectorExpr]*types.Selection),
+		Scopes:     make(map[ast.Node]*types.Scope),
+	}
+	_, err = config.Check(fname, fset, []*ast.File{f}, &info)
 	checkUserErr(err)
-	fmt.Println(pkg)
 
 	// print ast if requested
 	if *flagPrint {
@@ -58,7 +63,7 @@ func handleFile(fname string) {
 	outFile := fname[:len(fname)-len(path.Ext(fname))]
 
 	// transpile
-	w := &writer{fname: outFile, fset: fset}
+	w := &writer{fname: outFile, fset: fset, Info: info}
 	w.parseFile(f)
 	w.genCode()
 }

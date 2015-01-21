@@ -8,6 +8,8 @@ import (
 	"os"
 	"path"
 	"reflect"
+
+	"golang.org/x/tools/go/types"
 )
 
 const (
@@ -31,6 +33,7 @@ type writer struct {
 	needSpace  bool
 
 	fset *token.FileSet
+	types.Info
 
 	fname        string // output file name for principal class (no extension)
 	pkg          string
@@ -306,7 +309,7 @@ func (w *writer) putIndent() {
 
 // exit with fatal error, print token position of node n and msg.
 func (w *writer) error(n ast.Node, msg ...interface{}) {
-	fatal(append([]interface{}{w.pos(n), ": "}, msg...)...)
+	panic(fmt.Sprint(append([]interface{}{w.pos(n), ": "}, msg...)...))
 }
 
 // utils
