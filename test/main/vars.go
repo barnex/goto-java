@@ -8,7 +8,7 @@ func main() {
 	var c, d int = 2, 3 // var, two init values
 	var e = 4           // var, type inferred from value
 	var f, g = 5, "hi"  // var, two different types
-	var h string
+	var h string        // var, string, no init value
 
 	println(a)
 	println(b)

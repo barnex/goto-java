@@ -22,6 +22,7 @@ var typeMap = map[string]string{
 	"float32": "float",
 	"float64": "double",
 	"string":  "String",
+	"bool":    "boolean",
 }
 
 func (w *writer) toJavaType(t types.Type) string {
