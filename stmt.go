@@ -43,7 +43,7 @@ func (w *writer) PutReturnStmt(r *ast.ReturnStmt) {
 	if len(r.Results) > 1 {
 		w.error(r, "cannot handle multiple return values")
 	}
-	w.Putln("return ", r.Results[0], ";")
+	w.Put("return ", r.Results[0], ";")
 }
 
 func (w *writer) PutBlockStmt(n *ast.BlockStmt) {
@@ -78,10 +78,14 @@ func (w *writer) PutAssignStmt(n *ast.AssignStmt) {
 		tok = "="
 	}
 
+	// multiple assign: put one per line
 	for i := range n.Lhs {
+		if i != 0 {
+			w.Putln()
+		}
 		if n.Tok == token.DEFINE {
 			w.Put(w.javaTypeOf(n.Rhs[i]), " ")
 		}
-		w.Putln(n.Lhs[i], " ", tok, " ", n.Rhs[i], ";")
+		w.Put(n.Lhs[i], " ", tok, " ", n.Rhs[i], ";")
 	}
 }

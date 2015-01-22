@@ -68,15 +68,6 @@ func (w *writer) PutStaticFunc(f *ast.FuncDecl) {
 //	}
 //}
 
-// returns a comma if !=0
-func comma(i int) string {
-	if i != 0 {
-		return ", "
-	} else {
-		return ""
-	}
-}
-
 // Emit code for a method declaration, e.g.:
 // 	func (x *T) f() { ... }
 func (w *writer) PutMethod(n *ast.FuncDecl) {
@@ -120,6 +111,9 @@ func (w *writer) PutValueSpec(s *ast.ValueSpec) {
 			if i < len(s.Values) {
 				value = s.Values[i]
 			}
+			if i != 0 {
+				w.Putln()
+			}
 			w.putSpecOneType(w.javaTypeOf(n), s.Names[i:i+1], []ast.Expr{value}, s.Comment)
 		}
 	}
@@ -145,5 +139,4 @@ func (w *writer) putSpecOneType(typ string, names []*ast.Ident, values []ast.Exp
 	}
 	w.Put(";")
 	w.PutInlineComment(comment)
-	w.Putln()
 }
