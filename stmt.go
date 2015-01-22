@@ -10,16 +10,31 @@ func (w *writer) PutStmt(s ast.Stmt) {
 	switch s := s.(type) {
 	default:
 		w.error(s, "cannot handle ", reflect.TypeOf(s))
-	case *ast.ExprStmt:
-		w.PutExprStmt(s)
-	case *ast.DeclStmt:
-		w.PutDeclStmt(s)
 	case *ast.AssignStmt:
 		w.PutAssignStmt(s)
 	case *ast.BlockStmt:
 		w.PutBlockStmt(s)
+	case *ast.DeclStmt:
+		w.PutDeclStmt(s)
+	case *ast.ExprStmt:
+		w.PutExprStmt(s)
+	case *ast.IfStmt:
+		w.PutIfStmt(s)
 	case *ast.ReturnStmt:
 		w.PutReturnStmt(s)
+	}
+}
+
+// Emit if statement
+func (w *writer) PutIfStmt(i *ast.IfStmt) {
+	if i.Init != nil {
+		w.PutStmt(i.Init)
+	}
+
+	w.Put("if (", i.Cond, ")", i.Body)
+
+	if i.Else != nil {
+		w.Put("else ", i.Else)
 	}
 }
 
@@ -37,10 +52,11 @@ func (w *writer) PutBlockStmt(n *ast.BlockStmt) {
 
 	for _, n := range n.List {
 		w.PutStmt(n)
+		w.Putln()
 	}
 
 	w.indent--
-	w.Putln("}")
+	w.Put("}")
 }
 
 func (w *writer) PutDeclStmt(d *ast.DeclStmt) {

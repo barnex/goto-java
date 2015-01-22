@@ -26,7 +26,6 @@ func (w *writer) PutFuncDecl(n *ast.FuncDecl) {
 	} else {
 		w.PutMethod(n)
 	}
-
 }
 
 // Emit code for a top-level function (not method) declaration, e.g.:
