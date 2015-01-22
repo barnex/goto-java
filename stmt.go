@@ -28,7 +28,13 @@ func (w *writer) PutStmt(s ast.Stmt) {
 		w.PutIncDecStmt(s)
 	case *ast.ReturnStmt:
 		w.PutReturnStmt(s)
+	case *ast.SwitchStmt:
+		w.PutSwitchStmt(s)
 	}
+}
+
+func (w *writer) PutSwitchStmt(b *ast.SwitchStmt) {
+
 }
 
 // Emit branch statement (breat, continue, goto, fallthrough)
