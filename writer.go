@@ -59,6 +59,7 @@ func (w *writer) put(t interface{}) {
 	}
 	if t, ok := t.(ast.Node); ok {
 		w.PutNode(t)
+		return
 	}
 	panic("writer: cannot put type " + reflect.TypeOf(t).String())
 }
