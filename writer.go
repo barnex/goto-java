@@ -65,6 +65,11 @@ func (w *writer) put(t interface{}) {
 }
 
 func (w *writer) PutNode(n ast.Node) {
+	if n, ok := n.(ast.Stmt); ok {
+		w.PutStmt(n)
+		return
+	}
+
 	switch n := n.(type) {
 	default:
 		panic("putnode: need to handle: " + reflect.TypeOf(n).String())

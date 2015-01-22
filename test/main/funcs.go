@@ -1,10 +1,10 @@
 package main
 
-func square(n int)int{
-	return n*n
+// returns the square of n
+func square(n int) int {
+	return n * n
 }
 
-func main(){
-	println(square(1+1))
+func main() {
+	println(square(1 + 1))
 }
-

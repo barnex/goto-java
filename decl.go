@@ -16,29 +16,69 @@ func (w *writer) PutDecl(d ast.Decl) {
 	}
 }
 
+// Emit code for a top-level function/method declaration, e.g.:
+// 	func f(a, b int) { ... }
+// 	func (x *T) f() { ... }
 func (w *writer) PutFuncDecl(n *ast.FuncDecl) {
-	w.PutDoc(n.Doc)
-	if n.Name.Name == "main" {
-		w.PutMainDecl(n)
+
+	if n.Recv == nil {
+		w.PutStaticFunc(n)
+	} else {
+		w.PutMethod(n)
+	}
+
+}
+
+// Emit code for a top-level function (not method) declaration, e.g.:
+// 	func f(a, b int) { ... }
+func (w *writer) PutStaticFunc(f *ast.FuncDecl) {
+	w.PutDoc(f.Doc)
+
+	// main is special: need String[] args
+	if f.Name.Name == "main" {
+		w.PutMainDecl(f)
 		return
 	}
 
-	//	modifier := "private"
-	//	if ast.IsExported(n.Name.Name) {
-	//		modifier = "public"
-	//	}
-	//	w.Put(modifier, " static ")
-	//
-	//	ret := "void"
-	//	if len(n.Type.Results.List) == 1 {
-	//		ret := w.javaTypeOf(n.Type.Results.List[0])
-	//	}
-	//	if len(n.Type.Results.List) > 1 {
-	//		w.error(n, "no muliple return values supported")
-	//	}
-	//
-	//	w.Put(ret, "(")
+	w.Put(ModifierFor(f.Name.Name), "static ")
 
+	ret := "void"
+	if len(f.Type.Results.List) == 1 {
+		ret = w.javaTypeOf(f.Type.Results.List[0].Type) // todo: multiple names, wtf?
+	}
+	if len(f.Type.Results.List) > 1 {
+		w.error(f, "no muliple return values supported")
+	}
+
+	w.Put(ret, " ", (f.Name.Name), "(") // TODO: translate funcname
+	for i, a := range f.Type.Params.List {
+		name := a.Names[0] // TODO: more/none?
+		w.Put(comma(i), a.Type, " ", name)
+	}
+	w.Put(")")
+	w.Putln(f.Body)
+}
+
+func (w *writer) PutField(f *ast.Field) {
+	w.Put(f.Type, " ")
+	for i, n := range f.Names {
+		w.Put(comma(i), n)
+	}
+}
+
+// returns a comma if !=0
+func comma(i int) string {
+	if i != 0 {
+		return ", "
+	} else {
+		return ""
+	}
+}
+
+// Emit code for a method declaration, e.g.:
+// 	func (x *T) f() { ... }
+func (w *writer) PutMethod(n *ast.FuncDecl) {
+	panic("todo: method")
 }
 
 func (w *writer) PutMainDecl(n *ast.FuncDecl) {

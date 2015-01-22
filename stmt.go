@@ -6,17 +6,29 @@ import (
 	"reflect"
 )
 
-func (w *writer) PutStmt(n ast.Stmt) {
-	switch s := n.(type) {
+func (w *writer) PutStmt(s ast.Stmt) {
+	switch s := s.(type) {
 	default:
-		w.error(n, "cannot handle ", reflect.TypeOf(s))
+		w.error(s, "cannot handle ", reflect.TypeOf(s))
 	case *ast.ExprStmt:
 		w.PutExprStmt(s)
 	case *ast.DeclStmt:
 		w.PutDeclStmt(s)
 	case *ast.AssignStmt:
 		w.PutAssignStmt(s)
+	case *ast.BlockStmt:
+		w.PutBlockStmt(s)
+	case *ast.ReturnStmt:
+		w.PutReturnStmt(s)
 	}
+}
+
+// Emit return statement
+func (w *writer) PutReturnStmt(r *ast.ReturnStmt) {
+	if len(r.Results) > 1 {
+		w.error(r, "cannot handle multiple return values")
+	}
+	w.Putln("return ", r.Results[0], ";")
 }
 
 func (w *writer) PutBlockStmt(n *ast.BlockStmt) {
