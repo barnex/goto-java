@@ -36,9 +36,7 @@ func (w *writer) PutDeclStmt(d *ast.DeclStmt) {
 }
 
 func (w *writer) PutExprStmt(n *ast.ExprStmt) {
-	w.PutExpr(n.X)
-	w.Putln(";")
-	//w.PutComment(n.Comment)
+	w.Put(n.X, ";")
 }
 
 func (w *writer) PutAssignStmt(n *ast.AssignStmt) {
@@ -56,9 +54,6 @@ func (w *writer) PutAssignStmt(n *ast.AssignStmt) {
 		if n.Tok == token.DEFINE {
 			w.Put(w.javaTypeOf(n.Rhs[i]), " ")
 		}
-		w.PutExpr(n.Lhs[i])
-		w.Put(" ", tok, " ")
-		w.PutExpr(n.Rhs[i])
-		w.Putln(";")
+		w.Putln(n.Lhs[i], " ", tok, " ", n.Rhs[i], ";")
 	}
 }

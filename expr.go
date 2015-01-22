@@ -71,9 +71,7 @@ func (w *writer) putStringSlice(e *ast.SliceExpr) {
 }
 
 func (w *writer) PutParenExpr(e *ast.ParenExpr) {
-	w.Put("(")
-	w.PutExpr(e.X)
-	w.Put(")")
+	w.Put("(", e.X, ")")
 }
 
 func (w *writer) PutBinaryExpr(b *ast.BinaryExpr) {
