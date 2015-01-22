@@ -112,7 +112,7 @@ func (w *writer) PutValueSpec(s *ast.ValueSpec) {
 				value = s.Values[i]
 			}
 			if i != 0 {
-				w.Putln()
+				w.Putln(";")
 			}
 			w.putSpecOneType(w.javaTypeOf(n), s.Names[i:i+1], []ast.Expr{value}, s.Comment)
 		}
@@ -137,6 +137,6 @@ func (w *writer) putSpecOneType(typ string, names []*ast.Ident, values []ast.Exp
 			w.Put(", ")
 		}
 	}
-	w.Put(";")
-	w.PutInlineComment(comment)
+	//w.Put(";")
+	//w.PutInlineComment(comment)
 }

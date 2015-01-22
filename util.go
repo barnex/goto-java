@@ -13,3 +13,11 @@ func ifNonzero(i int, msg string) string {
 func comma(i int) string {
 	return ifNonzero(i, ", ")
 }
+
+func nnil(x interface{}) interface{} {
+	if x == nil {
+		return ""
+	} else {
+		return x
+	}
+}
