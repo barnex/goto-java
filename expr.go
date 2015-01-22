@@ -54,16 +54,14 @@ func (w *writer) PutSliceExpr(e *ast.SliceExpr) {
 func (w *writer) putStringSlice(e *ast.SliceExpr) {
 	w.Put(e.X, ".substring(")
 	if e.Low == nil {
-		w.Put(0)
+		w.Put("0")
 	} else {
 		w.PutExpr(e.Low)
 	}
 	w.Put(", ")
 
 	if e.High == nil {
-		w.Put("(")
-		w.PutExpr(e.X)
-		w.Put(").length()")
+		w.Put("(", e.X, ").length()") // need to parenthesize, X may be binary expression.
 	} else {
 		w.PutExpr(e.High)
 	}

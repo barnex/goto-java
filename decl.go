@@ -23,21 +23,21 @@ func (w *writer) PutFuncDecl(n *ast.FuncDecl) {
 		return
 	}
 
-//	modifier := "private"
-//	if ast.IsExported(n.Name.Name) {
-//		modifier = "public"
-//	}
-//	w.Put(modifier, " static ")
-//
-//	ret := "void"
-//	if len(n.Type.Results.List) == 1 {
-//		ret := w.javaTypeOf(n.Type.Results.List[0])
-//	}
-//	if len(n.Type.Results.List) > 1 {
-//		w.error(n, "no muliple return values supported")
-//	}
-//
-//	w.Put(ret, "(")
+	//	modifier := "private"
+	//	if ast.IsExported(n.Name.Name) {
+	//		modifier = "public"
+	//	}
+	//	w.Put(modifier, " static ")
+	//
+	//	ret := "void"
+	//	if len(n.Type.Results.List) == 1 {
+	//		ret := w.javaTypeOf(n.Type.Results.List[0])
+	//	}
+	//	if len(n.Type.Results.List) > 1 {
+	//		w.error(n, "no muliple return values supported")
+	//	}
+	//
+	//	w.Put(ret, "(")
 
 }
 
