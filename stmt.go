@@ -33,8 +33,47 @@ func (w *writer) PutStmt(s ast.Stmt) {
 	}
 }
 
-func (w *writer) PutSwitchStmt(b *ast.SwitchStmt) {
+func (w *writer) PutSwitchStmt(s *ast.SwitchStmt) {
+	if s.Init != nil {
+		w.error(s, "switch init not supported")
+	}
 
+	w.Putln("switch(", s.Tag, "){")
+	w.indent++
+
+	body := s.Body.List
+	for _, stmt := range body {
+		clause := stmt.(*ast.CaseClause)
+		body := clause.Body
+
+		if clause.List == nil {
+			w.Putln("default:")
+		} else {
+			for _, e := range clause.List {
+				w.Putln("case ", e, ":")
+			}
+		}
+
+		w.indent++
+		haveFallThrough := false
+		for _, s := range body {
+			if branch, ok := s.(*ast.BranchStmt); ok {
+				if branch.Tok == token.FALLTHROUGH {
+					haveFallThrough = true
+					continue // do not put "fallthrough" in java
+				}
+			}
+			w.Putln(s, ";")
+		}
+		w.indent--
+
+		if !haveFallThrough {
+			w.Putln("break;")
+		}
+	}
+
+	w.indent--
+	w.Putln("}")
 }
 
 // Emit branch statement (breat, continue, goto, fallthrough)
