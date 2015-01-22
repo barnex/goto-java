@@ -15,4 +15,6 @@ func main() {
 	println(d)
 	println(e)
 	println(f)
+
+	println(a || b && c || d)
 }

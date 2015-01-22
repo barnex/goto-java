@@ -9,4 +9,5 @@ func main() {
 	println((1 + 1) * 2)
 	println(1 << 2)
 	println(11 % 3)
+	println(1<<8 + 2<<16)
 }
