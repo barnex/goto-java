@@ -19,10 +19,13 @@ func (w *writer) javaTypeOf(n ast.Expr) string {
 }
 
 var typeMap = map[string]string{
+	"bool":    "boolean",
 	"float32": "float",
 	"float64": "double",
+	"int":     "int",
+	"int32":   "int",
+	"int64":   "long",
 	"string":  "String",
-	"bool":    "boolean",
 }
 
 func (w *writer) toJavaType(t types.Type) string {

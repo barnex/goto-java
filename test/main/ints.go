@@ -7,4 +7,6 @@ func main() {
 	println(1*2 + 3)
 	println(1*2 + 3 - 4/5*6)
 	println((1 + 1) * 2)
+	println(1 << 2)
+	println(11 % 3)
 }

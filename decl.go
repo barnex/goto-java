@@ -20,7 +20,6 @@ func (w *writer) PutDecl(d ast.Decl) {
 // 	func f(a, b int) { ... }
 // 	func (x *T) f() { ... }
 func (w *writer) PutFuncDecl(n *ast.FuncDecl) {
-
 	if n.Recv == nil {
 		w.PutStaticFunc(n)
 	} else {
