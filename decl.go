@@ -52,6 +52,9 @@ func (w *writer) PutStaticFunc(f *ast.FuncDecl) {
 
 	w.Put(ret, " ", (f.Name.Name), "(") // TODO: translate funcname
 	for i, a := range f.Type.Params.List {
+		if len(a.Names) != 1 {
+			w.error(f, "cannot handle multiple field names")
+		}
 		name := a.Names[0] // TODO: more/none?
 		w.Put(comma(i), a.Type, " ", name)
 	}
@@ -59,12 +62,12 @@ func (w *writer) PutStaticFunc(f *ast.FuncDecl) {
 	w.Putln(f.Body)
 }
 
-func (w *writer) PutField(f *ast.Field) {
-	w.Put(f.Type, " ")
-	for i, n := range f.Names {
-		w.Put(comma(i), n)
-	}
-}
+//func (w *writer) PutField(f *ast.Field) {
+//	w.Put(f.Type, " ")
+//	for i, n := range f.Names {
+//		w.Put(comma(i), n)
+//	}
+//}
 
 // returns a comma if !=0
 func comma(i int) string {
