@@ -5,6 +5,7 @@ import (
 	"go/ast"
 	"go/token"
 	"io"
+	"reflect"
 
 	"golang.org/x/tools/go/types"
 )
@@ -45,13 +46,33 @@ func (w *writer) Putln(tokens ...interface{}) {
 }
 
 func (w *writer) Put(tokens ...interface{}) {
-	w.PutIndent()
+	w.putIndent()
 	for _, t := range tokens {
-		fmt.Fprint(w.out, t)
+		w.put(t)
 	}
 }
 
-func (w *writer) PutIndent() {
+func (w *writer) put(t interface{}) {
+	if t, ok := t.(string); ok {
+		fmt.Fprint(w.out, t)
+		return
+	}
+	if t, ok := t.(ast.Node); ok {
+		w.PutNode(t)
+	}
+	panic("writer: cannot put type " + reflect.TypeOf(t).String())
+}
+
+func (w *writer) PutNode(n ast.Node) {
+	switch n := n.(type) {
+	default:
+		panic("putnode: need to handle: " + reflect.TypeOf(n).String())
+	case ast.Expr:
+		w.PutExpr(n)
+	}
+}
+
+func (w *writer) putIndent() {
 	if w.needIndent == false {
 		return
 	}

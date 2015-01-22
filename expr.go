@@ -79,7 +79,7 @@ func (w *writer) PutParenExpr(e *ast.ParenExpr) {
 func (w *writer) PutBinaryExpr(b *ast.BinaryExpr) {
 	// TODO: check unsupported ops
 	w.PutExpr(b.X)
-	w.Put(b.Op)
+	w.Put(b.Op.String())
 	w.PutExpr(b.Y)
 }
 
