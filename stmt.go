@@ -27,8 +27,16 @@ func (w *writer) PutStmt(s ast.Stmt) {
 
 // Emit if statement
 func (w *writer) PutIfStmt(i *ast.IfStmt) {
+
+	// put init statement in front
+	// guard scope with braces
+	//if i.Init != nil {
+	//	w.Putln("{")
+	//	w.indent++
+	//	w.Putln(i.Init)
+	//}
 	if i.Init != nil {
-		w.PutStmt(i.Init)
+		w.error(i, "if init statement not supported")
 	}
 
 	w.Put("if (", i.Cond, ")", i.Body)
@@ -36,6 +44,12 @@ func (w *writer) PutIfStmt(i *ast.IfStmt) {
 	if i.Else != nil {
 		w.Put("else ", i.Else)
 	}
+
+	//if i.Init != nil {
+	//	w.indent--
+	//	w.Putln()
+	//	w.Putln("}")
+	//}
 }
 
 // Emit return statement
