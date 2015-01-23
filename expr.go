@@ -83,8 +83,12 @@ func (w *writer) PutBinaryExpr(b *ast.BinaryExpr) {
 	switch b.Op {
 	default:
 		w.Put(b.X, b.Op.String(), b.Y)
-	case token.SHL, token.SHR, token.AND, token.OR, token.XOR: // different precedence in Go and Java, parentisize to be sure
+	case token.SHL, token.SHR, token.AND, token.OR, token.XOR:
+		// different precedence in Go and Java, parentisize to be sure
 		w.Put("(", b.X, b.Op.String(), b.Y, ")")
+	case token.AND_NOT: //
+		// not in java
+		w.Put("(", b.X, "&~", b.Y, ")")
 	}
 
 	if *flagParens {
