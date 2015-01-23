@@ -74,7 +74,14 @@ func (w *writer) PutParenExpr(e *ast.ParenExpr) {
 
 func (w *writer) PutBinaryExpr(b *ast.BinaryExpr) {
 	// TODO: check unsupported ops
-	w.Put(b.X, b.Op.String(), b.Y)
+
+	switch b.Op {
+	default:
+		w.Put(b.X, b.Op.String(), b.Y)
+	case token.SHL, token.SHR: // higher precendence in Go than in Java
+		w.Put("(", b.X, b.Op.String(), b.Y, ")")
+	}
+
 }
 
 func (w *writer) PutCallExpr(n *ast.CallExpr) {

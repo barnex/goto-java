@@ -5,7 +5,7 @@
 
 ./clean.bash
 
-a3 -print=false *.go
+goto-java -print=false *.go
 javac *.java
 
 for f in *.java; do
