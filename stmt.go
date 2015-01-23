@@ -102,13 +102,11 @@ func (w *writer) PutIfStmt(i *ast.IfStmt) {
 
 	// put init statement in front
 	// guard scope with braces
-	//if i.Init != nil {
-	//	w.Putln("{")
-	//	w.indent++
-	//	w.Putln(i.Init)
-	//}
+	// TODO: there is still a potential shadowing problem
 	if i.Init != nil {
-		w.error(i, "if init statement not supported")
+		w.Putln("{")
+		w.indent++
+		w.Putln(i.Init, ";")
 	}
 
 	w.Put("if (", i.Cond, ")", i.Body)
@@ -117,11 +115,11 @@ func (w *writer) PutIfStmt(i *ast.IfStmt) {
 		w.Put("else ", i.Else)
 	}
 
-	//if i.Init != nil {
-	//	w.indent--
-	//	w.Putln()
-	//	w.Putln("}")
-	//}
+	if i.Init != nil {
+		w.indent--
+		w.Putln()
+		w.Putln("}")
+	}
 }
 
 // Emit return statement
