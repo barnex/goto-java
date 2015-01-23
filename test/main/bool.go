@@ -17,4 +17,5 @@ func main() {
 	println(f)
 
 	println(a || b && c || d)
+	println(a || b && c || d == f != a || a == b && c != d == f || f)
 }
