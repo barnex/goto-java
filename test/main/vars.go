@@ -10,12 +10,12 @@ func main() {
 	var f, g = 5, "hi"  // var, two different types
 	var h string        // var, string, no init value
 
-	//	var (
-	//		i    int
-	//		j    = 7
-	//		k, l = 8, "hi"
-	//		m    string
-	//	)
+	var (
+		i    int
+		j    = 7
+		k, l = 8, "hi"
+		m    string
+	)
 
 	println(a)
 	println(b)
@@ -25,9 +25,9 @@ func main() {
 	println(f)
 	println(g)
 	println(h)
-	//	println(i)
-	//	println(j)
-	//	println(k)
-	//	println(l)
-	//	println(m)
+	println(i)
+	println(j)
+	println(k)
+	println(l)
+	println(m)
 }

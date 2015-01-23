@@ -80,8 +80,12 @@ func (w *writer) PutMainDecl(n *ast.FuncDecl) {
 }
 
 func (w *writer) PutGenDecl(d *ast.GenDecl) {
-	for _, s := range d.Specs {
+	for i, s := range d.Specs {
+		if i != 0 {
+			w.Putln(";")
+		}
 		w.PutSpec(s)
+		// TODO: comment
 	}
 }
 
