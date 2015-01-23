@@ -2,7 +2,6 @@ package main
 
 func main() {
 	// test scope
-
 	i := 1
 	{
 		i := 2
