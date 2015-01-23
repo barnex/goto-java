@@ -11,18 +11,20 @@ func (w *writer) PutExpr(n ast.Expr) {
 	switch e := n.(type) {
 	default:
 		w.error(n, "cannot handle ", reflect.TypeOf(e))
-	case *ast.CallExpr:
-		w.PutCallExpr(e)
-	case *ast.Ident:
-		w.PutIdent(e)
 	case *ast.BasicLit:
 		w.PutBasicLit(e)
 	case *ast.BinaryExpr:
 		w.PutBinaryExpr(e)
+	case *ast.CallExpr:
+		w.PutCallExpr(e)
+	case *ast.Ident:
+		w.PutIdent(e)
 	case *ast.ParenExpr:
 		w.PutParenExpr(e)
 	case *ast.SliceExpr:
 		w.PutSliceExpr(e)
+	case *ast.UnaryExpr:
+		w.PutUnaryExpr(e)
 	}
 }
 
@@ -30,6 +32,10 @@ func (w *writer) PutExpr(n ast.Expr) {
 var keywordMap = map[string]string{
 	"println": "System.out.println",
 	"print":   "System.out.print",
+}
+
+func (w *writer) PutUnaryExpr(u *ast.UnaryExpr) {
+	w.Put(u.Op.String(), u.X)
 }
 
 func (w *writer) PutIdent(n *ast.Ident) {
