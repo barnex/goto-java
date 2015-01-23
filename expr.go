@@ -83,7 +83,7 @@ func (w *writer) PutBinaryExpr(b *ast.BinaryExpr) {
 	switch b.Op {
 	default:
 		w.Put(b.X, b.Op.String(), b.Y)
-	case token.SHL, token.SHR: // higher precendence in Go than in Java
+	case token.SHL, token.SHR, token.AND: // higher precendence in Go than in Java
 		w.Put("(", b.X, b.Op.String(), b.Y, ")")
 	}
 
