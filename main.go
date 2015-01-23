@@ -14,9 +14,10 @@ import (
 )
 
 var (
-	flagPrint       = flag.Bool("print", false, "Print ast")
-	flagParens      = flag.Bool("parens", false, "Emit superfluous parens")
+	flagConstFold   = flag.Bool("foldconst", false, "Fold constants")
 	flagNoTypeCheck = flag.Bool("nocheck", false, "Don't do type check")
+	flagParens      = flag.Bool("parens", false, "Emit superfluous parens")
+	flagPrint       = flag.Bool("print", false, "Print ast")
 )
 
 func main() {

@@ -36,3 +36,9 @@ func (w *writer) toJavaType(t types.Type) string {
 		return orig
 	}
 }
+
+// returun exact value and minimal type for constant expression.
+func (w *writer) exactValue(e ast.Expr) (tv types.TypeAndValue, ok bool) {
+	tv, ok = w.info.Types[e]
+	return
+}

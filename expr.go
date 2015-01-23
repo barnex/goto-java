@@ -8,6 +8,14 @@ import (
 
 // Generate code for expression
 func (w *writer) PutExpr(n ast.Expr) {
+
+	if *flagConstFold {
+		if tv, ok := w.exactValue(n); ok && tv.Value != nil {
+			w.Put(tv.Value.String())
+			return
+		}
+	}
+
 	switch e := n.(type) {
 	default:
 		w.error(n, "cannot handle ", reflect.TypeOf(e))
