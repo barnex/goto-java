@@ -14,7 +14,8 @@ import (
 )
 
 var (
-	flagPrint = flag.Bool("print", false, "Print ast")
+	flagPrint  = flag.Bool("print", false, "Print ast")
+	flagParens = flag.Bool("parens", false, "Emit superfluous parens")
 )
 
 func main() {

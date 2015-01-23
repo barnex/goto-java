@@ -2,6 +2,7 @@ package main
 
 import (
 	"go/ast"
+	"go/token"
 	"reflect"
 )
 
@@ -75,11 +76,19 @@ func (w *writer) PutParenExpr(e *ast.ParenExpr) {
 func (w *writer) PutBinaryExpr(b *ast.BinaryExpr) {
 	// TODO: check unsupported ops
 
+	if *flagParens {
+		w.Put("(")
+	}
+
 	switch b.Op {
 	default:
 		w.Put(b.X, b.Op.String(), b.Y)
 	case token.SHL, token.SHR: // higher precendence in Go than in Java
 		w.Put("(", b.X, b.Op.String(), b.Y, ")")
+	}
+
+	if *flagParens {
+		w.Put(")")
 	}
 
 }
