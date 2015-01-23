@@ -14,8 +14,9 @@ import (
 )
 
 var (
-	flagPrint  = flag.Bool("print", false, "Print ast")
-	flagParens = flag.Bool("parens", false, "Emit superfluous parens")
+	flagPrint       = flag.Bool("print", false, "Print ast")
+	flagParens      = flag.Bool("parens", false, "Emit superfluous parens")
+	flagNoTypeCheck = flag.Bool("nocheck", false, "Don't do type check")
 )
 
 func main() {
@@ -55,7 +56,9 @@ func handleFile(fname string) {
 		Scopes:     make(map[ast.Node]*types.Scope),
 	}
 	_, err = config.Check(fname, fset, []*ast.File{f}, &info)
-	checkUserErr(err)
+	if !*flagNoTypeCheck {
+		checkUserErr(err)
+	}
 
 	// print ast if requested
 	if *flagPrint {
