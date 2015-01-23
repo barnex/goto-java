@@ -11,10 +11,16 @@ const (
 )
 
 func main() {
+
+	const a = 12
+	var f = a
+
+	println(a)
 	println(b)
 	println(c)
 	println(d)
 	println(e)
+	println(f)
 	println(g)
 	println(h)
 	println(i)

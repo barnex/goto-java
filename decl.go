@@ -4,6 +4,7 @@ import (
 	"go/ast"
 	"go/token"
 	"reflect"
+	"strings"
 )
 
 // Emit a declaration with optional context keyword (like "static")
@@ -87,6 +88,8 @@ func (w *writer) PutGenDecl(context string, d *ast.GenDecl) {
 	switch d.Tok { // IMPORT, CONST, TYPE, VAR
 	default:
 		w.error(d, "cannot handle "+d.Tok.String())
+	case token.CONST:
+		w.PutVarDecls(cat(context, "final"), d)
 	case token.VAR:
 		w.PutVarDecls(context, d)
 	}
@@ -136,6 +139,12 @@ func (w *writer) putVarDeclOneType(context, typ string, names []*ast.Ident, valu
 	if context != "" {
 		w.Put(context, " ")
 	}
+
+	// untyped const hack: remove "untyped " from type
+	if strings.Contains(context, "final") && strings.HasPrefix(typ, "untyped ") {
+		typ = typ[len("untyped "):]
+	}
+
 	w.Put(typ)
 	for i, n := range names {
 		w.Put(" ", n.Name, " = ")

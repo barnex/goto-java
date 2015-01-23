@@ -14,6 +14,15 @@ func comma(i int) string {
 	return ifNonzero(i, ", ")
 }
 
+// concatenate a and b, inserting a space if needed
+func cat(a, b string) string {
+	if (a != "") && (b != "") {
+		return a + " " + b
+	} else {
+		return a + b
+	}
+}
+
 func nnil(x interface{}) interface{} {
 	if x == nil {
 		return ""
