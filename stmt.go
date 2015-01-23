@@ -138,11 +138,11 @@ func (w *writer) PutBlockStmt(n *ast.BlockStmt) {
 
 	for _, n := range n.List {
 		w.PutStmt(n)
-		if needSemicolon(n){
-		w.Putln(";")
-	}else{
-		w.Putln()
-	}
+		if needSemicolon(n) {
+			w.Putln(";")
+		} else {
+			w.Putln()
+		}
 	}
 
 	w.indent--
@@ -150,10 +150,12 @@ func (w *writer) PutBlockStmt(n *ast.BlockStmt) {
 }
 
 // does this statement need a terminating semicolon if part of a BlockStmt?
-func needSemicolon(s ast.Stmt)bool{
-	switch s.(type){
-		default: return true
-		case *ast.BlockStmt, *ast.ForStmt, *ast.IfStmt, *ast.SwitchStmt: return false
+func needSemicolon(s ast.Stmt) bool {
+	switch s.(type) {
+	default:
+		return true
+	case *ast.BlockStmt, *ast.ForStmt, *ast.IfStmt, *ast.SwitchStmt:
+		return false
 	}
 }
 

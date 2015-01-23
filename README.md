@@ -1,3 +1,3 @@
-# a3
-hobby compiler 3.0
+# goto-java
+hobby go -> java compiler.
 Nothing to see here.
