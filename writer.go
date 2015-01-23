@@ -23,7 +23,7 @@ func NewWriter(out io.Writer) *writer {
 	return &writer{out: out}
 }
 
-// outPuts a class with given name based on go file.
+// Outputs a class with given name based on go file.
 func (w *writer) PutClass(className string, f *ast.File) {
 	w.Putln("package ", f.Name.Name, ";")
 	w.Putln()
@@ -33,7 +33,13 @@ func (w *writer) PutClass(className string, f *ast.File) {
 	w.indent++
 
 	for _, d := range f.Decls {
-		w.PutDecl(d)
+		w.PutDecl("static", d)
+
+		switch d.(type) {
+		default: // no semi
+		case *ast.GenDecl:
+			w.Putln(";")
+		}
 	}
 
 	w.indent--

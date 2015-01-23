@@ -2,17 +2,19 @@ package main
 
 import (
 	"go/ast"
+	"go/token"
 	"reflect"
 )
 
-func (w *writer) PutDecl(d ast.Decl) {
+// Emit a declaration with optional context keyword (like "static")
+func (w *writer) PutDecl(context string, d ast.Decl) {
 	switch d := d.(type) {
 	default:
 		panic("unhandled memeber type: " + reflect.TypeOf(d).String())
 	case *ast.FuncDecl:
 		w.PutFuncDecl(d)
 	case *ast.GenDecl:
-		w.PutGenDecl(d)
+		w.PutGenDecl(context, d)
 	}
 }
 
@@ -79,31 +81,35 @@ func (w *writer) PutMainDecl(n *ast.FuncDecl) {
 	w.Putln()
 }
 
-func (w *writer) PutGenDecl(d *ast.GenDecl) {
+// Emit a generic declaration (import, constant, type or variable)
+// with optional context ("static")
+func (w *writer) PutGenDecl(context string, d *ast.GenDecl) {
+	switch d.Tok { // IMPORT, CONST, TYPE, VAR
+	default:
+		w.error(d, "cannot handle "+d.Tok.String())
+	case token.VAR:
+		w.PutVarDecls(context, d)
+	}
+}
+
+// Emit one or more variable declarations
+func (w *writer) PutVarDecls(context string, d *ast.GenDecl) {
 	for i, s := range d.Specs {
 		if i != 0 {
 			w.Putln(";")
 		}
-		w.PutSpec(s)
-		// TODO: comment
+		w.PutVarDecl(context, s.(*ast.ValueSpec)) // doc says it's a valueSpec for Tok == VAR
 	}
 }
 
-func (w *writer) PutSpec(s ast.Spec) {
-	switch s := s.(type) {
-	default:
-		w.error(s, "cannot handle ", reflect.TypeOf(s))
-	case *ast.ValueSpec:
-		w.PutValueSpec(s)
-	}
-}
-
-func (w *writer) PutValueSpec(s *ast.ValueSpec) {
+// Emit a Variable declaration
+// with optional context prefix (e.g. "static")
+func (w *writer) PutVarDecl(context string, s *ast.ValueSpec) {
 	if s.Type != nil {
 		// var with explicit type:
 		// Put everything on one line, e.g.:
 		// 	int a = 1, b = 2
-		w.putSpecOneType(w.javaTypeOf(s.Type), s.Names, s.Values, s.Comment)
+		w.putVarDeclOneType(context, w.javaTypeOf(s.Type), s.Names, s.Values, s.Comment)
 	} else {
 		// var with infered type:
 		// Put specs on separate line, e.g.:
@@ -117,7 +123,7 @@ func (w *writer) PutValueSpec(s *ast.ValueSpec) {
 			if i != 0 {
 				w.Putln(";")
 			}
-			w.putSpecOneType(w.javaTypeOf(n), s.Names[i:i+1], []ast.Expr{value}, s.Comment)
+			w.putVarDeclOneType(context, w.javaTypeOf(n), s.Names[i:i+1], []ast.Expr{value}, s.Comment)
 		}
 	}
 }
@@ -126,7 +132,10 @@ func (w *writer) PutValueSpec(s *ast.ValueSpec) {
 // 	var x, y int = 1, 2
 // Translates to java:
 // 	int x = 1, y = 2
-func (w *writer) putSpecOneType(typ string, names []*ast.Ident, values []ast.Expr, comment *ast.CommentGroup) {
+func (w *writer) putVarDeclOneType(context, typ string, names []*ast.Ident, values []ast.Expr, comment *ast.CommentGroup) {
+	if context != "" {
+		w.Put(context, " ")
+	}
 	w.Put(typ)
 	for i, n := range names {
 		w.Put(" ", n.Name, " = ")
@@ -143,3 +152,13 @@ func (w *writer) putSpecOneType(typ string, names []*ast.Ident, values []ast.Exp
 	//w.Put(";")
 	//w.PutInlineComment(comment)
 }
+
+// Emit an *ImportSpec, *ValueSpec, or *TypeSpec.
+//func (w *writer) PutSpec(s ast.Spec) {
+//	switch s := s.(type) {
+//	default:
+//		w.error(s, "cannot handle ", reflect.TypeOf(s))
+//	case *ast.ValueSpec:
+//		w.PutValueSpec(s)
+//	}
+//}

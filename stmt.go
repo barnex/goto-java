@@ -157,8 +157,10 @@ func needSemicolon(s ast.Stmt) bool {
 	}
 }
 
+// A DeclStmt node represents a declaration in a statement list.
 func (w *writer) PutDeclStmt(d *ast.DeclStmt) {
-	w.PutDecl(d.Decl)
+	context := "" // inside a statement list, context = local(?). Static initializer?
+	w.PutDecl(context, d.Decl)
 }
 
 func (w *writer) PutExprStmt(n *ast.ExprStmt) {
