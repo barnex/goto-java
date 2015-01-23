@@ -8,7 +8,7 @@ func main() {
 	if 1 == 2 {
 		println("cosmic rays")
 	} else {
-		println("all is fine")
+		println("good")
 	}
 
 	// test init:
