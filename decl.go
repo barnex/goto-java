@@ -168,7 +168,7 @@ func (w *writer) PutValueSpec(context string, s *ast.ValueSpec) {
 		// var with explicit type:
 		// Put everything on one line, e.g.:
 		// 	int a = 1, b = 2
-		w.putVarDeclOneType(context, w.javaTypeOf(s.Type), s.Names, s.Values, s.Comment)
+		w.PutValueSpecLine(context, w.javaTypeOf(s.Type), s.Names, s.Values, s.Comment)
 	} else {
 		// var with infered type:
 		// Put specs on separate line, e.g.:
@@ -182,7 +182,7 @@ func (w *writer) PutValueSpec(context string, s *ast.ValueSpec) {
 			if i != 0 {
 				w.Putln(";")
 			}
-			w.putVarDeclOneType(context, w.javaTypeOf(n), s.Names[i:i+1], []ast.Expr{value}, s.Comment)
+			w.PutValueSpecLine(context, w.javaTypeOf(n), s.Names[i:i+1], []ast.Expr{value}, s.Comment)
 		}
 	}
 }
@@ -191,7 +191,7 @@ func (w *writer) PutValueSpec(context string, s *ast.ValueSpec) {
 // 	var x, y int = 1, 2
 // Translates to java:
 // 	int x = 1, y = 2
-func (w *writer) putVarDeclOneType(context, typ string, names []*ast.Ident, values []ast.Expr, comment *ast.CommentGroup) {
+func (w *writer) PutValueSpecLine(context, typ string, names []*ast.Ident, values []ast.Expr, comment *ast.CommentGroup) {
 	if context != "" {
 		w.Put(context, " ")
 	}
@@ -218,12 +218,3 @@ func (w *writer) putVarDeclOneType(context, typ string, names []*ast.Ident, valu
 	//w.PutInlineComment(comment)
 }
 
-// Emit an *ImportSpec, *ValueSpec, or *TypeSpec.
-//func (w *writer) PutSpec(s ast.Spec) {
-//	switch s := s.(type) {
-//	default:
-//		w.error(s, "cannot handle ", reflect.TypeOf(s))
-//	case *ast.ValueSpec:
-//		w.PutValueSpec(s)
-//	}
-//}
