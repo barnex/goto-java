@@ -6,7 +6,7 @@ import (
 	"reflect"
 )
 
-// Generate code for expression
+// Emit code for an expression.
 func (w *writer) PutExpr(n ast.Expr) {
 
 	if *flagConstFold {
@@ -36,23 +36,39 @@ func (w *writer) PutExpr(n ast.Expr) {
 	}
 }
 
+// Emit an identifier, translating built-ins.
+// Ident godoc:
+// 	type Ident struct {
+// 	        NamePos token.Pos // identifier position
+// 	        Name    string    // identifier name
+// 	        Obj     *Object   // denoted object; or nil
+// 	}
+func (w *writer) PutIdent(n *ast.Ident) {
+	name := n.Name
+	// translate name if keyword
+	if trans, ok := builtinIdentMap[name]; ok {
+		name = trans
+	}
+	w.Put(name)
+}
+
+// maps built-in Go identifiers to java
 // TODO: overlaps with builtin
-var keywordMap = map[string]string{
+var builtinIdentMap = map[string]string{
 	"println": "System.out.println",
 	"print":   "System.out.print",
 }
 
+// Emit a unary expression, execpt unary "*".
+// spec:
+// 	unary_op = "+" | "-" | "!" | "^" | "*" | "&" | "<-"
 func (w *writer) PutUnaryExpr(u *ast.UnaryExpr) {
-	w.Put(u.Op.String(), u.X)
-}
-
-func (w *writer) PutIdent(n *ast.Ident) {
-	name := n.Name
-	// translate name if keyword
-	if trans, ok := keywordMap[name]; ok {
-		name = trans
+	switch u.Op {
+	default:
+		w.error(u, "unary ", u.Op, " not supported")
+	case token.ADD, token.SUB, token.NOT: // TODO: xor
+		w.Put(u.Op.String(), u.X)
 	}
-	w.Put(name)
 }
 
 func (w *writer) PutSliceExpr(e *ast.SliceExpr) {
@@ -87,6 +103,10 @@ func (w *writer) PutParenExpr(e *ast.ParenExpr) {
 	w.Put("(", e.X, ")")
 }
 
+// binary_op  = "||" | "&&" | rel_op | add_op | mul_op .
+// rel_op     = "==" | "!=" | "<" | "<=" | ">" | ">=" .
+// add_op     = "+" | "-" | "|" | "^" .
+// mul_op     = "*" | "/" | "%" | "<<" | ">>" | "&" | "&^" .
 func (w *writer) PutBinaryExpr(b *ast.BinaryExpr) {
 	// TODO: check unsupported ops
 

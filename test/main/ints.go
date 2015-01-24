@@ -20,4 +20,12 @@ func main() {
 	println(1*2/3%4 + 5 - 6>>1<<2&3 | 4)
 	println(1 | 2 ^ 3&4<<5>>6 - 1 + 2*3/4)
 	println(3 &^ 4)
+
+	// TODO: sizeof int
+	//println(1 << 31)
+	//println(1 << 32)
+	//println(1 << 33)
+	//println(1 >> 31)
+	//println(1 >> 32)
+	//println(1 >> 33)
 }

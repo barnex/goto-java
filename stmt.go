@@ -221,7 +221,6 @@ func needSemicolon(s ast.Stmt) bool {
 	}
 }
 
-
 // Emit a declaration in a statement list.
 // DeclStmt godoc:
 // 	type DeclStmt struct {
@@ -252,6 +251,10 @@ func (w *writer) PutExprStmt(n *ast.ExprStmt) {
 func (w *writer) PutAssignStmt(n *ast.AssignStmt) {
 	if len(n.Lhs) != len(n.Rhs) {
 		w.error(n, "assignment count mismatch:", len(n.Lhs), "!=", len(n.Rhs))
+	}
+
+	if n.Tok == token.AND_NOT {
+		w.Error(n, "&^ not supported") // TODO
 	}
 
 	// translate := to =
