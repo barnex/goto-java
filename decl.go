@@ -120,32 +120,39 @@ func (w *writer) PutGenDecl(context string, d *ast.GenDecl) {
 	default:
 		w.error(d, "cannot handle "+d.Tok.String())
 	case token.CONST:
-		w.PutVarDecls(cat(context, "final"), d)
+		w.PutValueSpecs(cat(context, "final"), d.Specs)
 	case token.VAR:
-		w.PutVarDecls(context, d)
+		w.PutValueSpecs(context, d.Specs)
 	}
 }
 
-// Emit a block of variable/constant declarations, e.g.,
+// Emit a list of *ast.ValueSpecs, e.g.:
 // 	var(
 // 		a int
 // 		b, c int
 // 	)
+// or
+// 	const(
+// 		a = 1
+// 		b, c = 2, 3
+// 	)
 // with optional context prefix (e.g. "static", "final", "static final").
-func (w *writer) PutVarDecls(context string, d *ast.GenDecl) {
-	for i, s := range d.Specs {
+// The concrete type of specs elements must be *ast.ValueSpec.
+func (w *writer) PutValueSpecs(context string, specs []ast.Spec) {
+	for i, spec := range specs {
 		if i != 0 {
 			w.Putln(";")
 		}
-		w.PutValueSpec(context, s.(*ast.ValueSpec)) // doc says it's a valueSpec for Tok == VAR
+		w.PutValueSpec(context, spec.(*ast.ValueSpec)) // doc says it's a valueSpec for Tok == VAR, CONST
 	}
 }
 
-// Emit a ValueSpec, a single-line variable declaration, e.g.:
+// Emit a single ValueSpec, e.g.:
 // 	var a, b int
 // or
-// 	var a, b = 0, "hello"
-// with optional context prefix (e.g. "static")
+// 	const a, b = 0, "hello"
+// with optional context prefix (e.g. "static", "final", "static final").
+//
 // ValueSpec godoc:
 // 	type ValueSpec struct {
 // 	    Doc     *CommentGroup // associated documentation; or nil
