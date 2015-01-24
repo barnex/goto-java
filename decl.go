@@ -126,18 +126,18 @@ func (w *writer) PutGenDecl(context string, d *ast.GenDecl) {
 	}
 }
 
-// Emit a block of variable declarations, e.g.,
+// Emit a block of variable/constant declarations, e.g.,
 // 	var(
 // 		a int
 // 		b, c int
 // 	)
-// with optional context prefix (e.g. "static").
+// with optional context prefix (e.g. "static", "final", "static final").
 func (w *writer) PutVarDecls(context string, d *ast.GenDecl) {
 	for i, s := range d.Specs {
 		if i != 0 {
 			w.Putln(";")
 		}
-		w.PutVarDecl(context, s.(*ast.ValueSpec)) // doc says it's a valueSpec for Tok == VAR
+		w.PutValueSpec(context, s.(*ast.ValueSpec)) // doc says it's a valueSpec for Tok == VAR
 	}
 }
 
@@ -156,7 +156,7 @@ func (w *writer) PutVarDecls(context string, d *ast.GenDecl) {
 // 	}
 // A ValueSpec node represents a constant or variable declaration
 // (ConstSpec or VarSpec production).
-func (w *writer) PutVarDecl(context string, s *ast.ValueSpec) {
+func (w *writer) PutValueSpec(context string, s *ast.ValueSpec) {
 	if s.Type != nil {
 		// var with explicit type:
 		// Put everything on one line, e.g.:
