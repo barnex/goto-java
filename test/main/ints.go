@@ -1,6 +1,10 @@
 package main
 
 func main() {
+
+
+	// TODO: with consts, vars int, int64, int32, ...
+
 	println(42)
 	println(1 + 1)
 	println(1 + 2*3)
