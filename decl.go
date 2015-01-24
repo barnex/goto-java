@@ -1,5 +1,7 @@
 package main
 
+// This file handles declarations
+
 import (
 	"go/ast"
 	"go/token"
@@ -22,6 +24,14 @@ func (w *writer) PutDecl(context string, d ast.Decl) {
 // Emit code for a top-level function/method declaration, e.g.:
 // 	func f(a, b int) { ... }
 // 	func (x *T) f() { ... }
+// ast.FuncDecl godoc:
+// 	type FuncDecl struct {
+// 	    Doc  *CommentGroup // associated documentation; or nil
+// 	    Recv *FieldList    // receiver (methods); or nil (functions)
+// 	    Name *Ident        // function/method name
+// 	    Type *FuncType     // function signature: parameters, results, and position of "func" keyword
+// 	    Body *BlockStmt    // function body; or nil (forward declaration)
+// 	}
 func (w *writer) PutFuncDecl(n *ast.FuncDecl) {
 	if n.Recv == nil {
 		w.PutStaticFunc(n)
@@ -63,12 +73,12 @@ func (w *writer) PutStaticFunc(f *ast.FuncDecl) {
 	w.Putln(f.Body)
 }
 
-//func (w *writer) PutField(f *ast.Field) {
-//	w.Put(f.Type, " ")
-//	for i, n := range f.Names {
-//		w.Put(comma(i), n)
-//	}
-//}
+// Emit the main function. Special case in PutStaticFunc.
+func (w *writer) PutMainDecl(n *ast.FuncDecl) {
+	w.Put("public static void ", n.Name.Name, "(String[] args)")
+	w.PutBlockStmt(n.Body)
+	w.Putln()
+}
 
 // Emit code for a method declaration, e.g.:
 // 	func (x *T) f() { ... }
@@ -76,14 +86,35 @@ func (w *writer) PutMethod(n *ast.FuncDecl) {
 	panic("todo: method")
 }
 
-func (w *writer) PutMainDecl(n *ast.FuncDecl) {
-	w.Put("public static void ", n.Name.Name, "(String[] args)")
-	w.PutBlockStmt(n.Body)
-	w.Putln()
-}
+//func (w *writer) PutField(f *ast.Field) {
+//	w.Put(f.Type, " ")
+//	for i, n := range f.Names {
+//		w.Put(comma(i), n)
+//	}
+//}
 
 // Emit a generic declaration (import, constant, type or variable)
 // with optional context ("static")
+// godoc:
+// 	type GenDecl struct {
+// 	    Doc    *CommentGroup // associated documentation; or nil
+// 	    TokPos token.Pos     // position of Tok
+// 	    Tok    token.Token   // IMPORT, CONST, TYPE, VAR
+// 	    Lparen token.Pos     // position of '(', if any
+// 	    Specs  []Spec
+// 	    Rparen token.Pos // position of ')', if any
+// 	}
+// A GenDecl node (generic declaration node) represents an import,
+// constant, type or variable declaration. A valid Lparen position
+// (Lparen.Line > 0) indicates a parenthesized declaration.
+//
+// Relationship between Tok value and Specs element type:
+//
+// 	token.IMPORT  *ImportSpec
+// 	token.CONST   *ValueSpec
+// 	token.TYPE    *TypeSpec
+// 	token.VAR     *ValueSpec
+//
 func (w *writer) PutGenDecl(context string, d *ast.GenDecl) {
 	switch d.Tok { // IMPORT, CONST, TYPE, VAR
 	default:
@@ -95,7 +126,12 @@ func (w *writer) PutGenDecl(context string, d *ast.GenDecl) {
 	}
 }
 
-// Emit one or more variable declarations
+// Emit a block of variable declarations, e.g.,
+// 	var(
+// 		a int
+// 		b, c int
+// 	)
+// with optional context prefix (e.g. "static").
 func (w *writer) PutVarDecls(context string, d *ast.GenDecl) {
 	for i, s := range d.Specs {
 		if i != 0 {
@@ -105,8 +141,21 @@ func (w *writer) PutVarDecls(context string, d *ast.GenDecl) {
 	}
 }
 
-// Emit a Variable declaration
+// Emit a ValueSpec, a single-line variable declaration, e.g.:
+// 	var a, b int
+// or
+// 	var a, b = 0, "hello"
 // with optional context prefix (e.g. "static")
+// ValueSpec godoc:
+// 	type ValueSpec struct {
+// 	    Doc     *CommentGroup // associated documentation; or nil
+// 	    Names   []*Ident      // value names (len(Names) > 0)
+// 	    Type    Expr          // value type; or nil
+// 	    Values  []Expr        // initial values; or nil
+// 	    Comment *CommentGroup // line comments; or nil
+// 	}
+// A ValueSpec node represents a constant or variable declaration
+// (ConstSpec or VarSpec production).
 func (w *writer) PutVarDecl(context string, s *ast.ValueSpec) {
 	if s.Type != nil {
 		// var with explicit type:

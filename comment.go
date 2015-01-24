@@ -1,5 +1,7 @@
 package main
 
+// TODO: collect all comments and put in appropriate place
+
 import "go/ast"
 
 func (w *writer) PutDoc(g *ast.CommentGroup) {
