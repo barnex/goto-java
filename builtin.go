@@ -1,16 +1,18 @@
 package main
 
+// built-ins
+
 import "go/ast"
 
 // list of Go builtin identifiers
-var builtin = map[string]bool{
+var isBuiltin = map[string]bool{
 	"len": true,
 }
 
 // returns true if n is a Go built-in identifier
 func IsBuiltinExpr(n ast.Expr) bool {
 	if ident, ok := n.(*ast.Ident); ok {
-		return builtin[ident.Name]
+		return isBuiltin[ident.Name]
 	}
 	return false
 }
