@@ -217,4 +217,3 @@ func (w *writer) PutValueSpecLine(context, typ string, names []*ast.Ident, value
 	//w.Put(";")
 	//w.PutInlineComment(comment)
 }
-

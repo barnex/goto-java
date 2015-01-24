@@ -6,6 +6,10 @@ import (
 	"reflect"
 )
 
+// Emit code for a statement.
+// Statements are emitted without final semicolon,
+// it is up the caller to append a semicolon where needed.
+// This allows the statement to be put inside, e.g., a for loop.
 func (w *writer) PutStmt(s ast.Stmt) {
 	switch s := s.(type) {
 	default:
@@ -33,9 +37,20 @@ func (w *writer) PutStmt(s ast.Stmt) {
 	}
 }
 
+// Emit a switch statement.
+// SwitchStmt godoc:
+// 	type SwitchStmt struct {
+// 	        Switch token.Pos  // position of "switch" keyword
+// 	        Init   Stmt       // initialization statement; or nil
+// 	        Tag    Expr       // tag expression; or nil
+// 	        Body   *BlockStmt // CaseClauses only
+// 	}
 func (w *writer) PutSwitchStmt(s *ast.SwitchStmt) {
 	if s.Init != nil {
 		w.error(s, "switch init not supported")
+	}
+	if s.Tag == nil {
+		w.error(s, "switch w/o tag not supported")
 	}
 
 	w.Putln("switch(", s.Tag, "){")
@@ -77,27 +92,64 @@ func (w *writer) PutSwitchStmt(s *ast.SwitchStmt) {
 }
 
 // Emit branch statement (breat, continue, goto, fallthrough)
+// BranchStmt godoc:
+// 	type BranchStmt struct {
+// 	        TokPos token.Pos   // position of Tok
+// 	        Tok    token.Token // keyword token (BREAK, CONTINUE, GOTO, FALLTHROUGH)
+// 	        Label  *Ident      // label name; or nil
+// 	}
 func (w *writer) PutBranchStmt(b *ast.BranchStmt) {
+	if b.Label != nil {
+		w.error(b, b.Tok.String(), " with label not allowed")
+	}
 	switch b.Tok {
 	default:
 		w.error(b, "cannot handle ", b.Tok)
 	case token.BREAK, token.CONTINUE:
 		w.Put(b.Tok.String())
+	case token.FALLTHROUGH:
+		// fallthrough does not exist in java, it should never be emitted.
+		// Instead, PutSwitchStmt handles it as a special thing.
+		// If we do reach this code, it's either a bug or
+		// a misplaced fallthrough that slipped through the parser.
+		w.error(b, b.Tok, "not allowed here")
 	}
 }
 
-// Emit ++ or -- statement
+// Emit ++ or -- statement.
+// IncDecStmt godoc:
+// 	type IncDecStmt struct {
+// 	        X      Expr
+// 	        TokPos token.Pos   // position of Tok
+// 	        Tok    token.Token // INC or DEC
+// 	}
 func (w *writer) PutIncDecStmt(s *ast.IncDecStmt) {
 	w.Put(s.X, s.Tok.String())
 }
 
-// Emit for statement
+// Emit a for statement.
+// FotStmt godoc:
+// 	type ForStmt struct {
+// 	        For  token.Pos // position of "for" keyword
+// 	        Init Stmt      // initialization statement; or nil
+// 	        Cond Expr      // condition; or nil
+// 	        Post Stmt      // post iteration statement; or nil
+// 	        Body *BlockStmt
+// 	}
 func (w *writer) PutForStmt(f *ast.ForStmt) {
 	w.Put("for (", nnil(f.Init), "; ", nnil(f.Cond), "; ", nnil(f.Post), ")")
 	w.Putln(f.Body)
 }
 
-// Emit if statement
+// Emit if statement.
+// IfStmt godoc:
+// 	type IfStmt struct {
+// 	        If   token.Pos // position of "if" keyword
+// 	        Init Stmt      // initialization statement; or nil
+// 	        Cond Expr      // condition
+// 	        Body *BlockStmt
+// 	        Else Stmt // else branch; or nil
+// 	}
 func (w *writer) PutIfStmt(i *ast.IfStmt) {
 
 	// put init statement in front
@@ -122,7 +174,12 @@ func (w *writer) PutIfStmt(i *ast.IfStmt) {
 	}
 }
 
-// Emit return statement
+// Emit a return statement.
+// ReturnStmt godoc:
+// 	type ReturnStmt struct {
+// 	        Return  token.Pos // position of "return" keyword
+// 	        Results []Expr    // result expressions; or nil
+// 	}
 func (w *writer) PutReturnStmt(r *ast.ReturnStmt) {
 	if len(r.Results) > 1 {
 		w.error(r, "cannot handle multiple return values")
@@ -130,6 +187,13 @@ func (w *writer) PutReturnStmt(r *ast.ReturnStmt) {
 	w.Put("return ", r.Results[0])
 }
 
+// Emit a braced statement list.
+// BlockStmt godoc:
+// 	type BlockStmt struct {
+// 	        Lbrace token.Pos // position of "{"
+// 	        List   []Stmt
+// 	        Rbrace token.Pos // position of "}"
+// 	}
 func (w *writer) PutBlockStmt(n *ast.BlockStmt) {
 	w.Putln("{")
 	w.indent++
@@ -147,7 +211,7 @@ func (w *writer) PutBlockStmt(n *ast.BlockStmt) {
 	w.Put("}")
 }
 
-// does this statement need a terminating semicolon if part of a BlockStmt?
+// does this statement need a terminating semicolon if part of a statement list?
 func needSemicolon(s ast.Stmt) bool {
 	switch s.(type) {
 	default:
@@ -157,16 +221,34 @@ func needSemicolon(s ast.Stmt) bool {
 	}
 }
 
-// A DeclStmt node represents a declaration in a statement list.
+
+// Emit a declaration in a statement list.
+// DeclStmt godoc:
+// 	type DeclStmt struct {
+// 	        Decl Decl // *GenDecl with CONST, TYPE, or VAR token
+// 	}
 func (w *writer) PutDeclStmt(d *ast.DeclStmt) {
 	context := "" // inside a statement list, context = local(?). Static initializer?
 	w.PutDecl(context, d.Decl)
 }
 
+// Emit a (stand-alone) expression in a statement list.
+// ExprStmt godoc:
+// 	type ExprStmt struct {
+// 	        X Expr // expression
+// 	}
 func (w *writer) PutExprStmt(n *ast.ExprStmt) {
 	w.Put(n.X)
 }
 
+// Emit an assignment or a short variable declaration.
+// AssignStmt godoc:
+// 	type AssignStmt struct {
+// 	        Lhs    []Expr
+// 	        TokPos token.Pos   // position of Tok
+// 	        Tok    token.Token // assignment token, DEFINE
+// 	        Rhs    []Expr
+// 	}
 func (w *writer) PutAssignStmt(n *ast.AssignStmt) {
 	if len(n.Lhs) != len(n.Rhs) {
 		w.error(n, "assignment count mismatch:", len(n.Lhs), "!=", len(n.Rhs))
