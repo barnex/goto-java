@@ -62,8 +62,9 @@ func (w *writer) PutResolvedIdent(id *ast.Ident) {
 	if w.IsBuiltinIdent(id) {
 		w.PutBuiltinIdent(id)
 	} else {
-		if tv, ok := w.info.Defs[id]; ok {
-			w.Put(tv.Name())
+		obj := w.info.ObjectOf(id)
+		if obj != nil {
+			w.Put(obj.Name())
 		} else {
 			w.error(id, "undefined: ", id.Name)
 		}

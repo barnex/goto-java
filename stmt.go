@@ -266,6 +266,7 @@ func (w *writer) PutAssignStmt(n *ast.AssignStmt) {
 
 	if n.Tok == token.DEFINE {
 		w.PutDefine(JModifier(NONE), n)
+		return
 	}
 
 	// multiple assign: put one per line
