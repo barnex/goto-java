@@ -51,17 +51,21 @@ func (w *writer) PutStaticFunc(f *ast.FuncDecl) {
 		return
 	}
 
-	w.Put(ModifierFor(f.Name.Name), "static ")
+	mod := STATIC
+	if ast.IsExported(f.Name.Name) {
+		mod |= PUBLIC
+	}
 
 	ret := "void"
-	if len(f.Type.Results.List) == 1 {
+	if f.Type.Results != nil && len(f.Type.Results.List) == 1 {
 		ret = w.javaTypeOf(f.Type.Results.List[0].Type) // todo: multiple names, wtf?
 	}
-	if len(f.Type.Results.List) > 1 {
+	if f.Type.Results != nil && len(f.Type.Results.List) > 1 {
 		w.error(f, "no muliple return values supported")
 	}
 
-	w.Put(ret, " ", (f.Name.Name), "(") // TODO: translate funcname
+	w.Put(mod, " ", ret, " ", (f.Name.Name), "(") // TODO: translate funcname
+
 	for i, a := range f.Type.Params.List {
 		if len(a.Names) != 1 {
 			w.error(f, "cannot handle multiple field names")
@@ -69,6 +73,7 @@ func (w *writer) PutStaticFunc(f *ast.FuncDecl) {
 		name := a.Names[0] // TODO: more/none?
 		w.Put(comma(i), a.Type, " ", name)
 	}
+
 	w.Put(")")
 	w.Putln(f.Body)
 }

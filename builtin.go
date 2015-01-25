@@ -73,8 +73,8 @@ var builtin2java = map[string]string{
 // The resulut is scope-sensitive, as built-ins may be shadowed by
 // other declarations (e.g. len := 7).
 func (w *writer) IsBuiltinIdent(id *ast.Ident) bool {
-	if _, ok := w.info.Defs[id]; ok {
-		return false // resolved, so not built-in (though possibly shadowed)
+	if w.info.ObjectOf(id) != nil {
+		return false
 	} else {
 		return builtins[id.Name]
 	}
@@ -108,7 +108,7 @@ func (w *writer) PutBuiltinIdent(id *ast.Ident) {
 	if transl, ok := builtin2java[id.Name]; ok {
 		w.Put(transl)
 	} else {
-		w.error(id, "built-in identifier supported: ", id.Name)
+		w.error(id, "built-in identifier not supported: ", id.Name)
 	}
 }
 
