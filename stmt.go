@@ -253,13 +253,13 @@ func (w *writer) PutAssignStmt(n *ast.AssignStmt) {
 		w.error(n, "assignment count mismatch:", len(n.Lhs), "!=", len(n.Rhs))
 	}
 
-	// java does not have &^=
+	// java does not have &^=, translate
 	if n.Tok == token.AND_NOT_ASSIGN {
 		if len(n.Lhs) != 1 || len(n.Rhs) != 1{
 			// should have been caught by type checker.
 			w.error(n, n.Tok.String(), " requires single argument")
 		}
-		w.Put(n.Lhs[0], "&=", "~", "(", n.Rhs[0], ")")
+		w.Put(n.Lhs[0], " &= ", " ~", "(", n.Rhs[0], ")")
 		return
 	}
 

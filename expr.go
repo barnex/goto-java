@@ -125,6 +125,8 @@ func (w *writer) putStringSlice(e *ast.SliceExpr) {
 }
 
 // Emit code for a parnthesized expression.
+// TODO: in many other places parens are inserted,
+// do not put parens around parens.
 func (w *writer) PutParenExpr(e *ast.ParenExpr) {
 	w.Put("(", e.X, ")")
 }

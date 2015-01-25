@@ -1,8 +1,8 @@
 package main
 
 func main(){
-	a := 5
-	b := 1
+	a := 5+1
+	b := 1+1
 	println(a)
 	println(b)
 	
@@ -14,58 +14,58 @@ func main(){
 	println(a)
 	println(b)
 
-	a += 2
-	b += 3
+	a += 2+1
+	b += 3+1
 	println(a)
 	println(b)
 
-	a -= 3
-	b -= 7
+	a -= 3+1
+	b -= 7+1
 	println(a)
 	println(b)
 
-	a *= 4
-	b *= -4
+	a *= 4+1
+	b *= -4+1
 	println(a)
 	println(b)
 
-	a /= 5
-	b /= -6
+	a /= 5+1
+	b /= -6+1
 	println(a)
 	println(b)
 
-	a %= 6
-	b %= -7
+	a %= 6+1
+	b %= -7+1
 	println(a)
 	println(b)
 
-	a ^= 7
-	b ^= -8
+	a ^= 7+1
+	b ^= -8+1
 	println(a)
 	println(b)
 
-	a &= 9
-	b &= -10
+	a &= 9+1
+	b &= -10+1
 	println(a)
 	println(b)
 
-	a |= 10
-	b |= -11
+	a |= 10+1
+	b |= -11+1
 	println(a)
 	println(b)
 
-	a <<= 11
-	b <<= 3
+	a <<= 11+1
+	b <<= 3+1
 	println(a)
 	println(b)
 
-	a >>= 12
-	b >>= 4
+	a >>= 12+1
+	b >>= 4+1
 	println(a)
 	println(b)
 
-	a &^= 13
-	b &^= -14
+	a &^= 13+1
+	b &^= -14+1
 	println(a)
 	println(b)
 
