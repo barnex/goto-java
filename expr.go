@@ -172,7 +172,7 @@ func (w *writer) PutCallExpr(n *ast.CallExpr) {
 		return
 	}
 
-	w.PutExpr(n.Fun)
+	w.PutExpr(n.Fun) // TODO: parenthesized = problematic
 
 	w.Put("(")
 	for i, a := range n.Args {

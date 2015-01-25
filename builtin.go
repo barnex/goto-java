@@ -69,15 +69,22 @@ func (w *writer) IsBuiltinIdent(id *ast.Ident) bool {
 // 	(print)
 // 	...
 func (w *writer) IsBuiltinExpr(e ast.Expr) bool {
+	e = StripParens(e)
 	// identifier
 	if id, ok := e.(*ast.Ident); ok {
 		return w.IsBuiltinIdent(id)
 	}
-	// parentisized expression
-	if par, ok := e.(*ast.ParenExpr); ok {
-		return w.IsBuiltinExpr(par.X)
-	}
 	return false
+}
+
+// Strip parens from expression, if any. E.g.:
+// 	((x)) -> x
+func StripParens(e ast.Expr) ast.Expr {
+	if par, ok := e.(*ast.ParenExpr); ok {
+		return StripParens(par.X)
+	} else {
+		return e
+	}
 }
 
 // Emit code for a built-in identifer
@@ -87,12 +94,14 @@ func (w *writer) PutBuiltinIdent(id *ast.Ident) {
 
 // Generate code for built-in call, like len(x)
 func (w *writer) PutBuiltinCall(n *ast.CallExpr) {
-	name := n.Fun.(*ast.Ident).Name
+	name := StripParens(n.Fun).(*ast.Ident).Name
 	switch name {
 	default:
 		w.error(n, "cannot handle builtin: ", name)
 	case "len":
 		w.PutLenExpr(n)
+	case "print", "println":
+		//panic("todo")
 	}
 }
 
