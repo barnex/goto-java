@@ -1,6 +1,5 @@
 package main
 
-
 // ZeroValue returns the zero value for a new variable of java type jType.
 // E.g.:
 // 	var x int  ->  int x = 0;

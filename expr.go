@@ -1,5 +1,7 @@
 package main
 
+// This file handles expressions.
+
 import (
 	"go/ast"
 	"go/token"
@@ -34,6 +36,18 @@ func (w *writer) PutExpr(n ast.Expr) {
 	case *ast.UnaryExpr:
 		w.PutUnaryExpr(e)
 	}
+}
+
+// Emit code for a literal of basic type.
+// BasicLit godoc:
+// 	type BasicLit struct {
+// 	        ValuePos token.Pos   // literal position
+// 	        Kind     token.Token // token.INT, token.FLOAT, token.IMAG, token.CHAR, or token.STRING
+// 	        Value    string      // literal string; e.g. 42, 0x7f, 3.14, 1e-9, 2.4i, 'a', '\x7f', "foo" or `\m\n\o`
+// 	}
+func (w *writer) PutBasicLit(n *ast.BasicLit) {
+	w.Put(n.Value)
+	// TODO: translate backquotes, complex etc.
 }
 
 // Emit an identifier, translating built-ins.
@@ -71,6 +85,17 @@ func (w *writer) PutUnaryExpr(u *ast.UnaryExpr) {
 	}
 }
 
+// Emit code for a slice expression.
+// SliceExpr godoc:
+// 	type SliceExpr struct {
+// 	        X      Expr      // expression
+// 	        Lbrack token.Pos // position of "["
+// 	        Low    Expr      // begin of slice range; or nil
+// 	        High   Expr      // end of slice range; or nil
+// 	        Max    Expr      // maximum capacity of slice; or nil
+// 	        Slice3 bool      // true if 3-index slice (2 colons present)
+// 	        Rbrack token.Pos // position of "]"
+// 	}
 func (w *writer) PutSliceExpr(e *ast.SliceExpr) {
 	jType := w.javaTypeOf(e.X)
 	switch jType {
@@ -81,7 +106,7 @@ func (w *writer) PutSliceExpr(e *ast.SliceExpr) {
 	}
 }
 
-// code for slicing a string
+// Emit code for slicing a string.
 func (w *writer) putStringSlice(e *ast.SliceExpr) {
 	w.Put(e.X, ".substring(")
 	if e.Low == nil {
@@ -99,14 +124,16 @@ func (w *writer) putStringSlice(e *ast.SliceExpr) {
 	w.Put(")")
 }
 
+// Emit code for a parnthesized expression.
 func (w *writer) PutParenExpr(e *ast.ParenExpr) {
 	w.Put("(", e.X, ")")
 }
 
-// binary_op  = "||" | "&&" | rel_op | add_op | mul_op .
-// rel_op     = "==" | "!=" | "<" | "<=" | ">" | ">=" .
-// add_op     = "+" | "-" | "|" | "^" .
-// mul_op     = "*" | "/" | "%" | "<<" | ">>" | "&" | "&^" .
+// Emit code for a binary op.
+// 	binary_op  = "||" | "&&" | rel_op | add_op | mul_op .
+// 	rel_op     = "==" | "!=" | "<" | "<=" | ">" | ">=" .
+// 	add_op     = "+" | "-" | "|" | "^" .
+// 	mul_op     = "*" | "/" | "%" | "<<" | ">>" | "&" | "&^" .
 func (w *writer) PutBinaryExpr(b *ast.BinaryExpr) {
 	// TODO: check unsupported ops
 
@@ -131,6 +158,16 @@ func (w *writer) PutBinaryExpr(b *ast.BinaryExpr) {
 
 }
 
+// Emit code for a call expression.
+// CallExpr godoc:
+// 	type CallExpr struct {
+// 	        Fun      Expr      // function expression
+// 	        Lparen   token.Pos // position of "("
+// 	        Args     []Expr    // function arguments; or nil
+// 	        Ellipsis token.Pos // position of "...", if any
+// 	        Rparen   token.Pos // position of ")"
+// 	}
+// TODO: handle ellipsis.
 func (w *writer) PutCallExpr(n *ast.CallExpr) {
 	if IsBuiltinExpr(n.Fun) {
 		w.PutBuiltinCall(n)
@@ -151,9 +188,4 @@ func (w *writer) PutCallExpr(n *ast.CallExpr) {
 	if n.Ellipsis != 0 {
 		w.error(n, "cannot handle ellipsis")
 	}
-}
-
-func (w *writer) PutBasicLit(n *ast.BasicLit) {
-	w.Put(n.Value)
-	// TODO: translate backquotes, complex etc.
 }

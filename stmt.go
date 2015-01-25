@@ -254,7 +254,7 @@ func (w *writer) PutAssignStmt(n *ast.AssignStmt) {
 	}
 
 	if n.Tok == token.AND_NOT {
-		w.Error(n, "&^ not supported") // TODO
+		w.error(n, "&^ not supported") // TODO
 	}
 
 	// translate := to =
