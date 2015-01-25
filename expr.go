@@ -173,17 +173,19 @@ func (w *writer) PutCallExpr(n *ast.CallExpr) {
 	}
 
 	w.PutExpr(n.Fun) // TODO: parenthesized = problematic
+	w.PutArgs(n.Args, n.Ellipsis)
+}
 
+func (w *writer) PutArgs(args []ast.Expr, ellipsis token.Pos) {
 	w.Put("(")
-	for i, a := range n.Args {
+	for i, a := range args {
 		if i != 0 {
 			w.Put(",")
 		}
 		w.PutExpr(a)
 	}
-	w.Put(")")
-
-	if n.Ellipsis != 0 {
-		w.error(n, "cannot handle ellipsis")
+	if ellipsis != 0 {
+		w.Put("...")
 	}
+	w.Put(")")
 }

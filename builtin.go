@@ -93,16 +93,31 @@ func (w *writer) PutBuiltinIdent(id *ast.Ident) {
 }
 
 // Generate code for built-in call, like len(x)
-func (w *writer) PutBuiltinCall(n *ast.CallExpr) {
-	name := StripParens(n.Fun).(*ast.Ident).Name
+func (w *writer) PutBuiltinCall(c *ast.CallExpr) {
+	name := StripParens(c.Fun).(*ast.Ident).Name
 	switch name {
 	default:
-		w.error(n, "cannot handle builtin: ", name)
+		w.error(c, "cannot handle builtin: ", name)
 	case "len":
-		w.PutLenExpr(n)
+		w.PutLenExpr(c)
 	case "print", "println":
-		//panic("todo")
+		w.PutBuiltinPrintCall(c)
 	}
+}
+
+// Emit code for built-in print, prinln calls.
+func (w *writer) PutBuiltinPrintCall(c *ast.CallExpr) {
+	name := StripParens(c.Fun).(*ast.Ident).Name
+	switch name {
+	default:
+		w.error(c, "bug: not a print/println call:", name)
+	case "print":
+		name = "System.out.print"
+	case "println":
+		name = "System.out.println"
+	}
+	w.Put(name)
+	w.PutArgs(c.Args, c.Ellipsis)
 }
 
 // Generate code for len(x)
