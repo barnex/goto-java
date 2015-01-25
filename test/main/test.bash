@@ -5,10 +5,8 @@
 
 ./clean.bash
 
-for par in 1 0; do
-
-echo goto-java -print=false -parens=$par *.go
-goto-java -print=false -parens=$par *.go
+echo goto-java -print=false *.go
+goto-java -print=false *.go
 javac *.java
 
 for f in *.java; do
@@ -19,4 +17,3 @@ for f in *.java; do
 	diff $basename.go.txt $basename.java.txt || exit 1;
 done;
 
-done;
