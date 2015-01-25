@@ -64,10 +64,9 @@ func main(){
 	println(a)
 	println(b)
 
-	// TODO
-	//a &^= 13
-	//b &^= -14
-	//println(a)
-	//println(b)
+	a &^= 13
+	b &^= -14
+	println(a)
+	println(b)
 
 }
