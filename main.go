@@ -18,6 +18,7 @@ var (
 	flagNoTypeCheck = flag.Bool("nocheck", false, "Don't do type check")
 	flagParens      = flag.Bool("parens", false, "Emit superfluous parens")
 	flagPrint       = flag.Bool("print", false, "Print ast")
+	flagRenameAll   = flag.Bool("renameall", false, "Rename all variables (debug)")
 )
 
 func main() {

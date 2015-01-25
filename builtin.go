@@ -4,17 +4,77 @@ package main
 
 import "go/ast"
 
-// list of Go builtin identifiers
-var isBuiltin = map[string]bool{
-	"len": true,
+// maps built-in Go identifiers to java
+var builtinIdentMap = map[string]string{
+	"println": "System.out.println",
+	"print":   "System.out.print",
 }
 
-// returns true if n is a Go built-in identifier
-func IsBuiltinExpr(n ast.Expr) bool {
-	if ident, ok := n.(*ast.Ident); ok {
-		return isBuiltin[ident.Name]
+// Set of Go built-ins
+var builtins = map[string]bool{
+	"append":  true,
+	"cap":     true,
+	"close":   true,
+	"complex": true,
+	"copy":    true,
+	"delete":  true,
+	"false":   true,
+	"imag":    true,
+	"iota":    true,
+	"len":     true,
+	"make":    true,
+	"new":     true,
+	"nil":     true,
+	"panic":   true,
+	"print":   true,
+	"println": true,
+	"real":    true,
+	"recover": true,
+	"true":    true,
+
+	"bool":       true,
+	"byte":       true,
+	"complex128": true,
+	"error":      true,
+	"float32":    true,
+	"float64":    true,
+	"int":        true,
+	"int16":      true,
+	"int32":      true,
+	"int64":      true,
+	"int8":       true,
+	"rune":       true,
+	"string":     true,
+	"uint":       true,
+	"uint16":     true,
+	"uint32":     true,
+	"uint64":     true,
+	"uint8":      true,
+	"uintptr":    true,
+}
+
+// IsBuiltinIdent returns true if id refers to a Go built-in identifer.
+// The resulut is scope-sensitive, as built-ins may be shadowed by
+// other declarations (e.g. len := 7).
+func (w *writer) IsBuiltinIdent(id *ast.Ident) bool {
+	if _, ok := w.info.Defs[id]; ok {
+		return false // resolved, so not built-in (though possibly shadowed)
+	} else {
+		return builtins[id.Name]
+	}
+}
+
+// IsBuiltinExpr returns true if expression e refers to a built-in identifer.
+func (w *writer) IsBuiltinExpr(e ast.Expr) bool {
+	if id, ok := e.(*ast.Ident); ok {
+		return w.IsBuiltinIdent(id)
 	}
 	return false
+}
+
+// Emit code for a built-in identifer
+func (w *writer) PutBuiltinIdent(id *ast.Ident) {
+
 }
 
 // Generate code for built-in call, like len(x)

@@ -57,20 +57,16 @@ func (w *writer) PutBasicLit(n *ast.BasicLit) {
 // 	        Name    string    // identifier name
 // 	        Obj     *Object   // denoted object; or nil
 // 	}
-func (w *writer) PutIdent(n *ast.Ident) {
-	name := n.Name
-	// translate name if keyword
-	if trans, ok := builtinIdentMap[name]; ok {
-		name = trans
+func (w *writer) PutIdent(id *ast.Ident) {
+	if w.IsBuiltinIdent(id) {
+		w.PutBuiltinIdent(id)
+	} else {
+		if tv, ok := w.info.Defs[id]; ok {
+			w.Put(tv.Name())
+		} else {
+			w.error(id, "undefined: ", id.Name)
+		}
 	}
-	w.Put(name)
-}
-
-// maps built-in Go identifiers to java
-// TODO: overlaps with builtin
-var builtinIdentMap = map[string]string{
-	"println": "System.out.println",
-	"print":   "System.out.print",
 }
 
 // Emit a unary expression, execpt unary "*".
@@ -171,7 +167,7 @@ func (w *writer) PutBinaryExpr(b *ast.BinaryExpr) {
 // 	}
 // TODO: handle ellipsis.
 func (w *writer) PutCallExpr(n *ast.CallExpr) {
-	if IsBuiltinExpr(n.Fun) {
+	if w.IsBuiltinExpr(n.Fun) {
 		w.PutBuiltinCall(n)
 		return
 	}
