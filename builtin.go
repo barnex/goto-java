@@ -64,17 +64,25 @@ func (w *writer) IsBuiltinIdent(id *ast.Ident) bool {
 	}
 }
 
-// IsBuiltinExpr returns true if expression e refers to a built-in identifer.
+// IsBuiltinExpr returns true if expression e refers to a built-in identifer. E.g.:
+// 	print
+// 	(print)
+// 	...
 func (w *writer) IsBuiltinExpr(e ast.Expr) bool {
+	// identifier
 	if id, ok := e.(*ast.Ident); ok {
 		return w.IsBuiltinIdent(id)
+	}
+	// parentisized expression
+	if par, ok := e.(*ast.ParenExpr); ok {
+		return w.IsBuiltinExpr(par.X)
 	}
 	return false
 }
 
 // Emit code for a built-in identifer
 func (w *writer) PutBuiltinIdent(id *ast.Ident) {
-
+	panic("todo")
 }
 
 // Generate code for built-in call, like len(x)

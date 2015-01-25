@@ -5,15 +5,13 @@
 
 ./clean.bash
 
-echo goto-java -print=false *.go
-goto-java -print=false *.go
-javac *.java
+rm -f *.java
 
-for f in *.java; do
-	echo $f
-	basename=$(basename -s ".java" $f)
-	(cd .. && java main.$basename) > $basename.java.txt
-	go run $basename.go 2> $basename.go.txt
-	diff $basename.go.txt $basename.java.txt || exit 1;
+exitstat=0
+
+for f in *.go; do
+	echo -e -n $f '\t '
+	./testone.bash $f || exitstat=1
 done;
 
+exit $exitstat
