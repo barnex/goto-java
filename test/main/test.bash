@@ -7,11 +7,12 @@
 
 rm -f *.java
 
-exitstat=0
+failed=0
 
 for f in *.go; do
 	echo -e -n $f '\t '
-	./testone.bash $f || exitstat=1
+	./testone.bash $f || (( failed++ ))
 done;
 
-exit $exitstat
+echo $failed tests failed
+exit $failed

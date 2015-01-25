@@ -251,6 +251,7 @@ func (w *writer) PutExprStmt(n *ast.ExprStmt) {
 func (w *writer) PutAssignStmt(n *ast.AssignStmt) {
 	if len(n.Lhs) != len(n.Rhs) {
 		w.error(n, "assignment count mismatch:", len(n.Lhs), "!=", len(n.Rhs))
+		// TODO: function with multiple returns
 	}
 
 	// java does not have &^=, translate
@@ -263,10 +264,8 @@ func (w *writer) PutAssignStmt(n *ast.AssignStmt) {
 		return
 	}
 
-	// translate := to =
-	tok := n.Tok.String()
 	if n.Tok == token.DEFINE {
-		tok = "="
+		w.PutDefine(JModifier(NONE), n)
 	}
 
 	// multiple assign: put one per line
@@ -274,9 +273,20 @@ func (w *writer) PutAssignStmt(n *ast.AssignStmt) {
 		if i != 0 {
 			w.Putln(";")
 		}
-		if n.Tok == token.DEFINE {
-			w.Put(w.javaTypeOf(n.Rhs[i]), " ")
+		w.Put(n.Lhs[i], " ", n.Tok, " ", n.Rhs[i])
+	}
+}
+
+func (w *writer) PutDefine(mod JModifier, a *ast.AssignStmt) {
+	for i, n := range a.Lhs {
+		var value ast.Expr = nil
+		if i < len(a.Rhs) {
+			value = a.Rhs[i]
 		}
-		w.Put(n.Lhs[i], " ", tok, " ", n.Rhs[i])
+		if i != 0 {
+			w.Putln(";")
+		}
+		id := a.Lhs[i].(*ast.Ident) // should be
+		w.PutValueSpecLine(mod, w.javaTypeOf(n), []*ast.Ident{id}, []ast.Expr{value}, nil)
 	}
 }

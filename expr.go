@@ -28,7 +28,7 @@ func (w *writer) PutExpr(n ast.Expr) {
 	case *ast.CallExpr:
 		w.PutCallExpr(e)
 	case *ast.Ident:
-		w.PutIdent(e)
+		w.PutResolvedIdent(e)
 	case *ast.ParenExpr:
 		w.PutParenExpr(e)
 	case *ast.SliceExpr:
@@ -50,14 +50,15 @@ func (w *writer) PutBasicLit(n *ast.BasicLit) {
 	// TODO: translate backquotes, complex etc.
 }
 
-// Emit an identifier, translating built-ins.
+// Emit an identifier
 // Ident godoc:
 // 	type Ident struct {
 // 	        NamePos token.Pos // identifier position
 // 	        Name    string    // identifier name
 // 	        Obj     *Object   // denoted object; or nil
 // 	}
-func (w *writer) PutIdent(id *ast.Ident) {
+
+func (w *writer) PutResolvedIdent(id *ast.Ident) {
 	if w.IsBuiltinIdent(id) {
 		w.PutBuiltinIdent(id)
 	} else {
