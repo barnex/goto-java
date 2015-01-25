@@ -33,7 +33,7 @@ func (w *writer) PutClass(className string, f *ast.File) {
 	w.indent++
 
 	for _, d := range f.Decls {
-		w.PutDecl("static", d)
+		w.PutDecl(STATIC, d)
 
 		switch d.(type) {
 		default: // no semi
@@ -59,10 +59,12 @@ func (w *writer) Put(tokens ...interface{}) {
 }
 
 func (w *writer) put(t interface{}) {
-	if t, ok := t.(string); ok {
+	switch t.(type) {
+	case string, JModifier, token.Token:
 		fmt.Fprint(w.out, t)
 		return
 	}
+
 	if t, ok := t.(ast.Node); ok {
 		w.PutNode(t)
 		return

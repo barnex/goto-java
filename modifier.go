@@ -1,5 +1,7 @@
 package main
 
+// JModifier holds a java modifier. E.g.:
+// 	PUBLIC | STATIC | FINAL
 type JModifier uint32
 
 const (
@@ -11,4 +13,25 @@ const (
 	FINAL
 )
 
+func (m JModifier) String() string {
+	str := ""
+	switch {
+	case m.Is(PRIVATE):
+		str = cat(str, "private")
+	case m.Is(PROTECTED):
+		str = cat(str, "protected")
+	case m.Is(PUBLIC):
+		str = cat(str, "public")
+	case m.Is(STATIC):
+		str = cat(str, "static")
+	case m.Is(FINAL):
+		str = cat(str, "final")
+	}
+	return str
+}
 
+// Returns true if m contains b. E.g.:
+// 	m.Is(PUBLIC) // true if m is public
+func (m JModifier) Is(b JModifier) bool {
+	return m&b != 0
+}

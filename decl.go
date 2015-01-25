@@ -9,15 +9,15 @@ import (
 	"strings"
 )
 
-// Emit a declaration with optional context keyword (like "static")
-func (w *writer) PutDecl(context string, d ast.Decl) {
+// Emit a declaration with optional modifier (like static)
+func (w *writer) PutDecl(mod JModifier, d ast.Decl) {
 	switch d := d.(type) {
 	default:
 		panic("unhandled memeber type: " + reflect.TypeOf(d).String())
 	case *ast.FuncDecl:
 		w.PutFuncDecl(d)
 	case *ast.GenDecl:
-		w.PutGenDecl(context, d)
+		w.PutGenDecl(mod, d)
 	}
 }
 
@@ -94,7 +94,7 @@ func (w *writer) PutMethod(n *ast.FuncDecl) {
 //}
 
 // Emit a generic declaration (import, constant, type or variable)
-// with optional context ("static")
+// with optional modifier
 // godoc:
 // 	type GenDecl struct {
 // 	    Doc    *CommentGroup // associated documentation; or nil
@@ -115,14 +115,14 @@ func (w *writer) PutMethod(n *ast.FuncDecl) {
 // 	token.TYPE    *TypeSpec
 // 	token.VAR     *ValueSpec
 //
-func (w *writer) PutGenDecl(context string, d *ast.GenDecl) {
+func (w *writer) PutGenDecl(mod JModifier, d *ast.GenDecl) {
 	switch d.Tok { // IMPORT, CONST, TYPE, VAR
 	default:
 		w.error(d, "cannot handle "+d.Tok.String())
 	case token.CONST:
-		w.PutValueSpecs(cat(context, "final"), d.Specs)
+		w.PutValueSpecs(mod|FINAL, d.Specs)
 	case token.VAR:
-		w.PutValueSpecs(context, d.Specs)
+		w.PutValueSpecs(mod, d.Specs)
 	}
 }
 
@@ -136,14 +136,14 @@ func (w *writer) PutGenDecl(context string, d *ast.GenDecl) {
 // 		a = 1
 // 		b, c = 2, 3
 // 	)
-// with optional context prefix (e.g. "static", "final", "static final").
+// with optional modifier (e.g. "static", "final", "static final").
 // The concrete type of specs elements must be *ast.ValueSpec.
-func (w *writer) PutValueSpecs(context string, specs []ast.Spec) {
+func (w *writer) PutValueSpecs(mod JModifier, specs []ast.Spec) {
 	for i, spec := range specs {
 		if i != 0 {
 			w.Putln(";")
 		}
-		w.PutValueSpec(context, spec.(*ast.ValueSpec)) // doc says it's a valueSpec for Tok == VAR, CONST
+		w.PutValueSpec(mod, spec.(*ast.ValueSpec)) // doc says it's a valueSpec for Tok == VAR, CONST
 	}
 }
 
@@ -151,7 +151,7 @@ func (w *writer) PutValueSpecs(context string, specs []ast.Spec) {
 // 	var a, b int
 // or
 // 	const a, b = 0, "hello"
-// with optional context prefix (e.g. "static", "final", "static final").
+// with optional modifier prefix (e.g. "static", "final", "static final").
 //
 // ValueSpec godoc:
 // 	type ValueSpec struct {
@@ -163,12 +163,12 @@ func (w *writer) PutValueSpecs(context string, specs []ast.Spec) {
 // 	}
 // A ValueSpec node represents a constant or variable declaration
 // (ConstSpec or VarSpec production).
-func (w *writer) PutValueSpec(context string, s *ast.ValueSpec) {
+func (w *writer) PutValueSpec(mod JModifier, s *ast.ValueSpec) {
 	if s.Type != nil {
 		// var with explicit type:
 		// Put everything on one line, e.g.:
 		// 	int a = 1, b = 2
-		w.PutValueSpecLine(context, w.javaTypeOf(s.Type), s.Names, s.Values, s.Comment)
+		w.PutValueSpecLine(mod, w.javaTypeOf(s.Type), s.Names, s.Values, s.Comment)
 	} else {
 		// var with infered type:
 		// Put specs on separate line, e.g.:
@@ -182,7 +182,7 @@ func (w *writer) PutValueSpec(context string, s *ast.ValueSpec) {
 			if i != 0 {
 				w.Putln(";")
 			}
-			w.PutValueSpecLine(context, w.javaTypeOf(n), s.Names[i:i+1], []ast.Expr{value}, s.Comment)
+			w.PutValueSpecLine(mod, w.javaTypeOf(n), s.Names[i:i+1], []ast.Expr{value}, s.Comment)
 		}
 	}
 }
@@ -191,13 +191,15 @@ func (w *writer) PutValueSpec(context string, s *ast.ValueSpec) {
 // 	var x, y int = 1, 2
 // Translates to java:
 // 	int x = 1, y = 2
-func (w *writer) PutValueSpecLine(context, typ string, names []*ast.Ident, values []ast.Expr, comment *ast.CommentGroup) {
-	if context != "" {
-		w.Put(context, " ")
+func (w *writer) PutValueSpecLine(mod JModifier, typ string, names []*ast.Ident, values []ast.Expr, comment *ast.CommentGroup) {
+
+	w.Put(mod)
+	if mod != NONE {
+		w.Put(" ")
 	}
 
 	// untyped const hack: remove "untyped " from type
-	if strings.Contains(context, "final") && strings.HasPrefix(typ, "untyped ") {
+	if mod.Is(FINAL) && strings.HasPrefix(typ, "untyped ") {
 		typ = typ[len("untyped "):]
 	}
 

@@ -227,8 +227,8 @@ func needSemicolon(s ast.Stmt) bool {
 // 	        Decl Decl // *GenDecl with CONST, TYPE, or VAR token
 // 	}
 func (w *writer) PutDeclStmt(d *ast.DeclStmt) {
-	context := "" // inside a statement list, context = local(?). Static initializer?
-	w.PutDecl(context, d.Decl)
+	modifier := NONE
+	w.PutDecl(modifier, d.Decl)
 }
 
 // Emit a (stand-alone) expression in a statement list.
