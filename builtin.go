@@ -53,6 +53,22 @@ var builtins = map[string]bool{
 	"uintptr":    true,
 }
 
+// Go built-in identifiers that can be translated directly to java
+var builtin2java = map[string]string{
+	"false":   "false",
+	"nil":     "null", //?
+	"true":    "true",
+	"bool":    "boolean",
+	"float32": "float",
+	"float64": "double",
+	"int":     "int", //?
+	"int16":   "short",
+	"int32":   "int",
+	"int64":   "long",
+	"int8":    "byte",
+	"string":  "String",
+}
+
 // IsBuiltinIdent returns true if id refers to a Go built-in identifer.
 // The resulut is scope-sensitive, as built-ins may be shadowed by
 // other declarations (e.g. len := 7).
@@ -89,7 +105,11 @@ func StripParens(e ast.Expr) ast.Expr {
 
 // Emit code for a built-in identifer
 func (w *writer) PutBuiltinIdent(id *ast.Ident) {
-	panic("todo")
+	if transl, ok := builtin2java[id.Name]; ok {
+		w.Put(transl)
+	} else {
+		w.error(id, "built-in identifier supported: ", id.Name)
+	}
 }
 
 // Generate code for built-in call, like len(x)
