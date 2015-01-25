@@ -255,7 +255,7 @@ func (w *writer) PutAssignStmt(n *ast.AssignStmt) {
 
 	// java does not have &^=, translate
 	if n.Tok == token.AND_NOT_ASSIGN {
-		if len(n.Lhs) != 1 || len(n.Rhs) != 1{
+		if len(n.Lhs) != 1 || len(n.Rhs) != 1 {
 			// should have been caught by type checker.
 			w.error(n, n.Tok.String(), " requires single argument")
 		}
