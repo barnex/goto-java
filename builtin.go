@@ -2,13 +2,17 @@ package main
 
 // built-ins
 
-import "go/ast"
+import (
+	"go/ast"
+
+	"golang.org/x/tools/go/types"
+)
 
 // maps built-in Go identifiers to java
-var builtinIdentMap = map[string]string{
-	"println": "System.out.println",
-	"print":   "System.out.print",
-}
+//var builtinIdentMap = map[string]string{
+//	"println": "System.out.println",
+//	"print":   "System.out.print",
+//}
 
 // Set of Go built-ins
 var builtins = map[string]bool{
@@ -73,11 +77,9 @@ var builtin2java = map[string]string{
 // The resulut is scope-sensitive, as built-ins may be shadowed by
 // other declarations (e.g. len := 7).
 func (w *writer) IsBuiltinIdent(id *ast.Ident) bool {
-	if w.info.ObjectOf(id) != nil {
-		return false
-	} else {
-		return builtins[id.Name]
-	}
+	obj := w.info.ObjectOf(id)
+
+	return (obj.Parent() == types.Universe) && (builtins[id.Name] == true)
 }
 
 // IsBuiltinExpr returns true if expression e refers to a built-in identifer. E.g.:
