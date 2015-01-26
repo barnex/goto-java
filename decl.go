@@ -205,8 +205,8 @@ func (w *writer) PutValueSpecLine(mod JModifier, typ types.Type, names []*ast.Id
 	}
 
 	jType := w.TypeToJava(typ)
-
 	w.Put(jType)
+
 	for i, n := range names {
 
 		w.Put(" ", w.translate(n), " = ")
