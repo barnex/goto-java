@@ -5,7 +5,7 @@
 
 ./clean.bash
 
-rm -f *.java
+rm -f *.java *.class *.log *.out *.diff
 
 failed=0
 
