@@ -215,9 +215,17 @@ func (w *writer) PutBinaryExpr(b *ast.BinaryExpr) {
 		w.Put("(")
 	}
 
+	unsigned := w.IsUnsigned(w.TypeOf(b.X)) || w.IsUnsigned(w.TypeOf(b.Y))
+
 	switch b.Op {
 	default:
 		w.Put(b.X, b.Op.String(), b.Y)
+	case token.LSS, token.GTR, token.LEQ, token.GEQ, token.QUO, token.REM:
+		if unsigned {
+			w.PutUnsignedOp(b.X, b.Op, b.Y)
+		} else {
+			w.Put(b.X, b.Op.String(), b.Y) // default
+		}
 	case token.SHL, token.SHR, token.AND, token.OR, token.XOR:
 		// different precedence in Go and Java, parentisize to be sure
 		w.Put("(", b.X, b.Op.String(), b.Y, ")")

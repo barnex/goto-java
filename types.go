@@ -17,7 +17,11 @@ var typeToJava = map[string]string{
 	"int64":   "long",
 	"int8":    "byte",
 	"string":  "String", //?
-	"uint":    "int",
+	"uint":    "int",    //?
+	"uint8":   "byte",   //?
+	"uint16":  "short",  //?
+	"uint32":  "int",    //?
+	"uint64":  "long",   //?
 }
 
 func (w *writer) TypeOf(n ast.Expr) types.Type {
