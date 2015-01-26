@@ -1,9 +1,12 @@
 package main
 
+import "golang.org/x/tools/go/types"
+
 // ZeroValue returns the zero value for a new variable of java type jType.
 // E.g.:
 // 	var x int  ->  int x = 0;
-func ZeroValue(jType string) string {
+func (w *writer) ZeroValue(typ types.Type) string {
+	jType := w.TypeToJava(typ)
 	if v, ok := zeroValues[jType]; ok {
 		return v
 	} else {

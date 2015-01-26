@@ -288,6 +288,6 @@ func (w *writer) PutDefine(mod JModifier, a *ast.AssignStmt) {
 			w.Putln(";")
 		}
 		id := a.Lhs[i].(*ast.Ident) // should be
-		w.PutValueSpecLine(mod, w.javaTypeOf(n), []*ast.Ident{id}, []ast.Expr{value}, nil)
+		w.PutValueSpecLine(mod, w.TypeOf(n), []*ast.Ident{id}, []ast.Expr{value}, nil)
 	}
 }

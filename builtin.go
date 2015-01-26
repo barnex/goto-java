@@ -57,29 +57,11 @@ var builtins = map[string]bool{
 	"uintptr":    true,
 }
 
-// Go built-in identifiers that can be translated directly to java
-var builtin2java = map[string]string{
-	"false":   "false",
-	"nil":     "null", //?
-	"true":    "true",
-	"bool":    "boolean",
-	"float32": "float",
-	"float64": "double",
-	"int":     "int", //?
-	"int16":   "short",
-	"int32":   "int",
-	"int64":   "long",
-	"int8":    "byte",
-	"string":  "String", //?
-	"uint":    "int",
-}
-
 // IsBuiltinIdent returns true if id refers to a Go built-in identifer.
 // The resulut is scope-sensitive, as built-ins may be shadowed by
 // other declarations (e.g. len := 7).
 func (w *writer) IsBuiltinIdent(id *ast.Ident) bool {
 	obj := w.info.ObjectOf(id)
-
 	return (obj.Parent() == types.Universe) && (builtins[id.Name] == true)
 }
 
@@ -108,7 +90,7 @@ func StripParens(e ast.Expr) ast.Expr {
 
 // Emit code for a built-in identifer
 func (w *writer) PutBuiltinIdent(id *ast.Ident) {
-	if transl, ok := builtin2java[id.Name]; ok {
+	if transl, ok := lit2java[id.Name]; ok {
 		w.Put(transl)
 	} else {
 		w.error(id, "built-in identifier not supported: ", id.Name)
@@ -148,7 +130,7 @@ func (w *writer) PutLenExpr(n *ast.CallExpr) {
 	if len(n.Args) != 1 {
 		w.error(n, "too many arguments to len")
 	}
-	argT := w.javaTypeOf(n.Args[0])
+	argT := w.TypeToJava(w.TypeOf(n.Args[0]).Underlying())
 	switch argT {
 	default:
 		w.error(n, "invalid argument (type ", argT, ") for len")

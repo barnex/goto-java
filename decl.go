@@ -6,7 +6,8 @@ import (
 	"go/ast"
 	"go/token"
 	"reflect"
-	"strings"
+
+	"golang.org/x/tools/go/types"
 )
 
 // Emit a declaration with optional modifier (like static)
@@ -58,7 +59,7 @@ func (w *writer) PutStaticFunc(f *ast.FuncDecl) {
 
 	ret := "void"
 	if f.Type.Results != nil && len(f.Type.Results.List) == 1 {
-		ret = w.javaTypeOf(f.Type.Results.List[0].Type) // todo: multiple names, wtf?
+		ret = w.TypeToJava(w.TypeOf(f.Type.Results.List[0].Type)) // todo: multiple names, wtf?
 	}
 	if f.Type.Results != nil && len(f.Type.Results.List) > 1 {
 		w.error(f, "no muliple return values supported")
@@ -173,7 +174,7 @@ func (w *writer) PutValueSpec(mod JModifier, s *ast.ValueSpec) {
 		// var with explicit type:
 		// Put everything on one line, e.g.:
 		// 	int a = 1, b = 2
-		w.PutValueSpecLine(mod, w.javaTypeOf(s.Type), s.Names, s.Values, s.Comment)
+		w.PutValueSpecLine(mod, w.TypeOf(s.Type), s.Names, s.Values, s.Comment)
 	} else {
 		// var with infered type:
 		// Put specs on separate line, e.g.:
@@ -187,7 +188,7 @@ func (w *writer) PutValueSpec(mod JModifier, s *ast.ValueSpec) {
 			if i != 0 {
 				w.Putln(";")
 			}
-			w.PutValueSpecLine(mod, w.javaTypeOf(n), s.Names[i:i+1], []ast.Expr{value}, s.Comment)
+			w.PutValueSpecLine(mod, w.TypeOf(n), s.Names[i:i+1], []ast.Expr{value}, s.Comment)
 		}
 	}
 }
@@ -196,7 +197,7 @@ func (w *writer) PutValueSpec(mod JModifier, s *ast.ValueSpec) {
 // 	var x, y int = 1, 2
 // Translates to java:
 // 	int x = 1, y = 2
-func (w *writer) PutValueSpecLine(mod JModifier, typ string, names []*ast.Ident, values []ast.Expr, comment *ast.CommentGroup) {
+func (w *writer) PutValueSpecLine(mod JModifier, typ types.Type, names []*ast.Ident, values []ast.Expr, comment *ast.CommentGroup) {
 
 	w.Put(mod)
 	if mod != NONE {
@@ -204,11 +205,11 @@ func (w *writer) PutValueSpecLine(mod JModifier, typ string, names []*ast.Ident,
 	}
 
 	// untyped const hack: remove "untyped " from type
-	if mod.Is(FINAL) && strings.HasPrefix(typ, "untyped ") {
-		typ = typ[len("untyped "):]
-	}
+	//if mod.Is(FINAL) && strings.HasPrefix(typ, "untyped ") {
+	//	typ = typ[len("untyped "):]
+	//}
 
-	w.Put(typ)
+	w.Put(w.TypeToJava(typ))
 	for i, n := range names {
 
 		w.Put(" ", w.translate(n), " = ")
@@ -216,7 +217,7 @@ func (w *writer) PutValueSpecLine(mod JModifier, typ string, names []*ast.Ident,
 		if i < len(values) {
 			w.PutExpr(values[i])
 		} else {
-			w.Put(ZeroValue(w.javaTypeOf(n)))
+			w.Put(w.ZeroValue(w.TypeOf(n)))
 		}
 
 		if i != len(names)-1 {

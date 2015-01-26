@@ -169,7 +169,7 @@ func (w *writer) PutUnaryExpr(u *ast.UnaryExpr) {
 // 	        Rbrack token.Pos // position of "]"
 // 	}
 func (w *writer) PutSliceExpr(e *ast.SliceExpr) {
-	jType := w.javaTypeOf(e.X)
+	jType := w.TypeToJava(w.TypeOf(e.X))
 	switch jType {
 	default:
 		w.error(e, "cannot slice type ", jType)
