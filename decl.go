@@ -72,7 +72,7 @@ func (w *writer) PutStaticFunc(f *ast.FuncDecl) {
 			w.error(f, "cannot handle multiple field names")
 		}
 		name := a.Names[0] // TODO: more/none?
-		w.Put(comma(i), a.Type, " ", name)
+		w.Put(comma(i), w.TypeToJava(w.TypeOf(a.Names[0])), " ", name)
 	}
 
 	w.Put(")")
@@ -204,12 +204,9 @@ func (w *writer) PutValueSpecLine(mod JModifier, typ types.Type, names []*ast.Id
 		w.Put(" ")
 	}
 
-	// untyped const hack: remove "untyped " from type
-	//if mod.Is(FINAL) && strings.HasPrefix(typ, "untyped ") {
-	//	typ = typ[len("untyped "):]
-	//}
+	jType := w.TypeToJava(typ)
 
-	w.Put(w.TypeToJava(typ))
+	w.Put(jType)
 	for i, n := range names {
 
 		w.Put(" ", w.translate(n), " = ")

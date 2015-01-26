@@ -2,6 +2,7 @@ package main
 
 import (
 	"go/ast"
+	"strings"
 
 	"golang.org/x/tools/go/types"
 )
@@ -28,7 +29,13 @@ func (w *writer) TypeOf(n ast.Expr) types.Type {
 }
 
 func (w *writer) TypeToJava(t types.Type) string {
-	ident := t.String()
+	ident := t.String() // TODO: underlying?
+
+	// remove untyped. TODO: cli switch?
+	if strings.HasPrefix(ident, "untyped ") {
+		ident = ident[len("untyped "):]
+	}
+
 	if j, ok := typeToJava[ident]; ok {
 		return j
 	}
