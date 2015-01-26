@@ -19,13 +19,9 @@ func (w *writer) PutUnsignedOp(x ast.Expr, op token.Token, y ast.Expr) {
 	switch op {
 	default:
 		w.error(x, "unsigned", op.String(), "not supported")
-	case token.LSS:
-		w.Put("(", "Integer.compareUnsigned(", x, ",", y, ")<0", ")")
-	case token.GTR:
-		w.Put("(", "Integer.compareUnsigned(", x, ",", y, ")>0", ")")
-	case token.LEQ:
-		w.Put("(", "Integer.compareUnsigned(", x, ",", y, ")<=0", ")")
-	case token.GEQ:
-		w.Put("(", "Integer.compareUnsigned(", x, ",", y, ")>=0", ")")
+	case token.LSS, token.GTR, token.LEQ, token.GEQ:
+		w.Put("((", x, op.String(), y, ") ^ ((", x, "< 0) != (", y, " < 0)))")
 	}
 }
+
+// http://www.javamex.com/java_equivalents/unsigned_arithmetic.shtml
