@@ -70,7 +70,8 @@ var builtin2java = map[string]string{
 	"int32":   "int",
 	"int64":   "long",
 	"int8":    "byte",
-	"string":  "String",
+	"string":  "String", //?
+	"uint":    "int",
 }
 
 // IsBuiltinIdent returns true if id refers to a Go built-in identifer.
