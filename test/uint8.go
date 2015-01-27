@@ -1,7 +1,7 @@
 package main
 
 func main() {
-	var a, b, c, d uint = (1 << 31) - 1, (1 << 31), (1 << 31) + 1, 0
+	var a, b, c, d uint8 = (1 << 7) - 1, (1 << 7), (1 << 7) + 1, 0
 
 	println(a / a)
 	println(a / b)
