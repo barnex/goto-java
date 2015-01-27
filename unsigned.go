@@ -3,7 +3,6 @@ package main
 import (
 	"go/ast"
 	"go/token"
-	"strings"
 
 	"golang.org/x/tools/go/types"
 )
@@ -24,14 +23,21 @@ func (w *writer) PutUnsignedOp(x ast.Expr, op token.Token, y ast.Expr) {
 		w.error(x, "mismatched types", typX, "and", typY)
 	}
 
-	operator := strings.ToLower(op.String())
+	operator := map[token.Token]string{
+		token.QUO: "quo",
+		token.REM: "rem",
+		token.LSS: "lss",
+		token.GTR: "gtr",
+		token.LEQ: "leq",
+		token.GEQ: "geq",
+	}[op]
 	suffix := map[string]string{
 		"byte":  "8",
 		"short": "32",
 		"int":   "32",
 		"long":  "64",
 	}[typX]
-	function := "go.Unsigned." + operator + suffix
+	function := "Unsigned." + operator + suffix
 
 	switch op {
 	default:
