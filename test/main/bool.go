@@ -1,6 +1,6 @@
 package main
 
-// test boolean variables and initialisation.
+// test boolean variables, initialisation and ops.
 func main() {
 	var a bool
 	b := a

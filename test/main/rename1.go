@@ -5,5 +5,4 @@ func main() {
 	println(true)
 	true := false
 	println(true)
-
 }

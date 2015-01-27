@@ -4,6 +4,9 @@ func main() {
 	static := 1
 	println(static)
 
+	static_ := 2
+	println(static_)
+
 	public := 2
 	println(public)
 

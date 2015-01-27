@@ -1,15 +1,14 @@
 package main
 
+// out-of-order constants initialization
 const (
-	A = 1
-	B = A + 2
-	C = len("hello")
 	D = 2 * A << B
+	B = A + 2
+	A = 1
 )
 
 func main() {
 	println(A)
 	println(B)
-	println(C)
 	println(D)
 }

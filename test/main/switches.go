@@ -11,7 +11,7 @@ func main() {
 		case 2:
 			println("two")
 			fallthrough
-		case 3,4:
+		case 3, 4:
 			println("three or four")
 		}
 	}
@@ -22,7 +22,7 @@ func main() {
 			println("one")
 		case 2:
 			println("two")
-		case 0,3:
+		case 0, 3:
 			println("and three")
 			fallthrough
 		default:
