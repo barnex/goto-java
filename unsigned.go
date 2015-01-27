@@ -36,7 +36,7 @@ func (w *writer) PutUnsignedOp(x ast.Expr, op token.Token, y ast.Expr) {
 	switch op {
 	default:
 		w.error(x, "unsigned", op.String(), "not supported")
-	case token.QUO, token.LSS, token.GTR, token.LEQ, token.GEQ:
+	case token.QUO, token.REM, token.LSS, token.GTR, token.LEQ, token.GEQ:
 		w.Put(function+"(", x, ",", y, ")")
 	}
 }
