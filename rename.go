@@ -59,6 +59,7 @@ func (w *writer) translate(id *ast.Ident) string {
 	}
 
 	// nothing special: return original name
+	// TODO: do we need to filter unicode names?
 	return obj.Name()
 }
 
