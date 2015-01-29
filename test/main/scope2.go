@@ -1,12 +1,13 @@
 package main
 
+var i int = 42
+
 func main() {
+	println(i)
 	i := 1
-	i, j := 2, 3
+	if i := true; i {
+		println(i)
+	}
 	println(i)
-	println(j)
-	k, j, i := 4, 5, 6
-	println(i)
-	println(j)
-	println(k)
+
 }

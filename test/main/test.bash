@@ -4,8 +4,7 @@
 # runs go and java sources and compares output
 
 ./clean.bash
-
-rm -f *.log *.out *.diff
+javac Unsigned.java || exit 2
 
 failed=0
 

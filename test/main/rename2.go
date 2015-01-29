@@ -2,9 +2,9 @@ package main
 
 // test variable renaming
 func main() {
-	true_ := 1 // try to mix up with rename true -> true_
+	true_1 := 1 // try to mix up with rename true -> true_
 	println(true)
 	true := false
 	println(true)
-	println(true_)
+	println(true_1)
 }
