@@ -11,8 +11,8 @@ import (
 )
 
 var (
-	renamed = map[types.Object]string{}
-	idents  map[string]int
+	renamed = map[types.Object]string{} // maps some objects (typ. identifiers) to a new name for java.
+	idents  map[string]int              // holds all identifier names and a counter to create a new, non-conflicting name if needed.
 )
 
 // Collect the names of all identifiers in the AST and store in idents.
@@ -24,6 +24,7 @@ func CollectIdents(n ast.Node) {
 	ast.Walk(&identCollector{}, n)
 }
 
+// used by CollectIdents to put all identifier names in idents.
 type identCollector struct{}
 
 func (f identCollector) Visit(n ast.Node) ast.Visitor {
@@ -33,13 +34,23 @@ func (f identCollector) Visit(n ast.Node) ast.Visitor {
 	return f
 }
 
+// Translate an identifier to java.
+// Usually returns the identifier's name unchanged,
+// unless it has been renamed for some reason or when
+// the identifier name is a protected java keyword.
 func (w *writer) translate(id *ast.Ident) string {
 	obj := w.info.ObjectOf(id)
 
+	if obj == nil {
+		w.error(id, "undefined:", id.Name)
+	}
+
+	// object has been renamed
 	if tr, ok := renamed[obj]; ok {
 		return tr
 	}
 
+	// name is keyword: rename it and return new name
 	if javaKeyword[obj.Name()] {
 		new := makeNewName(obj.Name())
 		log.Println("renmaing", obj.Name(), "->", new)
@@ -47,12 +58,24 @@ func (w *writer) translate(id *ast.Ident) string {
 		return new
 	}
 
+	// nothing special: return original name
 	return obj.Name()
 }
 
+// Construct a new (java) name for a (go) identifier with original name orig.
+// The new name is globally unique and can be used in any scope.
 func makeNewName(orig string) string {
+
 	idents[orig]++
-	return fmt.Sprint(orig, "_", idents[orig])
+	new := fmt.Sprint(orig, "_", idents[orig]) // append, e.g., "_2"
+
+	// unlikely, but possible case that new name was already defined:
+	// recursively add more suffixes.
+	if _, ok := idents[new]; ok {
+		return makeNewName(new)
+	} else {
+		return new
+	}
 }
 
 var lit2java = map[string]string{
