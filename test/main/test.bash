@@ -14,5 +14,7 @@ for f in *.go; do
 	echo
 done;
 
-echo $failed of $(ls *.go | wc -l) failed
+total=$(ls *.go | wc -l)
+passed=$(( $total - $failed ))
+echo $passed passed, $failed failed of $total total
 exit $failed
