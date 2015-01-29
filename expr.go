@@ -6,8 +6,6 @@ import (
 	"go/ast"
 	"go/token"
 	"reflect"
-
-	"golang.org/x/tools/go/types"
 )
 
 // Emit code for an expression.
@@ -59,89 +57,11 @@ func (w *writer) PutBasicLit(n *ast.BasicLit) {
 // 	        Name    string    // identifier name
 // 	        Obj     *Object   // denoted object; or nil
 // 	}
-
-var rename = map[types.Object]string{}
-
 func (w *writer) PutResolvedIdent(id *ast.Ident) {
 	if w.IsBuiltinIdent(id) {
 		w.PutBuiltinIdent(id)
 	} else {
-		obj := w.info.ObjectOf(id)
-		if obj != nil {
-			if rename, ok := rename[obj]; ok {
-				w.Put(rename)
-			} else {
-				w.Put(obj.Name())
-			}
-		} else {
-			w.error(id, "undefined: ", id.Name)
-		}
-	}
-}
-
-var javaKeyword = map[string]bool{
-	"abstract":     true,
-	"continue":     true,
-	"for":          true,
-	"new":          true,
-	"switch":       true,
-	"assert":       true,
-	"default":      true,
-	"goto":         true,
-	"package":      true,
-	"synchronized": true,
-	"boolean":      true,
-	"do":           true,
-	"if":           true,
-	"private":      true,
-	"this":         true,
-	"break":        true,
-	"double":       true,
-	"implements":   true,
-	"protected":    true,
-	"throw":        true,
-	"byte":         true,
-	"else":         true,
-	"import":       true,
-	"public":       true,
-	"throws":       true,
-	"case":         true,
-	"enum":         true,
-	"instanceof":   true,
-	"return":       true,
-	"transient":    true,
-	"catch":        true,
-	"extends":      true,
-	"int":          true,
-	"short":        true,
-	"try":          true,
-	"char":         true,
-	"final":        true,
-	"interface":    true,
-	"static":       true,
-	"void":         true,
-	"class":        true,
-	"finally":      true,
-	"long":         true,
-	"strictfp":     true,
-	"volatile":     true,
-	"const":        true,
-	"float":        true,
-	"native":       true,
-	"super":        true,
-	"while":        true,
-	"true":         true,
-	"false":        true,
-	"null":         true,
-}
-
-func (w *writer) translate(id *ast.Ident) string {
-	obj := w.info.ObjectOf(id)
-	if javaKeyword[obj.Name()] {
-		rename[obj] = obj.Name() + "_" // TODO: check not yet defined!
-		return rename[obj]
-	} else {
-		return obj.Name()
+		w.Put(w.translate(id))
 	}
 }
 

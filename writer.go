@@ -25,6 +25,9 @@ func NewWriter(out io.Writer) *writer {
 
 // Outputs a class with given name based on go file.
 func (w *writer) PutClass(className string, f *ast.File) {
+
+	CollectIdents(f)
+
 	w.Putln("package ", f.Name.Name, ";")
 	w.Putln()
 
