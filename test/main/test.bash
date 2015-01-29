@@ -14,5 +14,5 @@ for f in *.go; do
 	./testone.bash $f || (( failed++ ))
 done;
 
-echo $failed tests failed
+echo $failed of $(ls *.go | wc -l) failed
 exit $failed
