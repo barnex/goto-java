@@ -33,7 +33,7 @@ func (w *writer) PutUnsignedOp(x ast.Expr, op token.Token, y ast.Expr) {
 	}[op]
 	suffix := map[string]string{
 		"byte":  "8",
-		"short": "32",
+		"short": "16",
 		"int":   "32",
 		"long":  "64",
 	}[typX]
