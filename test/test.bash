@@ -2,5 +2,5 @@
 
 set -e
 
-(cd main && ./test.bash)
+(cd main && ./test.bash $@)
 

@@ -10,7 +10,8 @@ failed=0
 
 for f in *.go; do
 	echo -e -n $f '\t '
-	./testone.bash $f || (( failed++ ))
+	./testone.bash $f $1 || (( failed++ ))
+	echo
 done;
 
 echo $failed of $(ls *.go | wc -l) failed

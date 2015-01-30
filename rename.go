@@ -50,8 +50,9 @@ func (w *writer) translate(id *ast.Ident) string {
 		return tr
 	}
 
-	// name is keyword: rename it and return new name
-	if javaKeyword[obj.Name()] {
+	// Name is keyword: rename it and return new name.
+	// DEBUG: flag -renameall renames all variables for stress testing.
+	if javaKeyword[obj.Name()] || *flagRenameAll {
 		new := makeNewName(obj.Name())
 		log.Println("renmaing", obj.Name(), "->", new)
 		renamed[obj] = new
