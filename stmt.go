@@ -3,6 +3,7 @@ package main
 import (
 	"go/ast"
 	"go/token"
+	"log"
 	"reflect"
 )
 
@@ -278,6 +279,9 @@ func (w *writer) PutAssignStmt(n *ast.AssignStmt) {
 	}
 }
 
+// Emit a short variable declaration, e.g.:
+// 	a := 1
+// Special case of PutAssignStmt
 func (w *writer) PutDefine(mod JModifier, a *ast.AssignStmt) {
 	for i, n := range a.Lhs {
 		var value ast.Expr = nil
@@ -288,6 +292,23 @@ func (w *writer) PutDefine(mod JModifier, a *ast.AssignStmt) {
 			w.Putln(";")
 		}
 		id := a.Lhs[i].(*ast.Ident) // should be
-		w.PutValueSpecLine(mod, w.TypeOf(n), []*ast.Ident{id}, []ast.Expr{value}, nil)
+
+		typ := w.TypeOf(n)
+
+		// aldready defined in current scope?
+		obj := w.info.ObjectOf(id)
+		pos := id.Pos()
+		scope := obj.Parent()
+		names := scope.Names()
+		for _, n := range names {
+			log.Println(id.Name, pos, "=?", n, scope.Lookup(n).Pos())
+			if n == id.Name && pos > scope.Lookup(n).Pos() {
+				typ = nil // already defined
+				log.Println("short decl:", id.Name)
+				break
+			}
+		}
+
+		w.PutValueSpecLine(mod, typ, []*ast.Ident{id}, []ast.Expr{value}, nil)
 	}
 }
