@@ -46,6 +46,15 @@ func (w *writer) TypeToJava(t types.Type) string {
 	panic("cannot convert type to java: " + ident)
 }
 
+// ObjectOf returns the object denoted by the specified identifier.
+func (w *writer) ObjectOf(id *ast.Ident) types.Object {
+	obj := w.info.ObjectOf(id)
+	if obj == nil {
+		w.error(id, "undefined:", id.Name)
+	}
+	return obj
+}
+
 // returun exact value and minimal type for constant expression.
 func (w *writer) exactValue(e ast.Expr) (tv types.TypeAndValue, ok bool) {
 	tv, ok = w.info.Types[e]

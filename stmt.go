@@ -296,7 +296,7 @@ func (w *writer) PutDefine(mod JModifier, a *ast.AssignStmt) {
 		typ := w.TypeOf(n)
 
 		// aldready defined in current scope?
-		obj := w.info.ObjectOf(id)
+		obj := w.ObjectOf(id)
 		pos := id.Pos()
 		scope := obj.Parent()
 		names := scope.Names()

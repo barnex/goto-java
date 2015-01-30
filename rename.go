@@ -39,11 +39,11 @@ func (f identCollector) Visit(n ast.Node) ast.Visitor {
 // unless it has been renamed for some reason or when
 // the identifier name is a protected java keyword.
 func (w *writer) translate(id *ast.Ident) string {
-	obj := w.info.ObjectOf(id)
+	obj := w.ObjectOf(id)
 
-	if obj == nil {
-		w.error(id, "undefined:", id.Name)
-	}
+	//if obj == nil {
+	//	w.error(id, "undefined:", id.Name)
+	//}
 
 	// object has been renamed
 	if tr, ok := renamed[obj]; ok {
@@ -64,10 +64,13 @@ func (w *writer) translate(id *ast.Ident) string {
 	return obj.Name()
 }
 
+func (w *writer) rename(id *ast.Ident) {
+	renamed[w.ObjectOf(id)] = makeNewName(id.Name)
+}
+
 // Construct a new (java) name for a (go) identifier with original name orig.
 // The new name is globally unique and can be used in any scope.
 func makeNewName(orig string) string {
-
 	new := orig
 	for {
 		if _, ok := idents[new]; ok {

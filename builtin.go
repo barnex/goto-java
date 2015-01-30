@@ -61,7 +61,7 @@ var builtins = map[string]bool{
 // The resulut is scope-sensitive, as built-ins may be shadowed by
 // other declarations (e.g. len := 7).
 func (w *writer) IsBuiltinIdent(id *ast.Ident) bool {
-	obj := w.info.ObjectOf(id)
+	obj := w.ObjectOf(id)
 	return (obj.Parent() == types.Universe) && (builtins[id.Name] == true)
 }
 
