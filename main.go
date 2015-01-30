@@ -15,6 +15,7 @@ import (
 
 var (
 	flagConstFold   = flag.Bool("foldconst", false, "Fold constants")
+	flagNoPkg       = flag.Bool("nopkg", false, "Do not output package clause")
 	flagNoTypeCheck = flag.Bool("nocheck", false, "Don't do type check")
 	flagParens      = flag.Bool("parens", false, "Emit superfluous parens")
 	flagPrint       = flag.Bool("print", false, "Print ast")

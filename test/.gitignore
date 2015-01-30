@@ -1,0 +1,5 @@
+*.out
+*.log
+*.diff
+*.java
+*.class

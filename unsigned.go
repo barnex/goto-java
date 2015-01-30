@@ -37,7 +37,7 @@ func (w *writer) PutUnsignedOp(x ast.Expr, op token.Token, y ast.Expr) {
 		"int":   "32",
 		"long":  "64",
 	}[typX]
-	function := "Unsigned." + operator + suffix
+	function := "go.Unsigned." + operator + suffix
 
 	switch op {
 	default:

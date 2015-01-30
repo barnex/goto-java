@@ -28,8 +28,11 @@ func (w *writer) PutClass(className string, f *ast.File) {
 
 	CollectIdents(f)
 
-	w.Putln("package ", f.Name.Name, ";")
-	w.Putln()
+	if !*flagNoPkg {
+		pkg := f.Name.Name
+		w.Putln("package ", pkg, ";")
+		w.Putln()
+	}
 
 	w.Putln("public final class ", className, " {")
 	w.Putln()

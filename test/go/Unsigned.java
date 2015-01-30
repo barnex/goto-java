@@ -1,4 +1,4 @@
-package main;
+package go;
 
 // http://www.javamex.com/java_equivalents/unsigned_arithmetic.shtml
 

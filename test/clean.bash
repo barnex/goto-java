@@ -2,6 +2,5 @@
 
 # cleanup test output files
 
-rm -f *.txt
-rm -f *.class
+rm -f *.class *.java *.log *.out *.diff
 
