@@ -197,6 +197,13 @@ func (w *writer) PutValueSpec(mod JModifier, s *ast.ValueSpec) {
 // 	var x, y int = 1, 2
 // Translates to java:
 // 	int x = 1, y = 2
+// Type may be nil to allow short declarations with an existing variable. e.g.:
+// 	a := 1
+// 	a, b := 2, 3
+// becomes:
+// 	int a = 1;
+// 	a = 2;       // typ = nil
+//  int b = 3;
 func (w *writer) PutValueSpecLine(mod JModifier, typ types.Type, names []*ast.Ident, values []ast.Expr, comment *ast.CommentGroup) {
 
 	w.Put(mod)
@@ -204,8 +211,10 @@ func (w *writer) PutValueSpecLine(mod JModifier, typ types.Type, names []*ast.Id
 		w.Put(" ")
 	}
 
-	jType := w.TypeToJava(typ)
-	w.Put(jType)
+	if typ != nil {
+		jType := w.TypeToJava(typ)
+		w.Put(jType)
+	}
 
 	for i, n := range names {
 
