@@ -65,7 +65,7 @@ func (w *writer) PutStaticFunc(f *ast.FuncDecl) {
 		w.error(f, "no muliple return values supported")
 	}
 
-	w.Put(mod, " ", ret, " ", (f.Name.Name), "(") // TODO: translate funcname
+	w.Put(mod, " ", ret, " ", (f.Name), "(")
 
 	for i, a := range f.Type.Params.List {
 		if len(a.Names) != 1 {
