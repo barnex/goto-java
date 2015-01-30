@@ -9,10 +9,11 @@ javac Unsigned.java || exit 2
 failed=0
 
 for f in *.go; do
-	echo -e -n $f '\t '
+	printf "%-20s" $f;
 	./testone.bash $f $1 || (( failed++ ))
 	echo
 done;
+wait
 
 total=$(ls *.go | wc -l)
 passed=$(( $total - $failed ))
