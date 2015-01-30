@@ -68,16 +68,16 @@ func (w *writer) translate(id *ast.Ident) string {
 // The new name is globally unique and can be used in any scope.
 func makeNewName(orig string) string {
 
-	idents[orig]++
-	new := fmt.Sprint(orig, "_", idents[orig]) // append, e.g., "_2"
-
-	// unlikely, but possible case that new name was already defined:
-	// recursively add more suffixes.
-	if _, ok := idents[new]; ok {
-		return makeNewName(new)
-	} else {
-		return new
+	new := orig
+	for {
+		if _, ok := idents[new]; ok {
+			idents[orig]++
+			new = fmt.Sprint(orig, "_", idents[orig]) // append, e.g., "_2"
+		} else {
+			break
+		}
 	}
+	return new
 }
 
 var lit2java = map[string]string{

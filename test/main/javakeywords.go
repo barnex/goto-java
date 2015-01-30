@@ -8,9 +8,9 @@ var (
 	final     = 8 // try to trigger global/local collision
 )
 
-//func private(a int, b int) int {
-//	return a + b
-//}
+func private(a int, b int) int {
+	return a + b
+}
 
 func main() {
 
@@ -23,6 +23,8 @@ func main() {
 
 	public := 2
 	println(public)
+
+	println(private(5, 7))
 
 	private_2 := 6
 	private := 3
