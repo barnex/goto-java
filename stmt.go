@@ -296,15 +296,14 @@ func (w *writer) PutDefine(mod JModifier, a *ast.AssignStmt) {
 		typ := w.TypeOf(n)
 
 		// aldready defined in current scope?
+		// See: https://golang.org/doc/effective_go.html#redeclaration
 		obj := w.ObjectOf(id)
 		pos := id.Pos()
 		scope := obj.Parent()
 		names := scope.Names()
 		for _, n := range names {
-			log.Println(id.Name, pos, "=?", n, scope.Lookup(n).Pos())
 			if n == id.Name && pos > scope.Lookup(n).Pos() {
 				typ = nil // already defined
-				log.Println("short decl:", id.Name)
 				break
 			}
 		}
