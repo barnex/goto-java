@@ -99,6 +99,7 @@ func (w *writer) PutBuiltinIdent(id *ast.Ident) {
 
 // Generate code for built-in call, like len(x)
 func (w *writer) PutBuiltinCall(c *ast.CallExpr) {
+
 	name := StripParens(c.Fun).(*ast.Ident).Name
 	switch name {
 	default:
@@ -107,6 +108,11 @@ func (w *writer) PutBuiltinCall(c *ast.CallExpr) {
 		w.PutLenExpr(c)
 	case "print", "println":
 		w.PutBuiltinPrintCall(c)
+	case "byte", "uint8", "int8", "uint16", "int16", "uint32", "int32", "uint", "int", "uint64", "int64":
+		if len(c.Args) != 1 {
+			w.error(c, "too many arguments to conversion to", name)
+		}
+		w.PutTypecast(name, c.Args[0])
 	}
 }
 

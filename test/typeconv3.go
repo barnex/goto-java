@@ -5,7 +5,7 @@ package main
 
 func print_byte(x byte)     { println(x) }
 func print_uint8(x uint8)   { println(x) }
-func print_uint(x uint)     { println(x) }
+func print_int8(x uint8)   { println(x) }
 func print_uint16(x uint16) { println(x) }
 func print_int16(x int16)   { println(x) }
 func print_uint(x uint)     { println(x) }

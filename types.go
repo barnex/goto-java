@@ -7,8 +7,10 @@ import (
 	"golang.org/x/tools/go/types"
 )
 
+// maps go primitives to java
 var typeToJava = map[string]string{
 	"bool":    "boolean",
+	"byte":    "byte",
 	"float32": "float",
 	"float64": "double",
 	"int":     "int", //?
@@ -18,10 +20,18 @@ var typeToJava = map[string]string{
 	"int8":    "byte",
 	"string":  "String", //?
 	"uint":    "int",    //?
-	"uint8":   "byte",   //?
 	"uint16":  "short",  //?
 	"uint32":  "int",    //?
 	"uint64":  "long",   //?
+	"uint8":   "byte",   //?
+}
+
+func (w *writer) PutTypecast(goType string, e ast.Expr) {
+	jType, ok := typeToJava[goType]
+	if !ok {
+		w.error(e, "cannot convert to java:", goType)
+	}
+	w.Put("(", jType, ")", "(", e, ")")
 }
 
 func (w *writer) TypeOf(n ast.Expr) types.Type {

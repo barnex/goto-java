@@ -3,7 +3,6 @@ package main
 import (
 	"go/ast"
 	"go/token"
-	"log"
 	"reflect"
 )
 
