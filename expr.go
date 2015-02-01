@@ -203,7 +203,7 @@ func (w *writer) PutCallExpr(n *ast.CallExpr) {
 		if i != 0 {
 			w.Put(",")
 		}
-		w.PutImplicitCast(a, params.At(i).Type())
+		w.PutImplicitCast(a, params.At(i).Type().Underlying().String())
 	}
 	w.Put(")")
 }

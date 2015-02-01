@@ -34,10 +34,9 @@ func (w *writer) PutTypecast(goType string, e ast.Expr) {
 	w.Put("(", jType, ")(", e, ")")
 }
 
-func (w *writer) PutImplicitCast(e ast.Expr, t types.Type) {
-
+func (w *writer) PutImplicitCast(e ast.Expr, goType string) {
 	if tv, ok := w.exactValue(e); ok && tv.Value != nil {
-		w.PutTypecast(tv.Type.Underlying().String(), e)
+		w.PutTypecast(goType, e)
 	} else {
 		w.PutExpr(e)
 	}

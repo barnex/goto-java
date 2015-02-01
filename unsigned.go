@@ -18,6 +18,7 @@ func (w *writer) IsUnsigned(t types.Type) bool {
 func (w *writer) PutUnsignedOp(x ast.Expr, op token.Token, y ast.Expr) {
 	typX := w.TypeToJava(w.TypeOf(x))
 	typY := w.TypeToJava(w.TypeOf(y))
+	goType := w.TypeOf(x).Underlying().String() // == same for y
 
 	if typX != typY {
 		w.error(x, "mismatched types", typX, "and", typY)
@@ -43,6 +44,10 @@ func (w *writer) PutUnsignedOp(x ast.Expr, op token.Token, y ast.Expr) {
 	default:
 		w.error(x, "unsigned", op.String(), "not supported")
 	case token.QUO, token.REM, token.LSS, token.GTR, token.LEQ, token.GEQ:
-		w.Put(function+"(", x, ",", y, ")")
+		w.Put(function, "(")
+		w.PutImplicitCast(x, goType)
+		w.Put(", ")
+		w.PutImplicitCast(y, goType)
+		w.Put(")")
 	}
 }
