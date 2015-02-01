@@ -76,8 +76,10 @@ func (w *writer) PutUnaryExpr(u *ast.UnaryExpr) {
 	switch u.Op {
 	default:
 		w.error(u, "unary ", u.Op, " not supported")
-	case token.ADD, token.SUB, token.NOT: // TODO: xor
+	case token.ADD, token.SUB, token.NOT:
 		w.Put(u.Op.String(), u.X)
+	case token.XOR:
+		w.Put("~", u.X)
 	}
 }
 
