@@ -293,20 +293,32 @@ func (w *writer) PutDefine(mod JModifier, a *ast.AssignStmt) {
 		id := a.Lhs[i].(*ast.Ident) // should be
 
 		typ := w.TypeOf(n)
-
-		// aldready defined in current scope?
-		// See: https://golang.org/doc/effective_go.html#redeclaration
-		obj := w.ObjectOf(id)
-		pos := id.Pos()
-		scope := obj.Parent()
-		names := scope.Names()
-		for _, n := range names {
-			if n == id.Name && pos > scope.Lookup(n).Pos() {
-				typ = nil // already defined
-				break
-			}
+		if w.isShortRedefine(id) {
+			typ = nil
 		}
 
 		w.PutValueSpecLine(mod, typ, []*ast.Ident{id}, []ast.Expr{value}, nil)
 	}
+}
+
+// Is the identifier aldready defined its scope?
+// Detects redeclaration in a short variable declaration, like:
+// 	a := 1
+// 	a, b := 2, 3  // isShortRedefine(a): true
+// See: https://golang.org/doc/effective_go.html#redeclaration
+func (w *writer) isShortRedefine(id *ast.Ident) bool {
+	if id.Name == "_" {
+		return false
+	}
+	obj := w.ObjectOf(id)
+	pos := id.Pos()
+	scope := obj.Parent()
+	names := scope.Names()
+	// TODO: names is sorted, could binary search
+	for _, n := range names {
+		if n == id.Name && pos > scope.Lookup(n).Pos() {
+			return true
+		}
+	}
+	return false
 }
