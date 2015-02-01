@@ -58,6 +58,10 @@ func (w *writer) PutBasicLit(n *ast.BasicLit) {
 // 	        Obj     *Object   // denoted object; or nil
 // 	}
 func (w *writer) PutResolvedIdent(id *ast.Ident) {
+	if id.Name == "_" {
+		w.Put(makeNewName("unused"))
+		return
+	}
 	if w.IsBuiltinIdent(id) {
 		w.PutBuiltinIdent(id)
 	} else {

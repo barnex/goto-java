@@ -67,12 +67,12 @@ func (w *writer) PutStaticFunc(f *ast.FuncDecl) {
 
 	w.Put(mod, " ", ret, " ", (f.Name), "(")
 
-	for i, a := range f.Type.Params.List {
-		if len(a.Names) != 1 {
-			w.error(f, "cannot handle multiple field names")
+	i := 0
+	for _, a := range f.Type.Params.List {
+		for _, name := range a.Names {
+			w.Put(comma(i), w.TypeToJava(w.TypeOf(name)), " ", name)
+			i++
 		}
-		name := a.Names[0] // TODO: more/none?
-		w.Put(comma(i), w.TypeToJava(w.TypeOf(a.Names[0])), " ", name)
 	}
 
 	w.Put(")")

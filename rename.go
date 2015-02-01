@@ -22,6 +22,7 @@ var (
 func CollectIdents(n ast.Node) {
 	idents = make(map[string]int) // init here ensures CollectIdents has been called
 	ast.Walk(&identCollector{}, n)
+	idents["unused"] = idents["unused"] // make sure it's in the map for makeNewName("unused") to work.
 }
 
 // used by CollectIdents to put all identifier names in idents.
@@ -41,9 +42,9 @@ func (f identCollector) Visit(n ast.Node) ast.Visitor {
 func (w *writer) translate(id *ast.Ident) string {
 	obj := w.ObjectOf(id)
 
-	//if obj == nil {
-	//	w.error(id, "undefined:", id.Name)
-	//}
+	if obj == nil {
+		w.error(id, "undefined:", id.Name)
+	}
 
 	// object has been renamed
 	if tr, ok := renamed[obj]; ok {
