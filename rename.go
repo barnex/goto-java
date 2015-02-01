@@ -13,6 +13,7 @@ import (
 var (
 	renamed = map[types.Object]string{} // maps some objects (typ. identifiers) to a new name for java.
 	idents  map[string]int              // holds all identifier names and a counter to create a new, non-conflicting name if needed.
+	UNUSED  string
 )
 
 // Collect the names of all identifiers in the AST and store in idents.
@@ -22,7 +23,7 @@ var (
 func CollectIdents(n ast.Node) {
 	idents = make(map[string]int) // init here ensures CollectIdents has been called
 	ast.Walk(&identCollector{}, n)
-	idents["unused"] = idents["unused"] // make sure it's in the map for makeNewName("unused") to work.
+	idents[UNUSED] = idents[UNUSED] // make sure it's in the map for makeNewName("unused") to work.
 }
 
 // used by CollectIdents to put all identifier names in idents.
@@ -76,7 +77,7 @@ func makeNewName(orig string) string {
 	for {
 		if _, ok := idents[new]; ok {
 			idents[orig]++
-			new = fmt.Sprint(orig, "_", idents[orig]) // append, e.g., "_2"
+			new = fmt.Sprint(orig, idents[orig]) // append number
 		} else {
 			break
 		}

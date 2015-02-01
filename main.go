@@ -14,6 +14,7 @@ import (
 )
 
 var (
+	flagBlank       = flag.String("blank", "_", "Name for blank identifier")
 	flagConstFold   = flag.Bool("foldconst", false, "Fold constants")
 	flagNoPkg       = flag.Bool("nopkg", false, "Do not output package clause")
 	flagNoTypeCheck = flag.Bool("nocheck", false, "Don't do type check")
@@ -25,6 +26,8 @@ var (
 func main() {
 	log.SetFlags(0)
 	flag.Parse()
+
+	UNUSED = *flagBlank
 
 	for _, f := range flag.Args() {
 		handleFile(f)

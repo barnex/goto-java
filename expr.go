@@ -59,7 +59,7 @@ func (w *writer) PutBasicLit(n *ast.BasicLit) {
 // 	}
 func (w *writer) PutResolvedIdent(id *ast.Ident) {
 	if id.Name == "_" {
-		w.Put(makeNewName("unused"))
+		w.Put(makeNewName(UNUSED))
 		return
 	}
 	if w.IsBuiltinIdent(id) {
