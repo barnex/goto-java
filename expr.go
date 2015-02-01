@@ -58,7 +58,7 @@ func (w *writer) PutBasicLit(n *ast.BasicLit) {
 // 	        Obj     *Object   // denoted object; or nil
 // 	}
 func (w *writer) PutResolvedIdent(id *ast.Ident) {
-	if id.Name == "_" {
+	if IsBlank(id) {
 		w.Put(makeNewName(UNUSED))
 		return
 	}
@@ -196,4 +196,12 @@ func (w *writer) PutArgs(args []ast.Expr, ellipsis token.Pos) {
 		w.Put("...")
 	}
 	w.Put(")")
+}
+
+func IsBlank(e ast.Expr) bool {
+	e = StripParens(e)
+	if id, ok := e.(*ast.Ident); ok {
+		return id.Name == "_"
+	}
+	return false
 }

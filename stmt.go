@@ -270,11 +270,17 @@ func (w *writer) PutAssignStmt(n *ast.AssignStmt) {
 	}
 
 	// multiple assign: put one per line
-	for i := range n.Lhs {
+	for i, lhs := range n.Lhs {
 		if i != 0 {
 			w.Putln(";")
 		}
-		w.Put(n.Lhs[i], " ", n.Tok, " ", n.Rhs[i])
+		// blank identifer: need to put type. E.g.:
+		// 	int _4 = f(x);
+		if IsBlank(lhs) {
+			w.Put(w.TypeToJava(w.TypeOf(n.Rhs[i])), " ")
+			lhs = StripParens(lhs) // border case, go allows "(_) = x"
+		}
+		w.Put(lhs, " ", n.Tok, " ", n.Rhs[i])
 	}
 }
 
@@ -307,8 +313,8 @@ func (w *writer) PutDefine(mod JModifier, a *ast.AssignStmt) {
 // 	a, b := 2, 3  // isShortRedefine(a): true
 // See: https://golang.org/doc/effective_go.html#redeclaration
 func (w *writer) isShortRedefine(id *ast.Ident) bool {
-	if id.Name == "_" {
-		return false
+	if IsBlank(id) {
+		return false // blank identifier _ is never redefined
 	}
 	obj := w.ObjectOf(id)
 	pos := id.Pos()
