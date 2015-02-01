@@ -15,6 +15,18 @@ func print_int32(x int32)   { println(x) }
 func print_uint64(x uint64) { println(x) }
 func print_int64(x int64)   { println(x) }
 
+func return_byte() byte     { return 2 }
+func return_uint8() uint8   { return 2 }
+func return_int8() int8     { return 2 }
+func return_uint16() uint16 { return 2 }
+func return_int16() int16   { return 2 }
+func return_uint() uint     { return 2 }
+func return_int() int       { return 2 }
+func return_uint32() uint32 { return 2 }
+func return_int32() int32   { return 2 }
+func return_uint64() uint64 { return 2 }
+func return_int64() int64   { return 2 }
+
 func main() {
 	print_byte(1)
 	print_uint8(2)
@@ -45,4 +57,16 @@ func main() {
 	print_int(-7)
 	print_int32(-9)
 	print_int64(-11)
+
+	print_byte(return_byte())
+	print_uint8(return_uint8())
+	print_int8(return_int8())
+	print_uint16(return_uint16())
+	print_int16(return_int16())
+	print_uint(return_uint())
+	print_int(return_int())
+	print_uint32(return_uint32())
+	print_int32(return_int32())
+	print_uint64(return_uint64())
+	print_int64(return_int64())
 }
