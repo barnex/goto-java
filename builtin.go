@@ -146,3 +146,11 @@ func (w *writer) PutLenExpr(n *ast.CallExpr) {
 		w.Put(").length()")
 	}
 }
+
+func IsBlank(e ast.Expr) bool {
+	e = StripParens(e)
+	if id, ok := e.(*ast.Ident); ok {
+		return id.Name == "_"
+	}
+	return false
+}

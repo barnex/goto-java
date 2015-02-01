@@ -6,6 +6,8 @@ import (
 	"go/ast"
 	"go/token"
 	"reflect"
+
+	"golang.org/x/tools/go/types"
 )
 
 // Emit code for an expression.
@@ -46,8 +48,16 @@ func (w *writer) PutExpr(n ast.Expr) {
 // 	        Value    string      // literal string; e.g. 42, 0x7f, 3.14, 1e-9, 2.4i, 'a', '\x7f', "foo" or `\m\n\o`
 // 	}
 func (w *writer) PutBasicLit(n *ast.BasicLit) {
-	w.Put(n.Value)
-	// TODO: translate backquotes, complex etc.
+	jType := w.TypeToJava(w.TypeOf(n))
+
+	switch jType {
+	default:
+		w.Put(n.Value)
+	case "long":
+		w.Put(n.Value, "L")
+	case "byte", "short":
+		w.Put("((", jType, ")(", n.Value, "))")
+	}
 }
 
 // Emit an identifier
@@ -177,13 +187,27 @@ func (w *writer) PutBinaryExpr(b *ast.BinaryExpr) {
 // 	}
 // TODO: handle ellipsis.
 func (w *writer) PutCallExpr(n *ast.CallExpr) {
+	if n.Ellipsis != 0 {
+		w.error(n, "cannot handle ellipsis...")
+	}
 	if w.IsBuiltinExpr(n.Fun) {
 		w.PutBuiltinCall(n)
 		return
 	}
 
 	w.PutExpr(n.Fun) // TODO: parenthesized = problematic
-	w.PutArgs(n.Args, n.Ellipsis)
+
+	signature := w.TypeOf(n.Fun).(*types.Signature) // go/types doc says it's always a signature
+	params := signature.Params()
+
+	w.Put("(")
+	for i, a := range n.Args {
+		if i != 0 {
+			w.Put(",")
+		}
+		w.PutImplicitCast(a, params.At(i).Type())
+	}
+	w.Put(")")
 }
 
 func (w *writer) PutArgs(args []ast.Expr, ellipsis token.Pos) {
@@ -198,12 +222,4 @@ func (w *writer) PutArgs(args []ast.Expr, ellipsis token.Pos) {
 		w.Put("...")
 	}
 	w.Put(")")
-}
-
-func IsBlank(e ast.Expr) bool {
-	e = StripParens(e)
-	if id, ok := e.(*ast.Ident); ok {
-		return id.Name == "_"
-	}
-	return false
 }
