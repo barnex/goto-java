@@ -2,7 +2,6 @@ package main
 
 import (
 	"go/ast"
-	"log"
 	"strings"
 
 	"golang.org/x/tools/go/types"
@@ -32,13 +31,13 @@ func (w *writer) PutTypecast(goType string, e ast.Expr) {
 	if !ok {
 		w.error(e, "cannot convert to java:", goType)
 	}
-	w.Put("(", jType, ")", e)
+	w.Put("(", jType, ")(", e, ")")
 }
 
 func (w *writer) PutImplicitCast(e ast.Expr, t types.Type) {
-	log.Println(w.TypeOf(e), "->", t)
-	if w.TypeOf(e) != t {
-		w.PutTypecast(t.Underlying().String(), e)
+
+	if tv, ok := w.exactValue(e); ok && tv.Value != nil {
+		w.PutTypecast(tv.Type.Underlying().String(), e)
 	} else {
 		w.PutExpr(e)
 	}

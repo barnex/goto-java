@@ -55,8 +55,6 @@ func (w *writer) PutBasicLit(n *ast.BasicLit) {
 		w.Put(n.Value)
 	case "long":
 		w.Put(n.Value, "L")
-	case "byte", "short":
-		w.Put("((", jType, ")(", n.Value, "))")
 	}
 }
 
