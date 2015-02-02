@@ -2,6 +2,7 @@ package main
 
 import (
 	"go/ast"
+	"log"
 
 	"golang.org/x/tools/go/types"
 )
@@ -38,12 +39,15 @@ func (w *writer) PutTypecast(goType string, e ast.Expr) {
 
 // implicit type cast from untyped to type, e.g.:
 // 	f(1)
-func (w *writer) PutImplicitCast(e ast.Expr, goType string) {
-	if tv, ok := w.exactValue(e); ok && tv.Value != nil {
-		w.PutTypecast(goType, e)
-	} else {
-		w.PutExpr(e)
-	}
+func (w *writer) PutImplicitCast(dst types.Type, e ast.Expr) {
+
+	dst = dst.Underlying()
+	src := w.TypeOf(e).Underlying()
+
+	log.Println(src, "->", dst)
+
+	w.PutExpr(e)
+
 }
 
 func (w *writer) TypeOf(n ast.Expr) types.Type {

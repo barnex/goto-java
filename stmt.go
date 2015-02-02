@@ -260,7 +260,7 @@ func (w *writer) PutAssignStmt(n *ast.AssignStmt) {
 			// should have been caught by type checker.
 			w.error(n, n.Tok.String(), " requires single argument")
 		}
-		w.Put(n.Lhs[0], " &= ", " ~", "(", n.Rhs[0], ")")
+		w.Put(n.Lhs[0], " &= ", " ~", "(", n.Rhs[0], ")") // TODO: implicit conv
 		return
 	}
 
@@ -280,7 +280,8 @@ func (w *writer) PutAssignStmt(n *ast.AssignStmt) {
 			w.Put(w.TypeToJava(w.TypeOf(n.Rhs[i])), " ")
 			lhs = StripParens(lhs) // border case, go allows "(_) = x"
 		}
-		w.Put(lhs, " ", n.Tok, " ", n.Rhs[i])
+		w.Put(lhs, " ", n.Tok, " ")
+		w.PutImplicitCast(w.TypeOf(lhs), n.Rhs[i])
 	}
 }
 
