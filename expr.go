@@ -46,13 +46,13 @@ func (w *writer) PutExpr(n ast.Expr) {
 // 	        Value    string      // literal string; e.g. 42, 0x7f, 3.14, 1e-9, 2.4i, 'a', '\x7f', "foo" or `\m\n\o`
 // 	}
 func (w *writer) PutBasicLit(n *ast.BasicLit) {
-	goType := w.TypeOf(n).String()
+	goType := w.TypeOf(n).Underlying().String()
 	//log.Println(goType, n.Value)
 
 	switch goType {
 	default:
 		w.Put("(", w.typeToJava(goType), ")", n.Value)
-	case "int", "int32", "untyped int":
+	case "int", "int32", "untyped int", "string":
 		w.Put(n.Value)
 	case "int64":
 		w.Put(n.Value, "L")

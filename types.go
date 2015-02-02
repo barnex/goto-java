@@ -8,23 +8,26 @@ import (
 
 // maps go primitives to java
 var typeToJava = map[string]string{
-	"bool":    "boolean",
-	"byte":    "byte",
-	"float32": "float",
-	"float64": "double",
-	"int":     "int", //?
-	"int16":   "short",
-	"int32":   "int",
-	"int64":   "long",
-	"int8":    "byte",
-	"string":  "String", //?
-	"uint":    "int",    //?
-	"uint16":  "short",  //?
-	"uint32":  "int",    //?
-	"uint64":  "long",   //?
-	"uint8":   "byte",   //?
+	"bool":        "boolean",
+	"byte":        "byte",
+	"float32":     "float",
+	"float64":     "double",
+	"int":         "int", //?
+	"int16":       "short",
+	"int32":       "int",
+	"int64":       "long",
+	"int8":        "byte",
+	"interface{}": "Object",
+	"string":      "String", //?
+	"uint":        "int",    //?
+	"uint16":      "short",  //?
+	"uint32":      "int",    //?
+	"uint64":      "long",   //?
+	"uint8":       "byte",   //?
 }
 
+// explicit type cast in input file, e.g.:
+// 	a := int(b)
 func (w *writer) PutTypecast(goType string, e ast.Expr) {
 	jType, ok := typeToJava[goType]
 	if !ok {
@@ -33,6 +36,8 @@ func (w *writer) PutTypecast(goType string, e ast.Expr) {
 	w.Put("(", jType, ")(", e, ")")
 }
 
+// implicit type cast from untyped to type, e.g.:
+// 	f(1)
 func (w *writer) PutImplicitCast(e ast.Expr, goType string) {
 	if tv, ok := w.exactValue(e); ok && tv.Value != nil {
 		w.PutTypecast(goType, e)
