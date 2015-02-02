@@ -49,18 +49,21 @@ func (w *writer) TypeOf(n ast.Expr) types.Type {
 	return t
 }
 
-func (w *writer) TypeToJava(t types.Type) string {
-	ident := t.String() // TODO: underlying?
+func (w *writer) TypeToJava(goType types.Type) string {
+	return w.typeToJava(goType.String())
 
 	// remove untyped.
 	//if strings.HasPrefix(ident, "untyped ") {
 	//	ident = ident[len("untyped "):]
 	//}
 
-	if j, ok := typeToJava[ident]; ok {
+}
+
+func (w *writer) typeToJava(goType string) string {
+	if j, ok := typeToJava[goType]; ok {
 		return j
 	}
-	panic("cannot convert type to java: " + ident)
+	panic("cannot convert type to java: " + goType)
 }
 
 // ObjectOf returns the object denoted by the specified identifier.
