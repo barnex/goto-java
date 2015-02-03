@@ -46,8 +46,12 @@ func (w *writer) PutImplicitCast(dst types.Type, e ast.Expr) {
 
 	log.Println(src, "->", dst)
 
-	w.PutExpr(e)
+	if dst.String() == "interface{}" {
+		w.PutEmptyInterfaceCast(e)
+		return
+	}
 
+	w.PutExpr(e)
 }
 
 func (w *writer) TypeOf(n ast.Expr) types.Type {

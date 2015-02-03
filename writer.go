@@ -34,6 +34,9 @@ func (w *writer) PutClass(className string, f *ast.File) {
 		w.Putln()
 	}
 
+	w.Putln("import go.*;")
+	w.Putln()
+
 	w.Putln("public final class ", className, " {")
 	w.Putln()
 	w.indent++

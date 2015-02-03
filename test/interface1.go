@@ -8,8 +8,8 @@ func main() {
 
 	var a interface{}
 	a = 1
-	a = byte(1)
-	a = "hello"
+	//a = byte(1)
+	//a = "hello"
 
 	print(a)
 }

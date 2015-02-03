@@ -51,8 +51,6 @@ func (w *writer) PutBasicLit(n *ast.BasicLit) {
 
 	switch goType {
 	default:
-		w.Put("(", w.typeToJava(goType), ")", n.Value)
-	case "int", "int32", "untyped int", "string":
 		w.Put(n.Value)
 	case "int64":
 		w.Put(n.Value, "L")
