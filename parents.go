@@ -24,6 +24,17 @@ func ParentOf(n Node) Node {
 	}
 }
 
+// Return the first a ancestor of n that is an ast.FuncDecl.
+// Used by return statements to find the function declaration they return from.
+func FuncDeclOf(n Node) *FuncDecl {
+	for p := ParentOf(n); p != nil; p = ParentOf(p) {
+		if f, ok := p.(*FuncDecl); ok {
+			return f
+		}
+	}
+	panic(PosOf(n).String() + ": no FuncDecl parent for node")
+}
+
 type visitor struct {
 	stack []Node // stack of parent nodes
 }

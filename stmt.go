@@ -181,10 +181,30 @@ func (w *writer) PutIfStmt(i *ast.IfStmt) {
 // 	        Results []Expr    // result expressions; or nil
 // 	}
 func (w *writer) PutReturnStmt(r *ast.ReturnStmt) {
-	if len(r.Results) > 1 {
-		Error(r, "cannot handle multiple return values")
+	results := r.Results
+	names, _ := FlattenFields(FuncDeclOf(r).Type.Results) // function declaration belonging to this return
+
+	// dress a naked return with its results
+	if len(results) == 0 && len(names) != 0 {
+		results = make([]ast.Expr, len(names))
+		for i := range results {
+			results[i] = names[i]
+		}
 	}
-	w.Put("return ", r.Results[0])
+
+	switch len(results) {
+	case 0:
+		w.Put("return")
+	case 1:
+		w.Put("return ", results[0])
+	default:
+		w.PutMultipleReturn(results)
+	}
+
+}
+
+func (w *writer) PutMultipleReturn(results []ast.Expr) {
+	panic("TODO")
 }
 
 // Emit a braced statement list.

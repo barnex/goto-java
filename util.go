@@ -6,6 +6,21 @@ import (
 	"golang.org/x/tools/go/types"
 )
 
+// FlattenFields turns an ast.FieldList into a list of names and a list of types of the same length. E.g.:
+// 	(a, b int) -> names: [a, b], types: [int, int]
+func FlattenFields(list *ast.FieldList) (names []*ast.Ident, types []ast.Expr) {
+	if list == nil {
+		return
+	}
+	for _, f := range list.List {
+		for _, n := range f.Names {
+			names = append(names, n)
+			types = append(types, f.Type)
+		}
+	}
+	return
+}
+
 // ObjectOf returns the object denoted by the specified identifier.
 func ObjectOf(id *ast.Ident) types.Object {
 	obj := info.ObjectOf(id)
