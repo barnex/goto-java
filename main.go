@@ -24,8 +24,9 @@ var (
 )
 
 var (
-	fset *token.FileSet
-	info types.Info
+	fset    *token.FileSet
+	info    types.Info
+	parents map[ast.Node]ast.Node // maps every node to his parent node. Populated by CollectParents
 )
 
 func main() {
@@ -77,7 +78,7 @@ func handleFile(fname string) {
 	}
 
 	CollectIdents(f) // see rename.go
-	//CollectParents(f)
+	CollectParents(f)
 
 	//// prepare outPut file
 	outFile := fname[:len(fname)-len(path.Ext(fname))]
