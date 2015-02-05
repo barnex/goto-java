@@ -72,7 +72,7 @@ func (w *writer) PutResolvedIdent(id *ast.Ident) {
 	if w.IsBuiltinIdent(id) {
 		w.PutBuiltinIdent(id)
 	} else {
-		w.Put(w.translate(id))
+		w.Put(JavaName(id))
 	}
 }
 

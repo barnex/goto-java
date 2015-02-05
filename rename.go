@@ -36,11 +36,11 @@ func (f identCollector) Visit(n ast.Node) ast.Visitor {
 	return f
 }
 
-// Translate an identifier to java.
+// Translate an identifier to its java name.
 // Usually returns the identifier's name unchanged,
 // unless it has been renamed for some reason or when
 // the identifier name is a protected java keyword.
-func (w *writer) translate(id *ast.Ident) string {
+func JavaName(id *ast.Ident) string {
 	obj := ObjectOf(id)
 
 	if obj == nil {

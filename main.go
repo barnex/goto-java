@@ -76,6 +76,8 @@ func handleFile(fname string) {
 		ast.Print(fset, f)
 	}
 
+	CollectIdents(f) // see rename.go
+
 	//// prepare outPut file
 	outFile := fname[:len(fname)-len(path.Ext(fname))]
 	out_, errOut := os.Create(outFile + ".java")
