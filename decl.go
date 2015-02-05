@@ -59,7 +59,7 @@ func (w *writer) PutStaticFunc(f *ast.FuncDecl) {
 
 	ret := "void"
 	if f.Type.Results != nil && len(f.Type.Results.List) == 1 {
-		ret = w.TypeToJava(TypeOf(f.Type.Results.List[0].Type)) // todo: multiple names, wtf?
+		ret = JavaType(TypeOf(f.Type.Results.List[0].Type)) // todo: multiple names, wtf?
 	}
 	if f.Type.Results != nil && len(f.Type.Results.List) > 1 {
 		Error(f, "no muliple return values supported")
@@ -70,7 +70,7 @@ func (w *writer) PutStaticFunc(f *ast.FuncDecl) {
 	i := 0
 	for _, a := range f.Type.Params.List {
 		for _, name := range a.Names {
-			w.Put(comma(i), w.TypeToJava(TypeOf(name)), " ", name)
+			w.Put(comma(i), JavaType(TypeOf(name)), " ", name)
 			i++
 		}
 	}
@@ -91,13 +91,6 @@ func (w *writer) PutMainDecl(n *ast.FuncDecl) {
 func (w *writer) PutMethod(n *ast.FuncDecl) {
 	panic("todo: method")
 }
-
-//func (w *writer) PutField(f *ast.Field) {
-//	w.Put(f.Type, " ")
-//	for i, n := range f.Names {
-//		w.Put(comma(i), n)
-//	}
-//}
 
 // Emit a generic declaration (import, constant, type or variable)
 // with optional modifier
@@ -171,13 +164,11 @@ func (w *writer) PutValueSpecs(mod JModifier, specs []ast.Spec) {
 // (ConstSpec or VarSpec production).
 func (w *writer) PutValueSpec(mod JModifier, s *ast.ValueSpec) {
 	if s.Type != nil {
-		// var with explicit type:
-		// Put everything on one line, e.g.:
+		// var with explicit type: everything on one line, e.g.:
 		// 	int a = 1, b = 2
 		w.PutValueSpecLine(mod, TypeOf(s.Type), s.Names, s.Values, s.Comment)
 	} else {
-		// var with infered type:
-		// Put specs on separate line, e.g.:
+		// var with infered type: specs on separate line, e.g.:
 		// 	int a = 1;
 		// 	String b = "";
 		for i, n := range s.Names {
@@ -212,7 +203,7 @@ func (w *writer) PutValueSpecLine(mod JModifier, typ types.Type, names []*ast.Id
 	}
 
 	if typ != nil {
-		jType := w.TypeToJava(typ)
+		jType := JavaType(typ)
 		w.Put(jType)
 	}
 
@@ -223,13 +214,11 @@ func (w *writer) PutValueSpecLine(mod JModifier, typ types.Type, names []*ast.Id
 		if i < len(values) {
 			w.PutExpr(values[i])
 		} else {
-			w.Put(w.ZeroValue(TypeOf(n)))
+			w.Put(ZeroValue(TypeOf(n)))
 		}
 
 		if i != len(names)-1 {
 			w.Put(", ")
 		}
 	}
-	//w.Put(";")
-	//w.PutInlineComment(comment)
 }

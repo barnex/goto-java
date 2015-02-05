@@ -277,7 +277,7 @@ func (w *writer) PutAssignStmt(n *ast.AssignStmt) {
 		// blank identifer: need to put type. E.g.:
 		// 	int _4 = f(x);
 		if IsBlank(lhs) {
-			w.Put(w.TypeToJava(TypeOf(n.Rhs[i])), " ")
+			w.Put(JavaType(TypeOf(n.Rhs[i])), " ")
 			lhs = StripParens(lhs) // border case, go allows "(_) = x"
 		}
 		w.Put(lhs, " ", n.Tok, " ")
@@ -300,7 +300,7 @@ func (w *writer) PutDefine(mod JModifier, a *ast.AssignStmt) {
 		id := a.Lhs[i].(*ast.Ident) // should be
 
 		typ := TypeOf(n)
-		if w.isShortRedefine(id) {
+		if IsShortRedefine(id) {
 			typ = nil
 		}
 
@@ -308,12 +308,12 @@ func (w *writer) PutDefine(mod JModifier, a *ast.AssignStmt) {
 	}
 }
 
-// Is the identifier aldready defined its scope?
-// Detects redeclaration in a short variable declaration, like:
+// Is the identifier already defined its scope?
+// Detects redeclaration in a short variable declaration, e.g.:
 // 	a := 1
-// 	a, b := 2, 3  // isShortRedefine(a): true
+// 	a, b := 2, 3  // IsShortRedefine(a): true
 // See: https://golang.org/doc/effective_go.html#redeclaration
-func (w *writer) isShortRedefine(id *ast.Ident) bool {
+func IsShortRedefine(id *ast.Ident) bool {
 	if IsBlank(id) {
 		return false // blank identifier _ is never redefined
 	}

@@ -2,7 +2,24 @@ package main
 
 import (
 	"go/ast"
+
+	"golang.org/x/tools/go/types"
 )
+
+// ObjectOf returns the object denoted by the specified identifier.
+func ObjectOf(id *ast.Ident) types.Object {
+	obj := info.ObjectOf(id)
+	if obj == nil {
+		Error(id, "undefined:", id.Name)
+	}
+	return obj
+}
+
+// returun exact value and minimal type for constant expression.
+func ExactValue(e ast.Expr) (tv types.TypeAndValue, ok bool) {
+	tv, ok = info.Types[e]
+	return
+}
 
 // Strip parens from expression, if any. E.g.:
 // 	((x)) -> x
@@ -22,6 +39,14 @@ func IsBlank(e ast.Expr) bool {
 		return id.Name == "_"
 	}
 	return false
+}
+
+func TypeOf(n ast.Expr) types.Type {
+	t := info.TypeOf(n)
+	if t == nil {
+		Error(n, "cannot infer type")
+	}
+	return t
 }
 
 // Returns a comma if i!=0.

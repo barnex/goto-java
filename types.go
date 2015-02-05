@@ -1,5 +1,7 @@
 package main
 
+// Type conversion between Go and Java.
+
 import (
 	"go/ast"
 	"log"
@@ -7,7 +9,7 @@ import (
 	"golang.org/x/tools/go/types"
 )
 
-// maps go primitives to java
+// maps Go primitives to java
 var typeToJava = map[string]string{
 	"bool":        "boolean",
 	"byte":        "byte",
@@ -54,42 +56,10 @@ func (w *writer) PutImplicitCast(dst types.Type, e ast.Expr) {
 	w.PutExpr(e)
 }
 
-func TypeOf(n ast.Expr) types.Type {
-	t := info.TypeOf(n)
-	if t == nil {
-		Error(n, "cannot infer type")
-	}
-	return t
-}
-
-func (w *writer) TypeToJava(goType types.Type) string {
-	return w.typeToJava(goType.String())
-
-	// remove untyped.
-	//if strings.HasPrefix(ident, "untyped ") {
-	//	ident = ident[len("untyped "):]
-	//}
-
-}
-
-func (w *writer) typeToJava(goType string) string {
-	if j, ok := typeToJava[goType]; ok {
+func JavaType(goType types.Type) string {
+	if j, ok := typeToJava[goType.Underlying().String()]; ok {
 		return j
+	} else {
+		panic("cannot convert type to java: " + goType.String())
 	}
-	panic("cannot convert type to java: " + goType)
-}
-
-// ObjectOf returns the object denoted by the specified identifier.
-func ObjectOf(id *ast.Ident) types.Object {
-	obj := info.ObjectOf(id)
-	if obj == nil {
-		Error(id, "undefined:", id.Name)
-	}
-	return obj
-}
-
-// returun exact value and minimal type for constant expression.
-func ExactValue(e ast.Expr) (tv types.TypeAndValue, ok bool) {
-	tv, ok = info.Types[e]
-	return
 }

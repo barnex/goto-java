@@ -68,10 +68,6 @@ func JavaName(id *ast.Ident) string {
 	return obj.Name()
 }
 
-func (w *writer) rename(id *ast.Ident) {
-	renamed[ObjectOf(id)] = makeNewName(id.Name)
-}
-
 // Construct a new (java) name for a (go) identifier with original name orig.
 // The new name is globally unique and can be used in any scope.
 func makeNewName(orig string) string {

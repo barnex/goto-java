@@ -28,7 +28,7 @@ func (w *writer) PutExpr(n ast.Expr) {
 	case *ast.CallExpr:
 		w.PutCallExpr(e)
 	case *ast.Ident:
-		w.PutResolvedIdent(e)
+		w.PutIdent(e)
 	case *ast.ParenExpr:
 		w.PutParenExpr(e)
 	case *ast.SliceExpr:
@@ -47,7 +47,6 @@ func (w *writer) PutExpr(n ast.Expr) {
 // 	}
 func (w *writer) PutBasicLit(n *ast.BasicLit) {
 	goType := TypeOf(n).Underlying().String()
-	//log.Println(goType, n.Value)
 
 	switch goType {
 	default:
@@ -64,7 +63,7 @@ func (w *writer) PutBasicLit(n *ast.BasicLit) {
 // 	        Name    string    // identifier name
 // 	        Obj     *Object   // denoted object; or nil
 // 	}
-func (w *writer) PutResolvedIdent(id *ast.Ident) {
+func (w *writer) PutIdent(id *ast.Ident) {
 	if IsBlank(id) {
 		w.Put(makeNewName(UNUSED))
 		return
@@ -102,7 +101,7 @@ func (w *writer) PutUnaryExpr(u *ast.UnaryExpr) {
 // 	        Rbrack token.Pos // position of "]"
 // 	}
 func (w *writer) PutSliceExpr(e *ast.SliceExpr) {
-	jType := w.TypeToJava(TypeOf(e.X))
+	jType := JavaType(TypeOf(e.X))
 	switch jType {
 	default:
 		Error(e, "cannot slice type ", jType)
@@ -142,13 +141,11 @@ func (w *writer) PutParenExpr(e *ast.ParenExpr) {
 // 	add_op     = "+" | "-" | "|" | "^" .
 // 	mul_op     = "*" | "/" | "%" | "<<" | ">>" | "&" | "&^" .
 func (w *writer) PutBinaryExpr(b *ast.BinaryExpr) {
-	// TODO: check unsupported ops
-
 	if *flagParens {
 		w.Put("(")
 	}
 
-	unsigned := w.IsUnsigned(TypeOf(b.X)) || w.IsUnsigned(TypeOf(b.Y))
+	unsigned := IsUnsigned(TypeOf(b.X)) || IsUnsigned(TypeOf(b.Y))
 
 	switch b.Op {
 	default:

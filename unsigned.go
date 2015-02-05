@@ -7,7 +7,7 @@ import (
 	"golang.org/x/tools/go/types"
 )
 
-func (w *writer) IsUnsigned(t types.Type) bool {
+func IsUnsigned(t types.Type) bool {
 	if b, ok := t.(*types.Basic); ok {
 		return b.Info()&types.IsUnsigned != 0
 	} else {
@@ -16,9 +16,8 @@ func (w *writer) IsUnsigned(t types.Type) bool {
 }
 
 func (w *writer) PutUnsignedOp(x ast.Expr, op token.Token, y ast.Expr) {
-	typX := w.TypeToJava(TypeOf(x))
-	typY := w.TypeToJava(TypeOf(y))
-	//goType := w.TypeOf(x).Underlying().String() // == same for y
+	typX := JavaType(TypeOf(x))
+	typY := JavaType(TypeOf(y))
 
 	if typX != typY {
 		Error(x, "mismatched types", typX, "and", typY)
