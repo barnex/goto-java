@@ -14,7 +14,7 @@ import (
 )
 
 var (
-	flagBlank       = flag.String("blank", "_", "Name for blank identifier")
+	flagBlank       = flag.String("blank", "_", "Java name for the blank (underscore) identifier")
 	flagConstFold   = flag.Bool("foldconst", false, "Fold constants")
 	flagNoPkg       = flag.Bool("nopkg", false, "Do not output package clause")
 	flagNoTypeCheck = flag.Bool("nocheck", false, "Don't do type check")

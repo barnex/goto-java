@@ -88,6 +88,13 @@ func StripParens(e ast.Expr) ast.Expr {
 	}
 }
 
+// maps go built-in identifiers to Java
+var lit2java = map[string]string{
+	"false": "false",
+	"nil":   "null", //? need to type!
+	"true":  "true",
+}
+
 // Emit code for a built-in identifer
 func (w *writer) PutBuiltinIdent(id *ast.Ident) {
 	if transl, ok := lit2java[id.Name]; ok {
