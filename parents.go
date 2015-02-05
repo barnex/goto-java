@@ -14,6 +14,16 @@ func CollectParents(n Node) {
 	walk(&visitor{}, n)
 }
 
+// ParentOf returns the parent node of n.
+// Precondition: CollectParents has been called on the tree containing n.
+func ParentOf(n Node) Node {
+	if p, ok := parents[n]; ok {
+		return p
+	} else {
+		panic(PosOf(n).String() + ": no parent")
+	}
+}
+
 type visitor struct {
 	stack []Node // stack of parent nodes
 }
@@ -35,7 +45,7 @@ func (v *visitor) Visit(n Node) *visitor {
 	return v
 }
 
-// Copied from go/ast/walk.go.
+// Copied from go/ast/walk.go, copyright The Go Authors.
 // Modified to call v.push(node)/v.pop() so that v keeps a parent stack.
 func walk(v *visitor, node Node) {
 	if v = v.Visit(node); v == nil {
