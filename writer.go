@@ -6,8 +6,6 @@ import (
 	"go/token"
 	"io"
 	"reflect"
-
-	"golang.org/x/tools/go/types"
 )
 
 // A writer takes AST nodes and outPuts java source
@@ -15,8 +13,6 @@ type writer struct {
 	out        io.Writer
 	indent     int
 	needIndent bool
-	fset       *token.FileSet
-	info       types.Info
 }
 
 func NewWriter(out io.Writer) *writer {
@@ -106,13 +102,13 @@ func (w *writer) putIndent() {
 }
 
 // exit with fatal error, print token position of node n and msg.
-func (w *writer) error(n ast.Node, msg ...interface{}) {
-	panic(fmt.Sprint(append([]interface{}{w.pos(n), ": "}, msg...)...))
+func Error(n ast.Node, msg ...interface{}) {
+	panic(fmt.Sprint(append([]interface{}{PosOf(n), ": "}, msg...)...))
 }
 
 // return position of node using this writer's fileset
-func (w *writer) pos(n ast.Node) token.Position {
-	return w.fset.Position(n.Pos())
+func PosOf(n ast.Node) token.Position {
+	return fset.Position(n.Pos())
 }
 
 // prints parentisized argument list: "(elem[0], elem[1], ...)"

@@ -59,10 +59,10 @@ func (w *writer) PutStaticFunc(f *ast.FuncDecl) {
 
 	ret := "void"
 	if f.Type.Results != nil && len(f.Type.Results.List) == 1 {
-		ret = w.TypeToJava(w.TypeOf(f.Type.Results.List[0].Type)) // todo: multiple names, wtf?
+		ret = w.TypeToJava(TypeOf(f.Type.Results.List[0].Type)) // todo: multiple names, wtf?
 	}
 	if f.Type.Results != nil && len(f.Type.Results.List) > 1 {
-		w.error(f, "no muliple return values supported")
+		Error(f, "no muliple return values supported")
 	}
 
 	w.Put(mod, " ", ret, " ", (f.Name), "(")
@@ -70,7 +70,7 @@ func (w *writer) PutStaticFunc(f *ast.FuncDecl) {
 	i := 0
 	for _, a := range f.Type.Params.List {
 		for _, name := range a.Names {
-			w.Put(comma(i), w.TypeToJava(w.TypeOf(name)), " ", name)
+			w.Put(comma(i), w.TypeToJava(TypeOf(name)), " ", name)
 			i++
 		}
 	}
@@ -124,7 +124,7 @@ func (w *writer) PutMethod(n *ast.FuncDecl) {
 func (w *writer) PutGenDecl(mod JModifier, d *ast.GenDecl) {
 	switch d.Tok { // IMPORT, CONST, TYPE, VAR
 	default:
-		w.error(d, "cannot handle "+d.Tok.String())
+		Error(d, "cannot handle "+d.Tok.String())
 	case token.CONST:
 		w.PutValueSpecs(mod|FINAL, d.Specs)
 	case token.VAR:
@@ -174,7 +174,7 @@ func (w *writer) PutValueSpec(mod JModifier, s *ast.ValueSpec) {
 		// var with explicit type:
 		// Put everything on one line, e.g.:
 		// 	int a = 1, b = 2
-		w.PutValueSpecLine(mod, w.TypeOf(s.Type), s.Names, s.Values, s.Comment)
+		w.PutValueSpecLine(mod, TypeOf(s.Type), s.Names, s.Values, s.Comment)
 	} else {
 		// var with infered type:
 		// Put specs on separate line, e.g.:
@@ -188,7 +188,7 @@ func (w *writer) PutValueSpec(mod JModifier, s *ast.ValueSpec) {
 			if i != 0 {
 				w.Putln(";")
 			}
-			w.PutValueSpecLine(mod, w.TypeOf(n), s.Names[i:i+1], []ast.Expr{value}, s.Comment)
+			w.PutValueSpecLine(mod, TypeOf(n), s.Names[i:i+1], []ast.Expr{value}, s.Comment)
 		}
 	}
 }
@@ -223,7 +223,7 @@ func (w *writer) PutValueSpecLine(mod JModifier, typ types.Type, names []*ast.Id
 		if i < len(values) {
 			w.PutExpr(values[i])
 		} else {
-			w.Put(w.ZeroValue(w.TypeOf(n)))
+			w.Put(w.ZeroValue(TypeOf(n)))
 		}
 
 		if i != len(names)-1 {

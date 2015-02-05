@@ -32,7 +32,7 @@ var typeToJava = map[string]string{
 func (w *writer) PutTypecast(goType string, e ast.Expr) {
 	jType, ok := typeToJava[goType]
 	if !ok {
-		w.error(e, "cannot convert to java:", goType)
+		Error(e, "cannot convert to java:", goType)
 	}
 	w.Put("(", jType, ")(", e, ")")
 }
@@ -42,7 +42,7 @@ func (w *writer) PutTypecast(goType string, e ast.Expr) {
 func (w *writer) PutImplicitCast(dst types.Type, e ast.Expr) {
 
 	dst = dst.Underlying()
-	src := w.TypeOf(e).Underlying()
+	src := TypeOf(e).Underlying()
 
 	log.Println(src, "->", dst)
 
@@ -54,10 +54,10 @@ func (w *writer) PutImplicitCast(dst types.Type, e ast.Expr) {
 	w.PutExpr(e)
 }
 
-func (w *writer) TypeOf(n ast.Expr) types.Type {
-	t := w.info.TypeOf(n)
+func TypeOf(n ast.Expr) types.Type {
+	t := info.TypeOf(n)
 	if t == nil {
-		w.error(n, "cannot infer type")
+		Error(n, "cannot infer type")
 	}
 	return t
 }
@@ -80,16 +80,16 @@ func (w *writer) typeToJava(goType string) string {
 }
 
 // ObjectOf returns the object denoted by the specified identifier.
-func (w *writer) ObjectOf(id *ast.Ident) types.Object {
-	obj := w.info.ObjectOf(id)
+func ObjectOf(id *ast.Ident) types.Object {
+	obj := info.ObjectOf(id)
 	if obj == nil {
-		w.error(id, "undefined:", id.Name)
+		Error(id, "undefined:", id.Name)
 	}
 	return obj
 }
 
 // returun exact value and minimal type for constant expression.
-func (w *writer) exactValue(e ast.Expr) (tv types.TypeAndValue, ok bool) {
-	tv, ok = w.info.Types[e]
+func ExactValue(e ast.Expr) (tv types.TypeAndValue, ok bool) {
+	tv, ok = info.Types[e]
 	return
 }

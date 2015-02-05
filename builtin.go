@@ -61,7 +61,7 @@ var builtins = map[string]bool{
 // The resulut is scope-sensitive, as built-ins may be shadowed by
 // other declarations (e.g. len := 7).
 func (w *writer) IsBuiltinIdent(id *ast.Ident) bool {
-	obj := w.ObjectOf(id)
+	obj := ObjectOf(id)
 	return (obj.Parent() == types.Universe) && (builtins[id.Name] == true)
 }
 
@@ -93,7 +93,7 @@ func (w *writer) PutBuiltinIdent(id *ast.Ident) {
 	if transl, ok := lit2java[id.Name]; ok {
 		w.Put(transl)
 	} else {
-		w.error(id, "built-in identifier not supported: ", id.Name)
+		Error(id, "built-in identifier not supported: ", id.Name)
 	}
 }
 
@@ -103,14 +103,14 @@ func (w *writer) PutBuiltinCall(c *ast.CallExpr) {
 	name := StripParens(c.Fun).(*ast.Ident).Name
 	switch name {
 	default:
-		w.error(c, "cannot handle builtin: ", name)
+		Error(c, "cannot handle builtin: ", name)
 	case "len":
 		w.PutLenExpr(c)
 	case "print", "println":
 		w.PutBuiltinPrintCall(c)
 	case "byte", "uint8", "int8", "uint16", "int16", "uint32", "int32", "uint", "int", "uint64", "int64":
 		if len(c.Args) != 1 {
-			w.error(c, "too many arguments to conversion to", name)
+			Error(c, "too many arguments to conversion to", name)
 		}
 		w.PutTypecast(name, c.Args[0])
 	}
@@ -121,7 +121,7 @@ func (w *writer) PutBuiltinPrintCall(c *ast.CallExpr) {
 	name := StripParens(c.Fun).(*ast.Ident).Name
 	switch name {
 	default:
-		w.error(c, "bug: not a print/println call:", name)
+		Error(c, "bug: not a print/println call:", name)
 	case "print":
 		name = "System.out.print"
 	case "println":
@@ -134,12 +134,12 @@ func (w *writer) PutBuiltinPrintCall(c *ast.CallExpr) {
 // Generate code for len(x)
 func (w *writer) PutLenExpr(n *ast.CallExpr) {
 	if len(n.Args) != 1 {
-		w.error(n, "too many arguments to len")
+		Error(n, "too many arguments to len")
 	}
-	argT := w.TypeToJava(w.TypeOf(n.Args[0]).Underlying())
+	argT := w.TypeToJava(TypeOf(n.Args[0]).Underlying())
 	switch argT {
 	default:
-		w.error(n, "invalid argument (type ", argT, ") for len")
+		Error(n, "invalid argument (type ", argT, ") for len")
 	case "String":
 		w.Put("(")
 		w.PutExpr(n.Args[0])

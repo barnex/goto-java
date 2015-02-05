@@ -13,7 +13,7 @@ import (
 func (w *writer) PutStmt(s ast.Stmt) {
 	switch s := s.(type) {
 	default:
-		w.error(s, "cannot handle ", reflect.TypeOf(s))
+		Error(s, "cannot handle ", reflect.TypeOf(s))
 	case *ast.AssignStmt:
 		w.PutAssignStmt(s)
 	case *ast.BlockStmt:
@@ -47,10 +47,10 @@ func (w *writer) PutStmt(s ast.Stmt) {
 // 	}
 func (w *writer) PutSwitchStmt(s *ast.SwitchStmt) {
 	if s.Init != nil {
-		w.error(s, "switch init not supported")
+		Error(s, "switch init not supported")
 	}
 	if s.Tag == nil {
-		w.error(s, "switch w/o tag not supported")
+		Error(s, "switch w/o tag not supported")
 	}
 
 	w.Putln("switch(", s.Tag, "){")
@@ -100,11 +100,11 @@ func (w *writer) PutSwitchStmt(s *ast.SwitchStmt) {
 // 	}
 func (w *writer) PutBranchStmt(b *ast.BranchStmt) {
 	if b.Label != nil {
-		w.error(b, b.Tok.String(), " with label not allowed")
+		Error(b, b.Tok.String(), " with label not allowed")
 	}
 	switch b.Tok {
 	default:
-		w.error(b, "cannot handle ", b.Tok)
+		Error(b, "cannot handle ", b.Tok)
 	case token.BREAK, token.CONTINUE:
 		w.Put(b.Tok.String())
 	case token.FALLTHROUGH:
@@ -112,7 +112,7 @@ func (w *writer) PutBranchStmt(b *ast.BranchStmt) {
 		// Instead, PutSwitchStmt handles it as a special thing.
 		// If we do reach this code, it's either a bug or
 		// a misplaced fallthrough that slipped through the parser.
-		w.error(b, b.Tok, "not allowed here")
+		Error(b, b.Tok, "not allowed here")
 	}
 }
 
@@ -182,7 +182,7 @@ func (w *writer) PutIfStmt(i *ast.IfStmt) {
 // 	}
 func (w *writer) PutReturnStmt(r *ast.ReturnStmt) {
 	if len(r.Results) > 1 {
-		w.error(r, "cannot handle multiple return values")
+		Error(r, "cannot handle multiple return values")
 	}
 	w.Put("return ", r.Results[0])
 }
@@ -250,7 +250,7 @@ func (w *writer) PutExprStmt(n *ast.ExprStmt) {
 // 	}
 func (w *writer) PutAssignStmt(n *ast.AssignStmt) {
 	if len(n.Lhs) != len(n.Rhs) {
-		w.error(n, "assignment count mismatch:", len(n.Lhs), "!=", len(n.Rhs))
+		Error(n, "assignment count mismatch:", len(n.Lhs), "!=", len(n.Rhs))
 		// TODO: function with multiple returns
 	}
 
@@ -258,7 +258,7 @@ func (w *writer) PutAssignStmt(n *ast.AssignStmt) {
 	if n.Tok == token.AND_NOT_ASSIGN {
 		if len(n.Lhs) != 1 || len(n.Rhs) != 1 {
 			// should have been caught by type checker.
-			w.error(n, n.Tok.String(), " requires single argument")
+			Error(n, n.Tok.String(), " requires single argument")
 		}
 		w.Put(n.Lhs[0], " &= ", " ~", "(", n.Rhs[0], ")") // TODO: implicit conv
 		return
@@ -277,11 +277,11 @@ func (w *writer) PutAssignStmt(n *ast.AssignStmt) {
 		// blank identifer: need to put type. E.g.:
 		// 	int _4 = f(x);
 		if IsBlank(lhs) {
-			w.Put(w.TypeToJava(w.TypeOf(n.Rhs[i])), " ")
+			w.Put(w.TypeToJava(TypeOf(n.Rhs[i])), " ")
 			lhs = StripParens(lhs) // border case, go allows "(_) = x"
 		}
 		w.Put(lhs, " ", n.Tok, " ")
-		w.PutImplicitCast(w.TypeOf(lhs), n.Rhs[i])
+		w.PutImplicitCast(TypeOf(lhs), n.Rhs[i])
 	}
 }
 
@@ -299,7 +299,7 @@ func (w *writer) PutDefine(mod JModifier, a *ast.AssignStmt) {
 		}
 		id := a.Lhs[i].(*ast.Ident) // should be
 
-		typ := w.TypeOf(n)
+		typ := TypeOf(n)
 		if w.isShortRedefine(id) {
 			typ = nil
 		}
@@ -317,7 +317,7 @@ func (w *writer) isShortRedefine(id *ast.Ident) bool {
 	if IsBlank(id) {
 		return false // blank identifier _ is never redefined
 	}
-	obj := w.ObjectOf(id)
+	obj := ObjectOf(id)
 	pos := id.Pos()
 	scope := obj.Parent()
 	names := scope.Names()

@@ -12,7 +12,7 @@ import (
 func (w *writer) PutExpr(n ast.Expr) {
 
 	if *flagConstFold {
-		if tv, ok := w.exactValue(n); ok && tv.Value != nil {
+		if tv, ok := ExactValue(n); ok && tv.Value != nil {
 			w.Put(tv.Value.String())
 			return
 		}
@@ -20,7 +20,7 @@ func (w *writer) PutExpr(n ast.Expr) {
 
 	switch e := n.(type) {
 	default:
-		w.error(n, "cannot handle ", reflect.TypeOf(e))
+		Error(n, "cannot handle ", reflect.TypeOf(e))
 	case *ast.BasicLit:
 		w.PutBasicLit(e)
 	case *ast.BinaryExpr:
@@ -46,7 +46,7 @@ func (w *writer) PutExpr(n ast.Expr) {
 // 	        Value    string      // literal string; e.g. 42, 0x7f, 3.14, 1e-9, 2.4i, 'a', '\x7f', "foo" or `\m\n\o`
 // 	}
 func (w *writer) PutBasicLit(n *ast.BasicLit) {
-	goType := w.TypeOf(n).Underlying().String()
+	goType := TypeOf(n).Underlying().String()
 	//log.Println(goType, n.Value)
 
 	switch goType {
@@ -82,7 +82,7 @@ func (w *writer) PutResolvedIdent(id *ast.Ident) {
 func (w *writer) PutUnaryExpr(u *ast.UnaryExpr) {
 	switch u.Op {
 	default:
-		w.error(u, "unary ", u.Op, " not supported")
+		Error(u, "unary ", u.Op, " not supported")
 	case token.ADD, token.SUB, token.NOT:
 		w.Put(u.Op.String(), u.X)
 	case token.XOR:
@@ -102,10 +102,10 @@ func (w *writer) PutUnaryExpr(u *ast.UnaryExpr) {
 // 	        Rbrack token.Pos // position of "]"
 // 	}
 func (w *writer) PutSliceExpr(e *ast.SliceExpr) {
-	jType := w.TypeToJava(w.TypeOf(e.X))
+	jType := w.TypeToJava(TypeOf(e.X))
 	switch jType {
 	default:
-		w.error(e, "cannot slice type ", jType)
+		Error(e, "cannot slice type ", jType)
 	case "String":
 		w.putStringSlice(e)
 	}
@@ -148,7 +148,7 @@ func (w *writer) PutBinaryExpr(b *ast.BinaryExpr) {
 		w.Put("(")
 	}
 
-	unsigned := w.IsUnsigned(w.TypeOf(b.X)) || w.IsUnsigned(w.TypeOf(b.Y))
+	unsigned := w.IsUnsigned(TypeOf(b.X)) || w.IsUnsigned(TypeOf(b.Y))
 
 	switch b.Op {
 	default:
@@ -185,7 +185,7 @@ func (w *writer) PutBinaryExpr(b *ast.BinaryExpr) {
 // TODO: handle ellipsis.
 func (w *writer) PutCallExpr(n *ast.CallExpr) {
 	if n.Ellipsis != 0 {
-		w.error(n, "cannot handle ellipsis...")
+		Error(n, "cannot handle ellipsis...")
 	}
 	if w.IsBuiltinExpr(n.Fun) {
 		w.PutBuiltinCall(n)
@@ -194,7 +194,7 @@ func (w *writer) PutCallExpr(n *ast.CallExpr) {
 
 	w.PutExpr(n.Fun) // TODO: parenthesized = problematic
 
-	//signature := w.TypeOf(n.Fun).(*types.Signature) // go/types doc says it's always a signature
+	//signature := TypeOf(n.Fun).(*types.Signature) // go/types doc says it's always a signature
 	//params := signature.Params()
 
 	w.Put("(")

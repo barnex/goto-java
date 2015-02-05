@@ -23,6 +23,11 @@ var (
 	flagRenameAll   = flag.Bool("renameall", false, "Rename all variables (debug)")
 )
 
+var (
+	fset *token.FileSet
+	info types.Info
+)
+
 func main() {
 	log.SetFlags(0)
 	flag.Parse()
@@ -48,12 +53,12 @@ func fatal(msg ...interface{}) {
 func handleFile(fname string) {
 
 	// read and parse file
-	fset := token.NewFileSet()
+	fset = token.NewFileSet()
 	f, err := parser.ParseFile(fset, fname, nil, parser.ParseComments)
 	checkUserErr(err)
 
 	var config types.Config
-	info := types.Info{
+	info = types.Info{
 		Types:      make(map[ast.Expr]types.TypeAndValue),
 		Defs:       make(map[*ast.Ident]types.Object),
 		Uses:       make(map[*ast.Ident]types.Object),
@@ -80,6 +85,6 @@ func handleFile(fname string) {
 	defer out.Flush()
 
 	// transpile
-	w := &writer{out: out, fset: fset, info: info}
+	w := &writer{out: out}
 	w.PutClass(outFile, f)
 }
