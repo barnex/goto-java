@@ -77,6 +77,7 @@ func handleFile(fname string) {
 	}
 
 	CollectIdents(f) // see rename.go
+	//CollectParents(f)
 
 	//// prepare outPut file
 	outFile := fname[:len(fname)-len(path.Ext(fname))]

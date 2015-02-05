@@ -23,19 +23,14 @@ var (
 // In principle new names only need to be unique in their scope,
 // but we make them globally unique to avoid potential scope subtleties.
 func CollectIdents(n ast.Node) {
-	idents = make(map[string]int) // init here ensures CollectIdents has been called
-	ast.Walk(&identCollector{}, n)
+	idents = make(map[string]int)   // init here ensures CollectIdents has been called
 	idents[UNUSED] = idents[UNUSED] // make sure it's in the map for makeNewName(UNUSED) to work.
-}
-
-// used by CollectIdents to put all identifier names in idents.
-type identCollector struct{}
-
-func (f identCollector) Visit(n ast.Node) ast.Visitor {
-	if id, ok := n.(*ast.Ident); ok {
-		idents[id.Name] = 0
-	}
-	return f
+	ast.Inspect(n, func(n ast.Node) bool {
+		if id, ok := n.(*ast.Ident); ok {
+			idents[id.Name] = 0
+		}
+		return true
+	})
 }
 
 // Translate an identifier to its java name.
