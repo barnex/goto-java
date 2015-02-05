@@ -30,6 +30,15 @@ func (m JModifier) String() string {
 	return str
 }
 
+// concatenate a and b, inserting a space if needed
+func cat(a, b string) string {
+	if (a != "") && (b != "") {
+		return a + " " + b
+	} else {
+		return a + b
+	}
+}
+
 // Returns true if m contains b. E.g.:
 // 	m.Is(PUBLIC) // true if m is public
 func (m JModifier) Is(b JModifier) bool {

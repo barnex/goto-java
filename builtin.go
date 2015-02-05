@@ -1,6 +1,6 @@
 package main
 
-// built-ins
+// Handle Go built-ins.
 
 import (
 	"go/ast"
@@ -8,59 +8,10 @@ import (
 	"golang.org/x/tools/go/types"
 )
 
-// maps built-in Go identifiers to java
-//var builtinIdentMap = map[string]string{
-//	"println": "System.out.println",
-//	"print":   "System.out.print",
-//}
-
-// Set of Go built-ins
-var builtins = map[string]bool{
-	"append":  true,
-	"cap":     true,
-	"close":   true,
-	"complex": true,
-	"copy":    true,
-	"delete":  true,
-	"false":   true,
-	"imag":    true,
-	"iota":    true,
-	"len":     true,
-	"make":    true,
-	"new":     true,
-	"nil":     true,
-	"panic":   true,
-	"print":   true,
-	"println": true,
-	"real":    true,
-	"recover": true,
-	"true":    true,
-
-	"bool":       true,
-	"byte":       true,
-	"complex128": true,
-	"error":      true,
-	"float32":    true,
-	"float64":    true,
-	"int":        true,
-	"int16":      true,
-	"int32":      true,
-	"int64":      true,
-	"int8":       true,
-	"rune":       true,
-	"string":     true,
-	"uint":       true,
-	"uint16":     true,
-	"uint32":     true,
-	"uint64":     true,
-	"uint8":      true,
-	"uintptr":    true,
-}
-
-// IsBuiltinIdent returns true if id refers to a Go built-in identifer.
-// The resulut is scope-sensitive, as built-ins may be shadowed by
+// IsBuiltinIdent returns true if id refers to a Go built-in identifier.
+// The result is scope-sensitive, as built-ins may be shadowed by
 // other declarations (e.g. len := 7).
-func (w *writer) IsBuiltinIdent(id *ast.Ident) bool {
+func IsBuiltinIdent(id *ast.Ident) bool {
 	obj := ObjectOf(id)
 	return (obj.Parent() == types.Universe) && (builtins[id.Name] == true)
 }
@@ -69,23 +20,13 @@ func (w *writer) IsBuiltinIdent(id *ast.Ident) bool {
 // 	print
 // 	(print)
 // 	...
-func (w *writer) IsBuiltinExpr(e ast.Expr) bool {
+func IsBuiltinExpr(e ast.Expr) bool {
 	e = StripParens(e)
 	// identifier
 	if id, ok := e.(*ast.Ident); ok {
-		return w.IsBuiltinIdent(id)
+		return IsBuiltinIdent(id)
 	}
 	return false
-}
-
-// Strip parens from expression, if any. E.g.:
-// 	((x)) -> x
-func StripParens(e ast.Expr) ast.Expr {
-	if par, ok := e.(*ast.ParenExpr); ok {
-		return StripParens(par.X)
-	} else {
-		return e
-	}
 }
 
 // maps go built-in identifiers to Java
@@ -106,7 +47,6 @@ func (w *writer) PutBuiltinIdent(id *ast.Ident) {
 
 // Generate code for built-in call, like len(x)
 func (w *writer) PutBuiltinCall(c *ast.CallExpr) {
-
 	name := StripParens(c.Fun).(*ast.Ident).Name
 	switch name {
 	default:
@@ -154,10 +94,45 @@ func (w *writer) PutLenExpr(n *ast.CallExpr) {
 	}
 }
 
-func IsBlank(e ast.Expr) bool {
-	e = StripParens(e)
-	if id, ok := e.(*ast.Ident); ok {
-		return id.Name == "_"
-	}
-	return false
+// Set of Go built-ins
+var builtins = map[string]bool{
+	"append":  true,
+	"cap":     true,
+	"close":   true,
+	"complex": true,
+	"copy":    true,
+	"delete":  true,
+	"false":   true,
+	"imag":    true,
+	"iota":    true,
+	"len":     true,
+	"make":    true,
+	"new":     true,
+	"nil":     true,
+	"panic":   true,
+	"print":   true,
+	"println": true,
+	"real":    true,
+	"recover": true,
+	"true":    true,
+
+	"bool":       true,
+	"byte":       true,
+	"complex128": true,
+	"error":      true,
+	"float32":    true,
+	"float64":    true,
+	"int":        true,
+	"int16":      true,
+	"int32":      true,
+	"int64":      true,
+	"int8":       true,
+	"rune":       true,
+	"string":     true,
+	"uint":       true,
+	"uint16":     true,
+	"uint32":     true,
+	"uint64":     true,
+	"uint8":      true,
+	"uintptr":    true,
 }

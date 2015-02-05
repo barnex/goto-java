@@ -69,7 +69,7 @@ func (w *writer) PutResolvedIdent(id *ast.Ident) {
 		w.Put(makeNewName(UNUSED))
 		return
 	}
-	if w.IsBuiltinIdent(id) {
+	if IsBuiltinIdent(id) {
 		w.PutBuiltinIdent(id)
 	} else {
 		w.Put(JavaName(id))
@@ -187,7 +187,7 @@ func (w *writer) PutCallExpr(n *ast.CallExpr) {
 	if n.Ellipsis != 0 {
 		Error(n, "cannot handle ellipsis...")
 	}
-	if w.IsBuiltinExpr(n.Fun) {
+	if IsBuiltinExpr(n.Fun) {
 		w.PutBuiltinCall(n)
 		return
 	}
