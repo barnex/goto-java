@@ -41,15 +41,25 @@ func (w *writer) PutFuncDecl(n *ast.FuncDecl) {
 	}
 }
 
-func JavaReturnTypeOf(resultTypes []ast.Expr) string {
+// Java return type for a function that returns given types.
+// For multiple return types, a Tuple type is returned
+func JavaReturnTypeOf(resultTypes []types.Type) string {
 	switch len(resultTypes) {
 	case 0:
 		return "void"
 	case 1:
-		return JavaType(TypeOf(resultTypes[0]))
+		return JavaType(resultTypes[0])
 	default:
-		panic("multiple returns")
+		return JavaTupleType(resultTypes)
 	}
+}
+
+func JavaTupleType(types []types.Type) string {
+	name := "Tuple"
+	for _, t := range types {
+		name += "_" + t.String() // not java name as we want to discriminate, e.g., int from uint
+	}
+	return name
 }
 
 // Emit code for a top-level function (not method) declaration, e.g.:
@@ -78,7 +88,7 @@ func (w *writer) PutStaticFunc(f *ast.FuncDecl) {
 	w.Put("(")
 	argNames, argTypes := FlattenFields(f.Type.Params)
 	for i := range argNames {
-		w.Put(comma(i), JavaType(TypeOf(argTypes[i])), " ", argNames[i])
+		w.Put(comma(i), JavaType(argTypes[i]), " ", argNames[i])
 	}
 	w.Put(")")
 
@@ -88,8 +98,7 @@ func (w *writer) PutStaticFunc(f *ast.FuncDecl) {
 	// declare named return values, if any
 	for i := range retNames {
 		if retNames[i] != nil {
-			retType := TypeOf(retTypes[i])
-			w.Putln(JavaType(retType), " ", retNames[i], " = ", ZeroValue(retType), ";", "// named return value")
+			w.Putln(JavaType(retTypes[i]), " ", retNames[i], " = ", ZeroValue(retTypes[i]), ";")
 		}
 	}
 

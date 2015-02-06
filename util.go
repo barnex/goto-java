@@ -8,7 +8,7 @@ import (
 
 // FlattenFields turns an ast.FieldList into a list of names and a list of types of the same length. E.g.:
 // 	(a, b int) -> names: [a, b], types: [int, int]
-func FlattenFields(list *ast.FieldList) (names []*ast.Ident, types []ast.Expr) {
+func FlattenFields(list *ast.FieldList) (names []*ast.Ident, types []types.Type) {
 	if list == nil {
 		return
 	}
@@ -16,11 +16,11 @@ func FlattenFields(list *ast.FieldList) (names []*ast.Ident, types []ast.Expr) {
 		if f.Names == nil {
 			// unnamed field
 			names = append(names, nil)
-			types = append(types, f.Type)
+			types = append(types, TypeOf(f.Type))
 		} else {
 			for _, n := range f.Names {
 				names = append(names, n)
-				types = append(types, f.Type)
+				types = append(types, TypeOf(f.Type))
 			}
 		}
 	}

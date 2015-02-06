@@ -174,7 +174,7 @@ func (w *writer) PutIfStmt(i *ast.IfStmt) {
 	}
 }
 
-// Emit a return statement.
+// Emit a return statement. Multiple return values are wrapped in a Tuple.
 // ReturnStmt godoc:
 // 	type ReturnStmt struct {
 // 	        Return  token.Pos // position of "return" keyword
@@ -182,7 +182,7 @@ func (w *writer) PutIfStmt(i *ast.IfStmt) {
 // 	}
 func (w *writer) PutReturnStmt(r *ast.ReturnStmt) {
 	results := r.Results
-	names, _ := FlattenFields(FuncDeclOf(r).Type.Results) // function declaration belonging to this return
+	names, types := FlattenFields(FuncDeclOf(r).Type.Results) // function declaration belonging to this return
 
 	// dress a naked return with its results
 	if len(results) == 0 && len(names) != 0 {
@@ -198,13 +198,12 @@ func (w *writer) PutReturnStmt(r *ast.ReturnStmt) {
 	case 1:
 		w.Put("return ", results[0])
 	default:
-		w.PutMultipleReturn(results)
+		w.Put("return new ", JavaTupleType(types), "(")
+		for i, r := range results {
+			w.Put(comma(i), r)
+		}
+		w.Put(")")
 	}
-
-}
-
-func (w *writer) PutMultipleReturn(results []ast.Expr) {
-	panic("TODO")
 }
 
 // Emit a braced statement list.
