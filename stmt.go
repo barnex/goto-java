@@ -214,11 +214,16 @@ func (w *writer) PutMultipleReturn(results []ast.Expr) {
 // 	        List   []Stmt
 // 	        Rbrace token.Pos // position of "}"
 // 	}
-func (w *writer) PutBlockStmt(n *ast.BlockStmt) {
+func (w *writer) PutBlockStmt(b *ast.BlockStmt) {
 	w.Putln("{")
 	w.indent++
+	w.PutStmtList(b.List)
+	w.indent--
+	w.Put("}")
+}
 
-	for _, n := range n.List {
+func (w *writer) PutStmtList(list []ast.Stmt) {
+	for _, n := range list {
 		w.PutStmt(n)
 		if needSemicolon(n) {
 			w.Putln(";")
@@ -226,9 +231,6 @@ func (w *writer) PutBlockStmt(n *ast.BlockStmt) {
 			w.Putln()
 		}
 	}
-
-	w.indent--
-	w.Put("}")
 }
 
 // does this statement need a terminating semicolon if part of a statement list?

@@ -41,6 +41,17 @@ func (w *writer) PutFuncDecl(n *ast.FuncDecl) {
 	}
 }
 
+func JavaReturnTypeOf(resultTypes []ast.Expr) string {
+	switch len(resultTypes) {
+	case 0:
+		return "void"
+	case 1:
+		return JavaType(TypeOf(resultTypes[0]))
+	default:
+		panic("multiple returns")
+	}
+}
+
 // Emit code for a top-level function (not method) declaration, e.g.:
 // 	func f(a, b int) { ... }
 func (w *writer) PutStaticFunc(f *ast.FuncDecl) {
@@ -52,31 +63,40 @@ func (w *writer) PutStaticFunc(f *ast.FuncDecl) {
 		return
 	}
 
+	// modifier
 	mod := STATIC
 	if ast.IsExported(f.Name.Name) {
 		mod |= PUBLIC
 	}
+	w.Put(mod, " ")
 
-	ret := "void"
-	if f.Type.Results != nil && len(f.Type.Results.List) == 1 {
-		ret = JavaType(TypeOf(f.Type.Results.List[0].Type)) // todo: multiple names, wtf?
+	// return type
+	retNames, retTypes := FlattenFields(f.Type.Results)
+	w.Put(JavaReturnTypeOf(retTypes), " ", f.Name)
+
+	// arguments
+	w.Put("(")
+	argNames, argTypes := FlattenFields(f.Type.Params)
+	for i := range argNames {
+		w.Put(comma(i), JavaType(TypeOf(argTypes[i])), " ", argNames[i])
 	}
-	if f.Type.Results != nil && len(f.Type.Results.List) > 1 {
-		Error(f, "no muliple return values supported")
-	}
+	w.Put(")")
 
-	w.Put(mod, " ", ret, " ", (f.Name), "(")
+	w.Putln("{")
+	w.indent++
 
-	i := 0
-	for _, a := range f.Type.Params.List {
-		for _, name := range a.Names {
-			w.Put(comma(i), JavaType(TypeOf(name)), " ", name)
-			i++
+	// declare named return values, if any
+	for i := range retNames {
+		if retNames[i] != nil {
+			retType := TypeOf(retTypes[i])
+			w.Putln(JavaType(retType), " ", retNames[i], " = ", ZeroValue(retType), ";", "// named return value")
 		}
 	}
 
-	w.Put(")")
-	w.Putln(f.Body)
+	w.PutStmtList(f.Body.List)
+
+	w.indent--
+	w.Putln("}")
 }
 
 // Emit the main function. Special case in PutStaticFunc.

@@ -13,11 +13,18 @@ func FlattenFields(list *ast.FieldList) (names []*ast.Ident, types []ast.Expr) {
 		return
 	}
 	for _, f := range list.List {
-		for _, n := range f.Names {
-			names = append(names, n)
+		if f.Names == nil {
+			// unnamed field
+			names = append(names, nil)
 			types = append(types, f.Type)
+		} else {
+			for _, n := range f.Names {
+				names = append(names, n)
+				types = append(types, f.Type)
+			}
 		}
 	}
+	assert(len(names) == len(types))
 	return
 }
 
@@ -79,5 +86,11 @@ func nnil(x interface{}) interface{} {
 		return ""
 	} else {
 		return x
+	}
+}
+
+func assert(test bool) {
+	if !test {
+		panic("assertion failed")
 	}
 }
