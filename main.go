@@ -23,6 +23,8 @@ var (
 	flagRenameAll   = flag.Bool("renameall", false, "Rename all variables (debug)")
 )
 
+// TODO: global package, use for class gen unless overridden.
+
 var (
 	fset    *token.FileSet
 	info    types.Info

@@ -29,7 +29,8 @@ func JavaTupleType(types []types.Type) string {
 	return name
 }
 
-//
+// TODO: JClass { name, implements, members, ... } -> render
+
 func GenTupleDef(name string, types []types.Type) {
 	classGen[name] = true
 
