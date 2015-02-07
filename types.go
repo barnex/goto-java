@@ -56,10 +56,24 @@ func (w *writer) PutImplicitCast(dst types.Type, e ast.Expr) {
 	w.PutExpr(e)
 }
 
+// JavaType returns the java type used to store the given go type. E.g.:
+// 	bool   -> boolean
+// 	uint32 -> int
 func JavaType(goType types.Type) string {
 	if j, ok := typeToJava[goType.Underlying().String()]; ok {
 		return j
 	} else {
 		panic("cannot convert type to java: " + goType.String())
 	}
+}
+
+
+// JavaTupleType returns the java type used to wrap a tuple of go types for multiple return values. E.g.:
+// 	return 1, 2 -> return new Tuple_int_int(1, 2)
+func JavaTupleType(types []types.Type) string {
+	name := "Tuple"
+	for _, t := range types {
+		name += "_" + t.String() // not java name as we want to discriminate, e.g., int from uint
+	}
+	return name
 }

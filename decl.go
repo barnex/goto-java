@@ -54,13 +54,6 @@ func JavaReturnTypeOf(resultTypes []types.Type) string {
 	}
 }
 
-func JavaTupleType(types []types.Type) string {
-	name := "Tuple"
-	for _, t := range types {
-		name += "_" + t.String() // not java name as we want to discriminate, e.g., int from uint
-	}
-	return name
-}
 
 // Emit code for a top-level function (not method) declaration, e.g.:
 // 	func f(a, b int) { ... }
