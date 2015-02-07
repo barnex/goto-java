@@ -54,7 +54,6 @@ func JavaReturnTypeOf(resultTypes []types.Type) string {
 	}
 }
 
-
 // Emit code for a top-level function (not method) declaration, e.g.:
 // 	func f(a, b int) { ... }
 func (w *writer) PutStaticFunc(f *ast.FuncDecl) {

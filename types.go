@@ -4,7 +4,6 @@ package main
 
 import (
 	"go/ast"
-	"log"
 
 	"golang.org/x/tools/go/types"
 )
@@ -44,9 +43,8 @@ func (w *writer) PutTypecast(goType string, e ast.Expr) {
 func (w *writer) PutImplicitCast(dst types.Type, e ast.Expr) {
 
 	dst = dst.Underlying()
-	src := TypeOf(e).Underlying()
-
-	log.Println(src, "->", dst)
+	//src := TypeOf(e).Underlying()
+	//log.Println(src, "->", dst)
 
 	if dst.String() == "interface{}" {
 		w.PutEmptyInterfaceCast(e)
@@ -65,15 +63,4 @@ func JavaType(goType types.Type) string {
 	} else {
 		panic("cannot convert type to java: " + goType.String())
 	}
-}
-
-
-// JavaTupleType returns the java type used to wrap a tuple of go types for multiple return values. E.g.:
-// 	return 1, 2 -> return new Tuple_int_int(1, 2)
-func JavaTupleType(types []types.Type) string {
-	name := "Tuple"
-	for _, t := range types {
-		name += "_" + t.String() // not java name as we want to discriminate, e.g., int from uint
-	}
-	return name
 }
