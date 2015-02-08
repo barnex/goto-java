@@ -37,7 +37,7 @@ func (w *writer) PutFuncDecl(n *ast.FuncDecl) {
 	if n.Recv == nil {
 		w.PutStaticFunc(n)
 	} else {
-		w.PutMethod(n)
+		RecordMethodDecl(n)
 	}
 }
 
@@ -107,12 +107,6 @@ func (w *writer) PutMainDecl(n *ast.FuncDecl) {
 	w.Putln()
 }
 
-// Emit code for a method declaration, e.g.:
-// 	func (x *T) f() { ... }
-func (w *writer) PutMethod(n *ast.FuncDecl) {
-	panic("todo: method")
-}
-
 // Emit a generic declaration (import, constant, type or variable)
 // with optional modifier
 // godoc:
@@ -122,7 +116,7 @@ func (w *writer) PutMethod(n *ast.FuncDecl) {
 // 	    Tok    token.Token   // IMPORT, CONST, TYPE, VAR
 // 	    Lparen token.Pos     // position of '(', if any
 // 	    Specs  []Spec
-// 	    Rparen token.Pos // position of ')', if any
+// 	    Rparen token.Pos     // position of ')', if any
 // 	}
 // A GenDecl node (generic declaration node) represents an import,
 // constant, type or variable declaration. A valid Lparen position
@@ -141,6 +135,9 @@ func (w *writer) PutGenDecl(mod JModifier, d *ast.GenDecl) {
 		Error(d, "cannot handle "+d.Tok.String())
 	case token.CONST:
 		w.PutValueSpecs(mod|FINAL, d.Specs)
+	case token.TYPE:
+		assert(len(d.Specs) == 1)
+		RecordTypeSpec(d.Specs[0].(*ast.TypeSpec))
 	case token.VAR:
 		w.PutValueSpecs(mod, d.Specs)
 	}
