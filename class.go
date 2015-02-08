@@ -84,10 +84,27 @@ func (w *writer) PutTypeDef(name string, c *TypeDef) {
 	switch typ := c.typeSpec.Type.(type) {
 	default:
 		Error(typ, "cannot handle", reflect.TypeOf(typ))
+	case *ast.StructType:
+		w.PutStructDef(typ)
 	}
 
 	w.indent--
 	w.Putln("}")
+}
+
+// 	type StructType struct {
+// 	        Struct     token.Pos  // position of "struct" keyword
+// 	        Fields     *FieldList // list of field declarations
+// 	        Incomplete bool       // true if (source) fields are missing in the Fields list
+// 	}
+func (w *writer) PutStructDef(c *ast.StructType) {
+	for _, f := range c.Fields.List {
+		w.Put(JavaType(TypeOf(f.Type)), " ")
+		for i, n := range f.Names {
+			w.Put(comma(i), n)
+		}
+		w.Putln(";")
+	}
 }
 
 func ClassNameFor(typ ast.Expr) string {

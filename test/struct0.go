@@ -1,5 +1,7 @@
 package main
 
+//var a Test
+
 type Test struct {
 	Public  int
 	private int
