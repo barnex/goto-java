@@ -1,13 +1,11 @@
 package main
 
 import (
-	"bufio"
 	"flag"
 	"go/ast"
 	"go/parser"
 	"go/token"
 	"log"
-	"os"
 	"path"
 
 	"golang.org/x/tools/go/types"
@@ -82,15 +80,12 @@ func handleFile(fname string) {
 	CollectIdents(f) // see rename.go
 	CollectParents(f)
 
-	//// prepare outPut file
-	outFile := fname[:len(fname)-len(path.Ext(fname))]
-	out_, errOut := os.Create(outFile + ".java")
-	checkUserErr(errOut)
-	defer out_.Close()
-	out := bufio.NewWriter(out_)
-	defer out.Flush()
+	// transpile primary class
+	className := fname[:len(fname)-len(path.Ext(fname))]
+	w := NewWriter(className + ".java")
+	defer w.Close()
+	w.PutClass(className, f)
 
-	// transpile
-	w := &writer{out: out}
-	w.PutClass(outFile, f)
+	// generate additional classes from type/method definitions encountered along the way
+	GenClasses()
 }

@@ -1,22 +1,35 @@
 package main
 
 import (
+	"bufio"
 	"fmt"
 	"go/ast"
 	"go/token"
 	"io"
+	"os"
 	"reflect"
 )
 
 // A writer takes AST nodes and outPuts java source
 type writer struct {
-	out        io.Writer
+	out        *bufio.Writer
+	f          io.WriteCloser
 	indent     int
 	needIndent bool
 }
 
-func NewWriter(out io.Writer) *writer {
-	return &writer{out: out}
+func NewWriter(fname string) *writer {
+	f, err := os.Create(fname)
+	checkUserErr(err)
+	out := bufio.NewWriter(f)
+	return &writer{out: out, f: f}
+}
+
+func (w *writer) Close() {
+	err := w.out.Flush()
+	checkUserErr(err)
+	err = w.f.Close()
+	checkUserErr(err)
 }
 
 // Outputs a class with given name based on go file.

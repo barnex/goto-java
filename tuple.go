@@ -3,9 +3,7 @@ package main
 // Tuples wrap multiple return values in a java class.
 
 import (
-	"bufio"
 	"fmt"
-	"os"
 
 	"golang.org/x/tools/go/types"
 )
@@ -29,17 +27,12 @@ func JavaTupleType(types []types.Type) string {
 	return name
 }
 
-// TODO: JClass { name, implements, members, ... } -> render
-
+// TODO class{implements, members, ...}.render
 func GenTupleDef(name string, types []types.Type) {
 	classGen[name] = true
 
-	f, err := os.Create(name + ".java")
-	checkUserErr(err)
-	defer f.Close()
-	out := bufio.NewWriter(f)
-	defer out.Flush()
-	w := NewWriter(out)
+	w := NewWriter(name + ".java")
+	defer w.Close()
 
 	w.Putln("public final class ", name, "{\n")
 	w.indent++

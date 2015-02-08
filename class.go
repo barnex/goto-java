@@ -14,7 +14,7 @@ var (
 )
 
 type TypeDef struct {
-	typeSpec   ast.Expr
+	typeSpec   *ast.TypeSpec
 	valMethods []*ast.FuncDecl
 	ptrMethods []*ast.FuncDecl
 }
@@ -30,7 +30,7 @@ type TypeDef struct {
 func RecordTypeSpec(s *ast.TypeSpec) {
 	cls := classOf(s.Name)
 	assert(cls.typeSpec == nil)
-	cls.typeSpec = s.Type
+	cls.typeSpec = s
 }
 
 // RecordMethodDecl adds a method declaration to the corresponding class's method set (in global classes variable).
@@ -65,6 +65,39 @@ func RecordMethodDecl(s *ast.FuncDecl) {
 	}
 
 	Error(s, "invalid receiver: "+reflect.TypeOf(recvTyp).String())
+}
+
+// generate code for all defs in global classes variable
+func GenClasses() {
+	for _, c := range classes {
+		name := ClassNameFor(c.typeSpec.Name)
+		w := NewWriter(name + ".java")
+		w.PutTypeDef(name, c)
+		w.Close()
+	}
+}
+
+func (w *writer) PutTypeDef(name string, c *TypeDef) {
+	w.Putln("public final class ", name, "{")
+	w.indent++
+
+	switch typ := c.typeSpec.Type.(type) {
+	default:
+		Error(typ, "cannot handle", reflect.TypeOf(typ))
+	}
+
+	w.indent--
+	w.Putln("}")
+}
+
+func ClassNameFor(typ ast.Expr) string {
+	switch typ := typ.(type) {
+	default:
+		Error(typ, "cannot handle", reflect.TypeOf(typ))
+		panic("")
+	case *ast.Ident:
+		return typ.Name // TODO: rename
+	}
 }
 
 func classOf(typeId *ast.Ident) *TypeDef {
