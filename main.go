@@ -22,7 +22,7 @@ func main() {
 	UNUSED = *flagBlank
 
 	for _, f := range flag.Args() {
-		handleFile(f)
+		HandleFile(f)
 	}
 
 }

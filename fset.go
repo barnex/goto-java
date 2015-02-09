@@ -13,11 +13,11 @@ import (
 var (
 	fset     *token.FileSet        // accessed through PosOf
 	info     types.Info            // accessed through TypeOf, ObjectOf, ExactValue
-	parents  map[ast.Node]ast.Node // accessed through ParentOf
+	parent   map[ast.Node]ast.Node // accessed through ParentOf
 	typedefs map[types.Object]*TypeDef
 )
 
-func handleFile(fname string) {
+func HandleFile(fname string) {
 	var f *ast.File
 	fset, f = ParseFile(fname)
 
@@ -29,7 +29,7 @@ func handleFile(fname string) {
 	}
 
 	// first passes collect parents and declarations
-	parents = CollectParents(f)
+	parent = CollectParents(f)
 	//typedefs = CollectDefs(f)
 	idents[UNUSED] = idents[UNUSED] // make sure it's in the map for makeNewName(UNUSED) to work.
 
@@ -92,7 +92,7 @@ func TypeOf(n ast.Expr) types.Type {
 // ParentOf returns the parent node of n.
 // Precondition: CollectParents has been called on the tree containing n.
 func ParentOf(n ast.Node) ast.Node {
-	if p, ok := parents[n]; ok {
+	if p, ok := parent[n]; ok {
 		return p
 	} else {
 		panic(PosOf(n).String() + ": no parent")

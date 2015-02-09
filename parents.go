@@ -1,8 +1,6 @@
 package main
 
-// Walk the ast and:
-//  map nodes to their parent
-//  collect identifiers, class definitions.
+// Walk the ast and map nodes to their parent
 
 import (
 	"fmt"
@@ -13,35 +11,36 @@ import (
 // mapping each node to its parent.
 func CollectParents(n Node) map[Node]Node {
 	parents := make(map[Node]Node)
-	walk(&visitor{}, n)
+	walk(&parentCollector{parents: parents}, n)
 	return parents
 }
 
-type visitor struct {
-	stack []Node // stack of parent nodes
+// Visitor that collects parents
+type parentCollector struct {
+	parents map[Node]Node
+	stack   []Node // stack of parent nodes
 }
 
-func (v *visitor) push(n Node) { v.stack = append(v.stack, n) }
-func (v *visitor) pop()        { v.stack = v.stack[:len(v.stack)-1] }
+func (v *parentCollector) push(n Node) { v.stack = append(v.stack, n) }
+func (v *parentCollector) pop()        { v.stack = v.stack[:len(v.stack)-1] }
 
-// this ast visitor enters n into the global parents map,
+// this ast visitor enters n into its parents map,
 // mapping it to its parent obtained from the visitor's stack
-func (v *visitor) Visit(n Node) *visitor {
+func (v *parentCollector) Visit(n Node) *parentCollector {
 	if n == nil {
 		return v
 	}
-
 	var parent Node = nil
 	if len(v.stack) > 0 {
 		parent = v.stack[len(v.stack)-1]
 	}
-	parents[n] = parent
+	v.parents[n] = parent
 	return v
 }
 
 // Copied from go/ast/walk.go, copyright The Go Authors.
 // Modified to call v.push(node)/v.pop() so that v keeps a parent stack.
-func walk(v *visitor, node Node) {
+func walk(v *parentCollector, node Node) {
 	if v = v.Visit(node); v == nil {
 		return
 	}
@@ -364,25 +363,25 @@ func walk(v *visitor, node Node) {
 	v.Visit(nil)
 }
 
-func walkIdentList(v *visitor, list []*Ident) {
+func walkIdentList(v *parentCollector, list []*Ident) {
 	for _, x := range list {
 		walk(v, x)
 	}
 }
 
-func walkExprList(v *visitor, list []Expr) {
+func walkExprList(v *parentCollector, list []Expr) {
 	for _, x := range list {
 		walk(v, x)
 	}
 }
 
-func walkStmtList(v *visitor, list []Stmt) {
+func walkStmtList(v *parentCollector, list []Stmt) {
 	for _, x := range list {
 		walk(v, x)
 	}
 }
 
-func walkDeclList(v *visitor, list []Decl) {
+func walkDeclList(v *parentCollector, list []Decl) {
 	for _, x := range list {
 		walk(v, x)
 	}
