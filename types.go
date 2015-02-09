@@ -8,6 +8,62 @@ import (
 	"golang.org/x/tools/go/types"
 )
 
+func JavaTypeOf(typeExpr ast.Expr) string {
+	return javaTypeOf(TypeOf(typeExpr))
+}
+
+func javaTypeOf(t types.Type) string {
+	switch t := t.(type) {
+	default:
+		panic("cannot handle type " + t.String())
+	}
+}
+
+func (w *writer) PutTypeExpr(typ ast.Expr) {
+	w.Put(JavaTypeOf(typ))
+}
+
+// explicit type cast in input file, e.g.:
+// 	a := int(b)
+func (w *writer) PutTypecast(goType types.Type, e ast.Expr) {
+	//Error(e, "TODO: typecast")
+
+	w.PutImplicitCast(goType, e)
+
+	//jType, ok := typeToJava[goType]
+	//if !ok {
+	//	Error(e, "cannot convert to java:", goType)
+	//}
+	//w.Put("(", jType, ")(", e, ")")
+}
+
+// implicit type cast from untyped to type, e.g.:
+// 	f(1)
+func (w *writer) PutImplicitCast(dst types.Type, e ast.Expr) {
+	//Error(e, "TODO: typecast")
+	//dst = dst.Underlying()
+	//src := TypeOf(e).Underlying()
+	//log.Println(src, "->", dst)
+
+	//if dst.String() == "interface{}" {
+	//	w.PutEmptyInterfaceCast(e)
+	//	return
+	//}
+
+	w.PutExpr(e)
+}
+
+// JavaType returns the java type used to store the given go type. E.g.:
+// 	bool   -> boolean
+// 	uint32 -> int
+//func JavaType(goType types.Type) string {
+//	if j, ok := typeToJava[goType.Underlying().String()]; ok {
+//		return j
+//	} else {
+//		panic("cannot convert type to java: " + goType.String())
+//	}
+//}
+
 // maps Go primitives to java
 var typeToJava = map[string]string{
 	"bool":        "boolean",
@@ -26,41 +82,4 @@ var typeToJava = map[string]string{
 	"uint32":      "int",    //?
 	"uint64":      "long",   //?
 	"uint8":       "byte",   //?
-}
-
-// explicit type cast in input file, e.g.:
-// 	a := int(b)
-func (w *writer) PutTypecast(goType string, e ast.Expr) {
-	jType, ok := typeToJava[goType]
-	if !ok {
-		Error(e, "cannot convert to java:", goType)
-	}
-	w.Put("(", jType, ")(", e, ")")
-}
-
-// implicit type cast from untyped to type, e.g.:
-// 	f(1)
-func (w *writer) PutImplicitCast(dst types.Type, e ast.Expr) {
-
-	dst = dst.Underlying()
-	//src := TypeOf(e).Underlying()
-	//log.Println(src, "->", dst)
-
-	if dst.String() == "interface{}" {
-		w.PutEmptyInterfaceCast(e)
-		return
-	}
-
-	w.PutExpr(e)
-}
-
-// JavaType returns the java type used to store the given go type. E.g.:
-// 	bool   -> boolean
-// 	uint32 -> int
-func JavaType(goType types.Type) string {
-	if j, ok := typeToJava[goType.Underlying().String()]; ok {
-		return j
-	} else {
-		panic("cannot convert type to java: " + goType.String())
-	}
 }

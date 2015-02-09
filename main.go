@@ -77,8 +77,9 @@ func handleFile(fname string) {
 		ast.Print(fset, f)
 	}
 
-	CollectIdents(f) // see rename.go
-	CollectParents(f)
+	// first pass collects all declarations
+	CollectDefs(f)
+	idents[UNUSED] = idents[UNUSED] // make sure it's in the map for makeNewName(UNUSED) to work.
 
 	// transpile primary class
 	className := fname[:len(fname)-len(path.Ext(fname))]

@@ -28,6 +28,27 @@ func FlattenFields(list *ast.FieldList) (names []*ast.Ident, types []types.Type)
 	return
 }
 
+// ParentOf returns the parent node of n.
+// Precondition: CollectParents has been called on the tree containing n.
+func ParentOf(n ast.Node) ast.Node {
+	if p, ok := parents[n]; ok {
+		return p
+	} else {
+		panic(PosOf(n).String() + ": no parent")
+	}
+}
+
+// Return the first a ancestor of n that is an ast.FuncDecl.
+// Used by return statements to find the function declaration they return from.
+func FuncDeclOf(n ast.Node) *ast.FuncDecl {
+	for p := ParentOf(n); p != nil; p = ParentOf(p) {
+		if f, ok := p.(*ast.FuncDecl); ok {
+			return f
+		}
+	}
+	panic(PosOf(n).String() + ": no FuncDecl parent for node")
+}
+
 // ObjectOf returns the object denoted by the specified identifier.
 func ObjectOf(id *ast.Ident) types.Object {
 	obj := info.ObjectOf(id)

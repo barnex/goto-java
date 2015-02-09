@@ -99,7 +99,8 @@ func (w *writer) PutTypeDef(name string, c *TypeDef) {
 // 	}
 func (w *writer) PutStructDef(c *ast.StructType) {
 	for _, f := range c.Fields.List {
-		w.Put(JavaType(TypeOf(f.Type)), " ")
+		w.PutTypeExpr(f.Type)
+		w.Put(" ")
 		for i, n := range f.Names {
 			w.Put(comma(i), n)
 		}

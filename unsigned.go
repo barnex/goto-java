@@ -16,8 +16,8 @@ func IsUnsigned(t types.Type) bool {
 }
 
 func (w *writer) PutUnsignedOp(x ast.Expr, op token.Token, y ast.Expr) {
-	typX := JavaType(TypeOf(x))
-	typY := JavaType(TypeOf(y))
+	typX := JavaTypeOf(x)
+	typY := JavaTypeOf(y)
 
 	if typX != typY {
 		Error(x, "mismatched types", typX, "and", typY)

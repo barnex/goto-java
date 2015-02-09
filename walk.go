@@ -1,6 +1,8 @@
 package main
 
-// Walk the ast and map nodes to their parent
+// Walk the ast and:
+//  map nodes to their parent
+//  collect identifiers, class definitions.
 
 import (
 	"fmt"
@@ -9,30 +11,9 @@ import (
 
 // Walk the ast rooted at n and populate the global parents map,
 // mapping each node to its parent.
-func CollectParents(n Node) {
+func CollectDefs(n Node) {
 	parents = make(map[Node]Node)
 	walk(&visitor{}, n)
-}
-
-// ParentOf returns the parent node of n.
-// Precondition: CollectParents has been called on the tree containing n.
-func ParentOf(n Node) Node {
-	if p, ok := parents[n]; ok {
-		return p
-	} else {
-		panic(PosOf(n).String() + ": no parent")
-	}
-}
-
-// Return the first a ancestor of n that is an ast.FuncDecl.
-// Used by return statements to find the function declaration they return from.
-func FuncDeclOf(n Node) *FuncDecl {
-	for p := ParentOf(n); p != nil; p = ParentOf(p) {
-		if f, ok := p.(*FuncDecl); ok {
-			return f
-		}
-	}
-	panic(PosOf(n).String() + ": no FuncDecl parent for node")
 }
 
 type visitor struct {
@@ -48,6 +29,9 @@ func (v *visitor) Visit(n Node) *visitor {
 	if n == nil {
 		return v
 	}
+
+	CollectIdent(n)
+
 	var parent Node = nil
 	if len(v.stack) > 0 {
 		parent = v.stack[len(v.stack)-1]

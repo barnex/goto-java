@@ -3,8 +3,8 @@ package main
 //var a Test
 
 type Test struct {
-	Public  int
-	private int
+	//Public  int
+	//private int
 }
 
 func (t Test) Method1() {

@@ -14,7 +14,7 @@ import (
 
 var (
 	renamed = map[types.Object]string{} // maps some objects (typ. identifiers) to a new name for java.
-	idents  map[string]int              // holds all identifier names and a counter to create a new, non-conflicting name if needed.
+	idents  = make(map[string]int)      // holds all identifier names and a counter to create a new, non-conflicting name if needed.
 	UNUSED  string                      // base name for translating the blank identifier (flag -blank)
 )
 
@@ -22,15 +22,12 @@ var (
 // Used to ensure identifier renaming returns an unused name.
 // In principle new names only need to be unique in their scope,
 // but we make them globally unique to avoid potential scope subtleties.
-func CollectIdents(n ast.Node) {
-	idents = make(map[string]int)   // init here ensures CollectIdents has been called
-	idents[UNUSED] = idents[UNUSED] // make sure it's in the map for makeNewName(UNUSED) to work.
-	ast.Inspect(n, func(n ast.Node) bool {
-		if id, ok := n.(*ast.Ident); ok {
-			idents[id.Name] = 0
-		}
-		return true
-	})
+func CollectIdent(n ast.Node) {
+	idents = make(map[string]int) // init here ensures CollectIdents has been called
+
+	if id, ok := n.(*ast.Ident); ok {
+		idents[id.Name] = 0
+	}
 }
 
 // Translate an identifier to its java name.

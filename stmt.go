@@ -298,7 +298,7 @@ func (w *writer) PutAssignStmt(n *ast.AssignStmt) {
 		// blank identifer: need to put type. E.g.:
 		// 	int _4 = f(x);
 		if IsBlank(lhs) {
-			w.Put(JavaType(TypeOf(n.Rhs[i])), " ")
+			w.Put(JavaTypeOf(n.Rhs[i]), " ")
 			lhs = StripParens(lhs) // border case, go allows "(_) = x"
 		}
 		w.Put(lhs, " ", n.Tok, " ")

@@ -55,11 +55,11 @@ func (w *writer) PutBuiltinCall(c *ast.CallExpr) {
 		w.PutLenExpr(c)
 	case "print", "println":
 		w.PutBuiltinPrintCall(c)
-	case "byte", "uint8", "int8", "uint16", "int16", "uint32", "int32", "uint", "int", "uint64", "int64":
-		if len(c.Args) != 1 {
-			Error(c, "too many arguments to conversion to", name)
-		}
-		w.PutTypecast(name, c.Args[0])
+		//case "byte", "uint8", "int8", "uint16", "int16", "uint32", "int32", "uint", "int", "uint64", "int64":
+		//	if len(c.Args) != 1 {
+		//		Error(c, "too many arguments to conversion to", name)
+		//	}
+		//	w.PutTypecast(name, c.Args[0])
 	}
 }
 
@@ -83,7 +83,7 @@ func (w *writer) PutLenExpr(n *ast.CallExpr) {
 	if len(n.Args) != 1 {
 		Error(n, "too many arguments to len")
 	}
-	argT := JavaType(TypeOf(n.Args[0]))
+	argT := JavaTypeOf(n.Args[0])
 	switch argT {
 	default:
 		Error(n, "invalid argument (type ", argT, ") for len")
