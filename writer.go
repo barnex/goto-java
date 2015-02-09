@@ -117,11 +117,6 @@ func Error(n ast.Node, msg ...interface{}) {
 	panic(fmt.Sprint(append([]interface{}{PosOf(n), ": "}, msg...)...))
 }
 
-// return position of node using this writer's fileset
-func PosOf(n ast.Node) token.Position {
-	return fset.Position(n.Pos())
-}
-
 // prints parentisized argument list: "(elem[0], elem[1], ...)"
 //func parens(elem ...interface{}) string {
 //	str := "("

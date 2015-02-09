@@ -11,9 +11,10 @@ import (
 
 // Walk the ast rooted at n and populate the global parents map,
 // mapping each node to its parent.
-func CollectDefs(n Node) {
-	parents = make(map[Node]Node)
+func CollectParents(n Node) map[Node]Node {
+	parents := make(map[Node]Node)
 	walk(&visitor{}, n)
+	return parents
 }
 
 type visitor struct {
@@ -29,8 +30,6 @@ func (v *visitor) Visit(n Node) *visitor {
 	if n == nil {
 		return v
 	}
-
-	CollectIdent(n)
 
 	var parent Node = nil
 	if len(v.stack) > 0 {

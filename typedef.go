@@ -5,12 +5,6 @@ package main
 import (
 	"go/ast"
 	"reflect"
-
-	"golang.org/x/tools/go/types"
-)
-
-var (
-	classes = make(map[types.Object]*TypeDef)
 )
 
 type TypeDef struct {
@@ -69,7 +63,7 @@ func RecordMethodDecl(s *ast.FuncDecl) {
 
 // generate code for all defs in global classes variable
 func GenClasses() {
-	for _, c := range classes {
+	for _, c := range typedefs {
 		name := ClassNameFor(c.typeSpec.Name)
 		w := NewWriter(name + ".java")
 		w.PutTypeDef(name, c)
@@ -120,11 +114,11 @@ func ClassNameFor(typ ast.Expr) string {
 
 func classOf(typeId *ast.Ident) *TypeDef {
 	cls := ObjectOf(typeId)
-	if def, ok := classes[cls]; ok {
+	if def, ok := typedefs[cls]; ok {
 		return def
 	} else {
 		def := new(TypeDef)
-		classes[cls] = def
+		typedefs[cls] = def
 		return def
 	}
 }
