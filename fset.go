@@ -32,8 +32,9 @@ func HandleFile(fname string) {
 
 	// first passes collect parents and declarations
 	parent = CollectParents(f)
+	// TODO: collect idents
 	//typedefs = CollectDefs(f)
-	idents[UNUSED] = idents[UNUSED] // make sure it's in the map for makeNewName(UNUSED) to work.
+	//idents[UNUSED] = idents[UNUSED] // make sure it's in the map for makeNewName(UNUSED) to work.
 
 	// transpile primary class
 	className := fname[:len(fname)-len(path.Ext(fname))]
