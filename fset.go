@@ -11,9 +11,11 @@ import (
 
 // TODO: global package, use for class gen unless overridden.
 var (
-	fset     *token.FileSet        // accessed through PosOf
-	info     types.Info            // accessed through TypeOf, ObjectOf, ExactValue
-	parent   map[ast.Node]ast.Node // accessed through ParentOf
+	fset     *token.FileSet              // accessed through PosOf
+	info     types.Info                  // accessed through TypeOf, ObjectOf, ExactValue
+	parent   map[ast.Node]ast.Node       // accessed through ParentOf
+	idents   = make(map[string]int)      // holds all identifier names and a counter to create a new, non-conflicting name if needed.
+	renamed  = map[types.Object]string{} // maps some objects (typ. identifiers) to a new name for java.
 	typedefs map[types.Object]*TypeDef
 )
 

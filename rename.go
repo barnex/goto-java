@@ -8,14 +8,6 @@ import (
 	"fmt"
 	"go/ast"
 	"log"
-
-	"golang.org/x/tools/go/types"
-)
-
-var (
-	renamed = map[types.Object]string{} // maps some objects (typ. identifiers) to a new name for java.
-	idents  = make(map[string]int)      // holds all identifier names and a counter to create a new, non-conflicting name if needed.
-	UNUSED  string                      // base name for translating the blank identifier (flag -blank)
 )
 
 // Collect the names of all identifiers in the AST and store in idents.

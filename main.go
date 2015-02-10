@@ -13,6 +13,7 @@ var (
 	flagParens      = flag.Bool("parens", false, "Emit superfluous parens")
 	flagPrint       = flag.Bool("print", false, "Print ast")
 	flagRenameAll   = flag.Bool("renameall", false, "Rename all variables (debug)")
+	UNUSED          string // base name for translating the blank identifier (flag -blank)
 )
 
 func main() {
