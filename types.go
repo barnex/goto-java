@@ -12,10 +12,23 @@ func JavaTypeOf(typeExpr ast.Expr) string {
 	return javaTypeOf(TypeOf(typeExpr))
 }
 
+// Array, Basic, Chan, Signature, Interface, Map, Named, Pointer, Slice, Struct, Tuple
 func javaTypeOf(t types.Type) string {
+
 	switch t := t.(type) {
 	default:
 		panic("cannot handle type " + t.String())
+	case *types.Basic:
+		return javaBasicType(t)
+	}
+	panic("")
+}
+
+func javaBasicType(t *types.Basic) string {
+	if transl, ok := javaBasic[t.String()]; ok {
+		return transl
+	} else {
+		panic("cannot handle basic type " + t.String())
 	}
 }
 
@@ -65,21 +78,20 @@ func (w *writer) PutImplicitCast(dst types.Type, e ast.Expr) {
 //}
 
 // maps Go primitives to java
-var typeToJava = map[string]string{
-	"bool":        "boolean",
-	"byte":        "byte",
-	"float32":     "float",
-	"float64":     "double",
-	"int":         "int", //?
-	"int16":       "short",
-	"int32":       "int",
-	"int64":       "long",
-	"int8":        "byte",
-	"interface{}": "Object",
-	"string":      "String", //?
-	"uint":        "int",    //?
-	"uint16":      "short",  //?
-	"uint32":      "int",    //?
-	"uint64":      "long",   //?
-	"uint8":       "byte",   //?
+var javaBasic = map[string]string{
+	"bool":    "boolean",
+	"byte":    "byte",
+	"float32": "float",
+	"float64": "double",
+	"int":     "int",
+	"int16":   "short",
+	"int32":   "int",
+	"int64":   "long",
+	"int8":    "byte",
+	"string":  "String",
+	"uint":    "int",
+	"uint16":  "short",
+	"uint32":  "int",
+	"uint64":  "long",
+	"uint8":   "byte",
 }
