@@ -11,30 +11,31 @@ import (
 
 // TODO: global package, use for class gen unless overridden.
 var (
-	fset     *token.FileSet              // accessed through PosOf
-	info     types.Info                  // accessed through TypeOf, ObjectOf, ExactValue
-	parent   map[ast.Node]ast.Node       // accessed through ParentOf
-	idents   = make(map[string]int)      // holds all identifier names and a counter to create a new, non-conflicting name if needed.
-	renamed  = map[types.Object]string{} // maps some objects (typ. identifiers) to a new name for java.
+	fset     *token.FileSet          // accessed through PosOf
+	info     types.Info              // accessed through TypeOf, ObjectOf, ExactValue
+	parent   map[ast.Node]ast.Node   // accessed through ParentOf
+	idents   map[string]int          // holds all identifier names and a counter to create a new, non-conflicting name if needed.
+	rename   map[types.Object]string // maps some objects (typ. identifiers) to a new name for java.
 	typedefs map[types.Object]*TypeDef
 )
 
 func HandleFile(fname string) {
+
+	// (1) Parse
 	var f *ast.File
 	fset, f = ParseFile(fname)
-
-	info = TypeCheck(fname, fset, f)
-
-	// print ast if requested
 	if *flagPrint {
 		ast.Print(fset, f)
 	}
 
-	// first passes collect parents and declarations
+	// (2) Determine types
+	info = TypeCheck(fname, fset, f)
+
+	// (3) Pre-processing: collect parents and declarations
 	parent = CollectParents(f)
-	// TODO: collect idents
+	idents = CollectIdents(f)
+	rename = RenameReservedIdents(f)
 	//typedefs = CollectDefs(f)
-	//idents[UNUSED] = idents[UNUSED] // make sure it's in the map for makeNewName(UNUSED) to work.
 
 	// transpile primary class
 	className := fname[:len(fname)-len(path.Ext(fname))]
@@ -77,11 +78,15 @@ func PosOf(n ast.Node) token.Position {
 
 // ObjectOf returns the object denoted by the specified identifier.
 func ObjectOf(id *ast.Ident) types.Object {
-	obj := info.ObjectOf(id)
+	obj := objectOf(id)
 	if obj == nil {
 		Error(id, "undefined:", id.Name)
 	}
 	return obj
+}
+
+func objectOf(id *ast.Ident) types.Object {
+	return info.ObjectOf(id)
 }
 
 func TypeOf(n ast.Expr) types.Type {

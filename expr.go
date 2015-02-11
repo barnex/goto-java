@@ -56,7 +56,7 @@ func (w *writer) PutBasicLit(n *ast.BasicLit) {
 	}
 }
 
-// Emit an identifier
+// Emit an identifier, honoring the global rename map.
 // Ident godoc:
 // 	type Ident struct {
 // 	        NamePos token.Pos // identifier position
@@ -64,14 +64,16 @@ func (w *writer) PutBasicLit(n *ast.BasicLit) {
 // 	        Obj     *Object   // denoted object; or nil
 // 	}
 func (w *writer) PutIdent(id *ast.Ident) {
-	if IsBlank(id) {
-		w.Put(makeNewName(UNUSED))
-		return
-	}
 	if IsBuiltinIdent(id) {
 		w.PutBuiltinIdent(id)
+		return
+	}
+
+	obj := ObjectOf(id)
+	if renamed, ok := rename[obj]; ok {
+		w.Put(renamed)
 	} else {
-		w.Put(JavaName(id))
+		w.Put(obj.Name())
 	}
 }
 

@@ -227,7 +227,7 @@ func (w *writer) PutValueSpecLine(mod JModifier, typ types.Type, names []*ast.Id
 
 	for i, n := range names {
 
-		w.Put(" ", JavaName(n), " = ")
+		w.Put(" ", n, " = ")
 
 		if i < len(values) {
 			w.PutExpr(values[i])
