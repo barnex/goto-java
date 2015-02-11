@@ -1,19 +1,19 @@
 package main
 
-//var a Test
+var a Test
 
 type Test struct {
 	//Public  int
 	//private int
 }
 
-func (t Test) Method1() {
-
-}
-
-func (t *Test) Method2() {
-
-}
+//func (t Test) Method1() {
+//
+//}
+//
+//func (t *Test) Method2() {
+//
+//}
 
 func main() {
 

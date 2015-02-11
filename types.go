@@ -13,13 +13,17 @@ func JavaTypeOf(typeExpr ast.Expr) string {
 }
 
 // Array, Basic, Chan, Signature, Interface, Map, Named, Pointer, Slice, Struct, Tuple
+// TODO: pass expr, if *ident: rename?  Or rename types in pre-processing?
 func javaTypeOf(t types.Type) string {
 
 	switch t := t.(type) {
 	default:
-		panic("cannot handle type " + t.String())
+		panic("cannot handle type " + reflect.TypeOf(t).String())
 	case *types.Basic:
 		return javaBasicType(t)
+	
+	case *types.Struct:
+		return javaStructType(t)
 	}
 	panic("")
 }
@@ -30,6 +34,14 @@ func javaBasicType(t *types.Basic) string {
 	} else {
 		panic("cannot handle basic type " + t.String())
 	}
+}
+
+func javaNamedType(){
+
+}
+
+func javaStructType(t*types.Struct)string{
+	return "STRUCT"	
 }
 
 func (w *writer) PutTypeExpr(typ ast.Expr) {
