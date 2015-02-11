@@ -7,6 +7,12 @@ type Test struct {
 	//private int
 }
 
+type private struct{
+
+}
+
+var b private
+
 //func (t Test) Method1() {
 //
 //}

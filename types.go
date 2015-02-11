@@ -4,6 +4,7 @@ package main
 
 import (
 	"go/ast"
+	"reflect"
 
 	"golang.org/x/tools/go/types"
 )
@@ -21,9 +22,10 @@ func javaTypeOf(t types.Type) string {
 		panic("cannot handle type " + reflect.TypeOf(t).String())
 	case *types.Basic:
 		return javaBasicType(t)
-	
-	case *types.Struct:
-		return javaStructType(t)
+	case *types.Named:
+		return javaNamedType(t)
+		//case *types.Struct:
+		//	return javaStructType(t)
 	}
 	panic("")
 }
@@ -36,12 +38,17 @@ func javaBasicType(t *types.Basic) string {
 	}
 }
 
-func javaNamedType(){
-
+func javaNamedType(t *types.Named) string {
+	obj := t.Obj()
+	if r, ok := rename[obj]; ok {
+		return r
+	} else {
+		return obj.Name()
+	}
 }
 
-func javaStructType(t*types.Struct)string{
-	return "STRUCT"	
+func javaStructType(t *types.Struct) string {
+	panic("")
 }
 
 func (w *writer) PutTypeExpr(typ ast.Expr) {

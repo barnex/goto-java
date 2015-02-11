@@ -4,6 +4,7 @@ package main
 
 import (
 	"go/ast"
+	"log"
 	"reflect"
 )
 
@@ -22,9 +23,10 @@ type TypeDef struct {
 // 	        Comment *CommentGroup // line comments; or nil
 // 	}
 func RecordTypeSpec(s *ast.TypeSpec) {
-	cls := classOf(s.Name)
-	assert(cls.typeSpec == nil)
-	cls.typeSpec = s
+	log.Println("TODO")
+	//cls := classOf(s.Name)
+	//assert(cls.typeSpec == nil)
+	//cls.typeSpec = s
 }
 
 // RecordMethodDecl adds a method declaration to the corresponding class's method set (in global classes variable).
