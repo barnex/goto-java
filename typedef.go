@@ -6,6 +6,8 @@ import (
 	"go/ast"
 	"log"
 	"reflect"
+
+	"golang.org/x/tools/go/types"
 )
 
 type TypeDef struct {
@@ -15,6 +17,7 @@ type TypeDef struct {
 }
 
 func CollectDefs(root ast.Node) {
+	typedefs = make(map[types.Object]*TypeDef)
 	ast.Inspect(root, func(n ast.Node) bool {
 		switch n := n.(type) {
 		default:
@@ -35,10 +38,10 @@ func CollectDefs(root ast.Node) {
 // 	        Comment *CommentGroup // line comments; or nil
 // 	}
 func CollectTypeSpec(s *ast.TypeSpec) {
-	log.Println("record", s.Name)
-	//cls := classOf(s.Name)
-	//assert(cls.typeSpec == nil)
-	//cls.typeSpec = s
+	Log(s, "CollectTypeSpec", s.Name)
+	cls := classOf(s.Name)
+	assert(cls.typeSpec == nil)
+	cls.typeSpec = s
 }
 
 // RecordMethodDecl adds a method declaration to the corresponding class's method set (in global classes variable).
@@ -78,6 +81,7 @@ func RecordMethodDecl(s *ast.FuncDecl) {
 // generate code for all defs in global classes variable
 func GenClasses() {
 	for _, c := range typedefs {
+		Log("GenClasses:", c)
 		name := ClassNameFor(c.typeSpec.Name)
 		w := NewWriter(name + ".java")
 		w.PutTypeDef(name, c)

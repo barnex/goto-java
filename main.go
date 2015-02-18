@@ -37,3 +37,5 @@ func checkUserErr(err error) {
 func fatal(msg ...interface{}) {
 	log.Fatal(msg...)
 }
+
+func Log(msg ...interface{}) { log.Println(msg...) }
