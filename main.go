@@ -38,4 +38,4 @@ func fatal(msg ...interface{}) {
 	log.Fatal(msg...)
 }
 
-func Log(msg ...interface{}) { log.Println(msg...) }
+func Log(n ast.Node, msg ...interface{}) { log.Println(msg...) }
