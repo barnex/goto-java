@@ -136,8 +136,7 @@ func (w *writer) PutGenDecl(mod JModifier, d *ast.GenDecl) {
 	case token.CONST:
 		w.PutValueSpecs(mod|FINAL, d.Specs)
 	case token.TYPE:
-		assert(len(d.Specs) == 1)
-		RecordTypeSpec(d.Specs[0].(*ast.TypeSpec))
+		// do nothing. already handled by CollectDefs
 	case token.VAR:
 		w.PutValueSpecs(mod, d.Specs)
 	}

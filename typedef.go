@@ -14,6 +14,18 @@ type TypeDef struct {
 	ptrMethods []*ast.FuncDecl
 }
 
+func CollectDefs(root ast.Node) {
+	ast.Inspect(root, func(n ast.Node) bool {
+		switch n := n.(type) {
+		default:
+			return true
+		case *ast.TypeSpec:
+			CollectTypeSpec(n)
+		}
+		return true
+	})
+}
+
 // RecordTypeSpec sets the type declaration of the corresponding class (in global classes variable).
 // Code generation is deferred until all methods are known.
 // 	type TypeSpec struct {
@@ -22,8 +34,8 @@ type TypeDef struct {
 // 	        Type    Expr          // *Ident, *ParenExpr, *SelectorExpr, *StarExpr, or any of the *XxxTypes
 // 	        Comment *CommentGroup // line comments; or nil
 // 	}
-func RecordTypeSpec(s *ast.TypeSpec) {
-	log.Println("TODO")
+func CollectTypeSpec(s *ast.TypeSpec) {
+	log.Println("record", s.Name)
 	//cls := classOf(s.Name)
 	//assert(cls.typeSpec == nil)
 	//cls.typeSpec = s

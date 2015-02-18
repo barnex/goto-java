@@ -1,17 +1,12 @@
 package main
 
-var a Test
+var s Struct
+var i Int
 
-type Test struct {
-	//Public  int
-	//private int
+type Struct struct {
 }
 
-type private struct{
-
-}
-
-var b private
+type Int int
 
 //func (t Test) Method1() {
 //
