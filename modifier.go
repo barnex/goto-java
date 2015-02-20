@@ -43,7 +43,6 @@ func (m JModifier) String() string {
 	if m.Is(FINAL) {
 		str = cat(str, "final")
 	}
-	println(m, str)
 	return str
 }
 

@@ -115,6 +115,7 @@ func (w *writer) PutStructDef(def *TypeDef) {
 	// Fields
 	spec := def.typeSpec.Type.(*ast.StructType)
 	for _, f := range spec.Fields.List {
+		//w.Put(ModifierFor(f.Name))
 		w.PutTypeExpr(f.Type)
 		w.Put(" ")
 		for i, n := range f.Names {
@@ -124,10 +125,50 @@ func (w *writer) PutStructDef(def *TypeDef) {
 	}
 	w.Putln()
 
-	// Methods
+	// Methods on value
 	for _, m := range def.valMethods {
 		w.PutMethodDecl(m)
 	}
+	// Methods on pointer
+	//for _, m := range def.ptrMethods {
+	//	w.PutMethodDecl(m)
+	//}
+}
+
+func (w *writer) PutMethodDecl(f *ast.FuncDecl) {
+
+	// actual implementation with "this" as first receiver
+	w.PutStaticFunc(f)
+	w.Putln()
+
+	w.PutDoc(f.Doc)
+	w.Put(ModifierFor(f.Name), " ")
+
+	// return type
+	_, retTypes := FlattenFields(f.Type.Results)
+	w.Put(JavaReturnTypeOf(retTypes), " ", f.Name)
+
+	// arguments
+	w.Put("(")
+	argNames, argTypes := FlattenFields(f.Type.Params)
+	for i := range argNames {
+		w.Put(comma(i), javaTypeOf(argTypes[i]), " ", argNames[i])
+	}
+	w.Put(")")
+
+	w.Putln("{")
+	w.indent++
+
+	// body calls static implementation with this as first arg
+	w.Put("\t", f.Name, "(this")
+	for i := range argNames {
+		w.Put(", ", argNames[i])
+	}
+	w.Putln(");")
+
+	w.indent--
+	w.Putln("}")
+
 }
 
 func ClassNameFor(typ ast.Expr) string {

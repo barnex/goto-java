@@ -78,6 +78,7 @@ func (w *writer) PutStaticFunc(f *ast.FuncDecl) {
 
 	argNames, argTypes := FlattenFields(f.Type.Params)
 
+	// receiver, if any, is first argument
 	if f.Recv != nil {
 		assert(len(f.Recv.List) == 1)
 		field := f.Recv.List[0]
@@ -112,10 +113,6 @@ func (w *writer) PutStaticFunc(f *ast.FuncDecl) {
 
 	w.indent--
 	w.Putln("}")
-}
-
-func (w *writer) PutMethodDecl(m *ast.FuncDecl) {
-	w.PutStaticFunc(m)
 }
 
 // Emit the main function. Special case in PutStaticFunc.
