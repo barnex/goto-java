@@ -38,13 +38,13 @@ func GenTupleDef(name string, types []types.Type) {
 	w.indent++
 
 	for i, t := range types {
-		w.Putln("public ", javaTypeOf(t), " ", fmt.Sprint("v", i), ";")
+		w.Putln("public ", JavaTypeOf(t), " ", fmt.Sprint("v", i), ";")
 	}
 
 	w.Putln()
 	w.Put("public ", name, "(")
 	for i, t := range types {
-		w.Put(comma(i), javaTypeOf(t), " ", fmt.Sprint("v", i))
+		w.Put(comma(i), JavaTypeOf(t), " ", fmt.Sprint("v", i))
 	}
 	w.Putln("){")
 	w.indent++

@@ -118,8 +118,8 @@ func (w *Writer) PutStructDef(def *TypeDef) {
 	for i, n := range names {
 		t := types[i]
 		w.Put(ModifierFor(n), " ")
-		w.Put(t)
-		w.Put(" ", n, ";")
+		w.Put(JavaTypeOf(t))
+		w.Putln(" ", n, ";")
 		// TODO Docs
 	}
 	w.Putln()
@@ -151,7 +151,7 @@ func (w *Writer) PutMethodDecl(f *ast.FuncDecl) {
 	w.Put("(")
 	argNames, argTypes := FlattenFields(f.Type.Params)
 	for i := range argNames {
-		w.Put(comma(i), javaTypeOf(argTypes[i]), " ", argNames[i])
+		w.Put(comma(i), JavaTypeOf(argTypes[i]), " ", argNames[i])
 	}
 	w.Put(")")
 

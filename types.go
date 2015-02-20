@@ -9,13 +9,13 @@ import (
 	"golang.org/x/tools/go/types"
 )
 
-func JavaTypeOf(typeExpr ast.Expr) string {
-	return javaTypeOf(TypeOf(typeExpr))
+func JavaTypeOfExpr(typeExpr ast.Expr) string {
+	return JavaTypeOf(TypeOf(typeExpr))
 }
 
 // Array, Basic, Chan, Signature, Interface, Map, Named, Pointer, Slice, Struct, Tuple
 // TODO: pass expr, if *ident: rename?  Or rename types in pre-processing?
-func javaTypeOf(t types.Type) string {
+func JavaTypeOf(t types.Type) string {
 	switch t := t.(type) {
 	default:
 		panic("cannot handle type " + reflect.TypeOf(t).String())
@@ -62,7 +62,7 @@ func javaStructType(t *types.Struct) string {
 }
 
 func (w *Writer) PutTypeExpr(typ ast.Expr) {
-	w.Put(JavaTypeOf(typ))
+	w.Put(JavaTypeOfExpr(typ))
 }
 
 // explicit type cast in input file, e.g.:

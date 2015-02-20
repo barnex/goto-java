@@ -6,7 +6,7 @@ import "golang.org/x/tools/go/types"
 // E.g.:
 // 	var x int  ->  int x = 0;
 func ZeroValue(typ types.Type) string {
-	jType := javaTypeOf(typ)
+	jType := JavaTypeOf(typ)
 	if v, ok := zeroValues[jType]; ok {
 		return v
 	} else {

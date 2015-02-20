@@ -83,7 +83,7 @@ func (w *Writer) PutLenExpr(n *ast.CallExpr) {
 	if len(n.Args) != 1 {
 		Error(n, "too many arguments to len")
 	}
-	argT := JavaTypeOf(n.Args[0])
+	argT := JavaTypeOfExpr(n.Args[0])
 	switch argT {
 	default:
 		Error(n, "invalid argument (type ", argT, ") for len")

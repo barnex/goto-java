@@ -48,7 +48,7 @@ func JavaReturnTypeOf(resultTypes []types.Type) string {
 	case 0:
 		return "void"
 	case 1:
-		return javaTypeOf(resultTypes[0])
+		return JavaTypeOf(resultTypes[0])
 	default:
 		return JavaTupleType(resultTypes)
 	}
@@ -95,7 +95,7 @@ func (w *Writer) PutStaticFunc(f *ast.FuncDecl) {
 	}
 
 	for i := range argNames {
-		w.Put(comma(i), javaTypeOf(argTypes[i]), " ", argNames[i])
+		w.Put(comma(i), JavaTypeOf(argTypes[i]), " ", argNames[i])
 	}
 	w.Put(")")
 
@@ -105,7 +105,7 @@ func (w *Writer) PutStaticFunc(f *ast.FuncDecl) {
 	// declare named return values, if any
 	for i := range retNames {
 		if retNames[i] != nil {
-			w.Putln(javaTypeOf(retTypes[i]), " ", retNames[i], " = ", ZeroValue(retTypes[i]), ";")
+			w.Putln(JavaTypeOf(retTypes[i]), " ", retNames[i], " = ", ZeroValue(retTypes[i]), ";")
 		}
 	}
 
@@ -235,7 +235,7 @@ func (w *Writer) PutValueSpecLine(mod JModifier, typ types.Type, names []*ast.Id
 	}
 
 	if typ != nil {
-		jType := javaTypeOf(typ)
+		jType := JavaTypeOf(typ)
 		w.Put(jType)
 	}
 
