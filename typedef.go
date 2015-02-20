@@ -119,7 +119,7 @@ func (w *Writer) PutStructDef(def *TypeDef) {
 		t := types[i]
 		w.Put(ModifierFor(n), " ")
 		w.Put(JavaTypeOf(t))
-		w.Putln(" ", n, ";")
+		w.Putln(" ", n, " = ", ZeroValue(t), ";")
 		// TODO Docs
 	}
 	w.Putln()

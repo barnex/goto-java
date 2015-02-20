@@ -28,6 +28,8 @@ func (*Struct) ptrmethod() {}
 func main() {
 	var s Struct
 
+	println(s.a)
+
 	s.ValMethod1()
 	println(s.ValMethod2(1, 2))
 	s.valmethod()
