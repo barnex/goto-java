@@ -1,4 +1,4 @@
-package main
+package gotojava
 
 // This file provides functionality to rename identifiers.
 // Some valid Go identifiers cannot be used in java (e.g. keywords like "static").

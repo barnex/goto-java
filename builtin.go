@@ -1,4 +1,4 @@
-package main
+package gotojava
 
 // Handle Go built-ins.
 
@@ -37,7 +37,7 @@ var lit2java = map[string]string{
 }
 
 // Emit code for a built-in identifer
-func (w *writer) PutBuiltinIdent(id *ast.Ident) {
+func (w *Writer) PutBuiltinIdent(id *ast.Ident) {
 	if transl, ok := lit2java[id.Name]; ok {
 		w.Put(transl)
 	} else {
@@ -46,7 +46,7 @@ func (w *writer) PutBuiltinIdent(id *ast.Ident) {
 }
 
 // Generate code for built-in call, like len(x)
-func (w *writer) PutBuiltinCall(c *ast.CallExpr) {
+func (w *Writer) PutBuiltinCall(c *ast.CallExpr) {
 	name := StripParens(c.Fun).(*ast.Ident).Name
 	switch name {
 	default:
@@ -64,7 +64,7 @@ func (w *writer) PutBuiltinCall(c *ast.CallExpr) {
 }
 
 // Emit code for built-in print, prinln calls.
-func (w *writer) PutBuiltinPrintCall(c *ast.CallExpr) {
+func (w *Writer) PutBuiltinPrintCall(c *ast.CallExpr) {
 	name := StripParens(c.Fun).(*ast.Ident).Name
 	switch name {
 	default:
@@ -79,7 +79,7 @@ func (w *writer) PutBuiltinPrintCall(c *ast.CallExpr) {
 }
 
 // Generate code for len(x)
-func (w *writer) PutLenExpr(n *ast.CallExpr) {
+func (w *Writer) PutLenExpr(n *ast.CallExpr) {
 	if len(n.Args) != 1 {
 		Error(n, "too many arguments to len")
 	}

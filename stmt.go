@@ -1,4 +1,4 @@
-package main
+package gotojava
 
 import (
 	"go/ast"
@@ -10,7 +10,7 @@ import (
 // Statements are emitted without final semicolon,
 // it is up the caller to append a semicolon where needed.
 // This allows the statement to be put inside, e.g., a for loop.
-func (w *writer) PutStmt(s ast.Stmt) {
+func (w *Writer) PutStmt(s ast.Stmt) {
 	switch s := s.(type) {
 	default:
 		Error(s, "cannot handle ", reflect.TypeOf(s))
@@ -45,7 +45,7 @@ func (w *writer) PutStmt(s ast.Stmt) {
 // 	        Tag    Expr       // tag expression; or nil
 // 	        Body   *BlockStmt // CaseClauses only
 // 	}
-func (w *writer) PutSwitchStmt(s *ast.SwitchStmt) {
+func (w *Writer) PutSwitchStmt(s *ast.SwitchStmt) {
 	if s.Init != nil {
 		Error(s, "switch init not supported")
 	}
@@ -98,7 +98,7 @@ func (w *writer) PutSwitchStmt(s *ast.SwitchStmt) {
 // 	        Tok    token.Token // keyword token (BREAK, CONTINUE, GOTO, FALLTHROUGH)
 // 	        Label  *Ident      // label name; or nil
 // 	}
-func (w *writer) PutBranchStmt(b *ast.BranchStmt) {
+func (w *Writer) PutBranchStmt(b *ast.BranchStmt) {
 	if b.Label != nil {
 		Error(b, b.Tok.String(), " with label not allowed")
 	}
@@ -123,7 +123,7 @@ func (w *writer) PutBranchStmt(b *ast.BranchStmt) {
 // 	        TokPos token.Pos   // position of Tok
 // 	        Tok    token.Token // INC or DEC
 // 	}
-func (w *writer) PutIncDecStmt(s *ast.IncDecStmt) {
+func (w *Writer) PutIncDecStmt(s *ast.IncDecStmt) {
 	w.Put(s.X, s.Tok.String())
 }
 
@@ -136,7 +136,7 @@ func (w *writer) PutIncDecStmt(s *ast.IncDecStmt) {
 // 	        Post Stmt      // post iteration statement; or nil
 // 	        Body *BlockStmt
 // 	}
-func (w *writer) PutForStmt(f *ast.ForStmt) {
+func (w *Writer) PutForStmt(f *ast.ForStmt) {
 	w.Put("for (", nnil(f.Init), "; ", nnil(f.Cond), "; ", nnil(f.Post), ")")
 	w.Putln(f.Body)
 }
@@ -150,7 +150,7 @@ func (w *writer) PutForStmt(f *ast.ForStmt) {
 // 	        Body *BlockStmt
 // 	        Else Stmt // else branch; or nil
 // 	}
-func (w *writer) PutIfStmt(i *ast.IfStmt) {
+func (w *Writer) PutIfStmt(i *ast.IfStmt) {
 
 	// put init statement in front
 	// guard scope with braces
@@ -180,7 +180,7 @@ func (w *writer) PutIfStmt(i *ast.IfStmt) {
 // 	        Return  token.Pos // position of "return" keyword
 // 	        Results []Expr    // result expressions; or nil
 // 	}
-func (w *writer) PutReturnStmt(r *ast.ReturnStmt) {
+func (w *Writer) PutReturnStmt(r *ast.ReturnStmt) {
 	results := r.Results
 	names, types := FlattenFields(FuncDeclOf(r).Type.Results) // function declaration belonging to this return
 
@@ -213,7 +213,7 @@ func (w *writer) PutReturnStmt(r *ast.ReturnStmt) {
 // 	        List   []Stmt
 // 	        Rbrace token.Pos // position of "}"
 // 	}
-func (w *writer) PutBlockStmt(b *ast.BlockStmt) {
+func (w *Writer) PutBlockStmt(b *ast.BlockStmt) {
 	w.Putln("{")
 	w.indent++
 	w.PutStmtList(b.List)
@@ -221,7 +221,7 @@ func (w *writer) PutBlockStmt(b *ast.BlockStmt) {
 	w.Put("}")
 }
 
-func (w *writer) PutStmtList(list []ast.Stmt) {
+func (w *Writer) PutStmtList(list []ast.Stmt) {
 	for _, n := range list {
 		w.PutStmt(n)
 		if needSemicolon(n) {
@@ -247,7 +247,7 @@ func needSemicolon(s ast.Stmt) bool {
 // 	type DeclStmt struct {
 // 	        Decl Decl // *GenDecl with CONST, TYPE, or VAR token
 // 	}
-func (w *writer) PutDeclStmt(d *ast.DeclStmt) {
+func (w *Writer) PutDeclStmt(d *ast.DeclStmt) {
 	modifier := NONE
 	w.PutDecl(modifier, d.Decl)
 }
@@ -257,7 +257,7 @@ func (w *writer) PutDeclStmt(d *ast.DeclStmt) {
 // 	type ExprStmt struct {
 // 	        X Expr // expression
 // 	}
-func (w *writer) PutExprStmt(n *ast.ExprStmt) {
+func (w *Writer) PutExprStmt(n *ast.ExprStmt) {
 	w.Put(n.X)
 }
 
@@ -269,7 +269,7 @@ func (w *writer) PutExprStmt(n *ast.ExprStmt) {
 // 	        Tok    token.Token // assignment token, DEFINE
 // 	        Rhs    []Expr
 // 	}
-func (w *writer) PutAssignStmt(n *ast.AssignStmt) {
+func (w *Writer) PutAssignStmt(n *ast.AssignStmt) {
 	if len(n.Lhs) != len(n.Rhs) {
 		Error(n, "assignment count mismatch:", len(n.Lhs), "!=", len(n.Rhs))
 		// TODO: function with multiple returns
@@ -309,7 +309,7 @@ func (w *writer) PutAssignStmt(n *ast.AssignStmt) {
 // Emit a short variable declaration, e.g.:
 // 	a := 1
 // Special case of PutAssignStmt
-func (w *writer) PutDefine(mod JModifier, a *ast.AssignStmt) {
+func (w *Writer) PutDefine(mod JModifier, a *ast.AssignStmt) {
 	for i, n := range a.Lhs {
 		var value ast.Expr = nil
 		if i < len(a.Rhs) {

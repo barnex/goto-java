@@ -1,4 +1,4 @@
-package main
+package gotojava
 
 import (
 	"go/ast"
@@ -15,7 +15,7 @@ func IsUnsigned(t types.Type) bool {
 	}
 }
 
-func (w *writer) PutUnsignedOp(x ast.Expr, op token.Token, y ast.Expr) {
+func (w *Writer) PutUnsignedOp(x ast.Expr, op token.Token, y ast.Expr) {
 	typX := JavaTypeOf(x)
 	typY := JavaTypeOf(y)
 

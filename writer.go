@@ -1,4 +1,4 @@
-package main
+package gotojava
 
 import (
 	"bufio"
@@ -11,21 +11,21 @@ import (
 )
 
 // A writer takes AST nodes and outPuts java source
-type writer struct {
+type Writer struct {
 	out        *bufio.Writer
 	f          io.WriteCloser
 	indent     int
 	needIndent bool
 }
 
-func NewWriter(fname string) *writer {
+func NewWriter(fname string) *Writer {
 	f, err := os.Create(fname)
 	checkUserErr(err)
 	out := bufio.NewWriter(f)
-	return &writer{out: out, f: f}
+	return &Writer{out: out, f: f}
 }
 
-func (w *writer) Close() {
+func (w *Writer) Close() {
 	err := w.out.Flush()
 	checkUserErr(err)
 	err = w.f.Close()
@@ -33,7 +33,7 @@ func (w *writer) Close() {
 }
 
 // Outputs a class with given name based on go file.
-func (w *writer) PutClass(className string, f *ast.File) {
+func (w *Writer) PutClass(className string, f *ast.File) {
 
 	if !*flagNoPkg {
 		pkg := f.Name.Name
@@ -62,19 +62,19 @@ func (w *writer) PutClass(className string, f *ast.File) {
 	w.Putln("}")
 }
 
-func (w *writer) Putln(tokens ...interface{}) {
+func (w *Writer) Putln(tokens ...interface{}) {
 	w.Put(append(tokens, "\n")...)
 	w.needIndent = true
 }
 
-func (w *writer) Put(tokens ...interface{}) {
+func (w *Writer) Put(tokens ...interface{}) {
 	w.putIndent()
 	for _, t := range tokens {
 		w.put(t)
 	}
 }
 
-func (w *writer) put(t interface{}) {
+func (w *Writer) put(t interface{}) {
 	switch t.(type) {
 	case string, JModifier, token.Token:
 		fmt.Fprint(w.out, t)
@@ -88,7 +88,7 @@ func (w *writer) put(t interface{}) {
 	panic("writer: cannot put type " + reflect.TypeOf(t).String())
 }
 
-func (w *writer) PutNode(n ast.Node) {
+func (w *Writer) PutNode(n ast.Node) {
 	if n, ok := n.(ast.Stmt); ok {
 		w.PutStmt(n)
 		return
@@ -102,7 +102,7 @@ func (w *writer) PutNode(n ast.Node) {
 	}
 }
 
-func (w *writer) putIndent() {
+func (w *Writer) putIndent() {
 	if w.needIndent == false {
 		return
 	}

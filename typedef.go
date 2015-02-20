@@ -1,4 +1,4 @@
-package main
+package gotojava
 
 // Handling of type definitions and methods
 
@@ -111,17 +111,16 @@ func GenClass(c *TypeDef) {
 // 	        Fields     *FieldList // list of field declarations
 // 	        Incomplete bool       // true if (source) fields are missing in the Fields list
 // 	}
-func (w *writer) PutStructDef(def *TypeDef) {
+func (w *Writer) PutStructDef(def *TypeDef) {
 	// Fields
 	spec := def.typeSpec.Type.(*ast.StructType)
-	for _, f := range spec.Fields.List {
-		//w.Put(ModifierFor(f.Name))
-		w.PutTypeExpr(f.Type)
-		w.Put(" ")
-		for i, n := range f.Names {
-			w.Put(comma(i), n)
-		}
-		w.Putln(";")
+	names, types := FlattenFields(spec.Fields)
+	for i, n := range names {
+		t := types[i]
+		w.Put(ModifierFor(n), " ")
+		w.Put(t)
+		w.Put(" ", n, ";")
+		// TODO Docs
 	}
 	w.Putln()
 
@@ -135,7 +134,7 @@ func (w *writer) PutStructDef(def *TypeDef) {
 	}
 }
 
-func (w *writer) PutMethodDecl(f *ast.FuncDecl) {
+func (w *Writer) PutMethodDecl(f *ast.FuncDecl) {
 
 	// actual implementation with "this" as first receiver
 	w.PutStaticFunc(f)

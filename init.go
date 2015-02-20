@@ -1,4 +1,4 @@
-package main
+package gotojava
 
 import "golang.org/x/tools/go/types"
 

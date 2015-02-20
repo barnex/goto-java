@@ -35,4 +35,4 @@ TODO: Other comments are not.
 
 
 */
-package main
+package gotojava

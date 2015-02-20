@@ -1,4 +1,4 @@
-package main
+package gotojava
 
 // Type conversion between Go and Java.
 
@@ -16,7 +16,6 @@ func JavaTypeOf(typeExpr ast.Expr) string {
 // Array, Basic, Chan, Signature, Interface, Map, Named, Pointer, Slice, Struct, Tuple
 // TODO: pass expr, if *ident: rename?  Or rename types in pre-processing?
 func javaTypeOf(t types.Type) string {
-
 	switch t := t.(type) {
 	default:
 		panic("cannot handle type " + reflect.TypeOf(t).String())
@@ -62,13 +61,13 @@ func javaStructType(t *types.Struct) string {
 	panic("")
 }
 
-func (w *writer) PutTypeExpr(typ ast.Expr) {
+func (w *Writer) PutTypeExpr(typ ast.Expr) {
 	w.Put(JavaTypeOf(typ))
 }
 
 // explicit type cast in input file, e.g.:
 // 	a := int(b)
-func (w *writer) PutTypecast(goType types.Type, e ast.Expr) {
+func (w *Writer) PutTypecast(goType types.Type, e ast.Expr) {
 	//Error(e, "TODO: typecast")
 
 	w.PutImplicitCast(goType, e)
@@ -82,7 +81,7 @@ func (w *writer) PutTypecast(goType types.Type, e ast.Expr) {
 
 // implicit type cast from untyped to type, e.g.:
 // 	f(1)
-func (w *writer) PutImplicitCast(dst types.Type, e ast.Expr) {
+func (w *Writer) PutImplicitCast(dst types.Type, e ast.Expr) {
 	//Error(e, "TODO: typecast")
 	//dst = dst.Underlying()
 	//src := TypeOf(e).Underlying()

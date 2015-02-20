@@ -1,4 +1,4 @@
-package main
+package gotojava
 
 // This file handles expressions.
 
@@ -9,7 +9,7 @@ import (
 )
 
 // Emit code for an expression.
-func (w *writer) PutExpr(n ast.Expr) {
+func (w *Writer) PutExpr(n ast.Expr) {
 
 	if *flagConstFold {
 		if tv, ok := ExactValue(n); ok && tv.Value != nil {
@@ -47,7 +47,7 @@ func (w *writer) PutExpr(n ast.Expr) {
 // 	        Kind     token.Token // token.INT, token.FLOAT, token.IMAG, token.CHAR, or token.STRING
 // 	        Value    string      // literal string; e.g. 42, 0x7f, 3.14, 1e-9, 2.4i, 'a', '\x7f', "foo" or `\m\n\o`
 // 	}
-func (w *writer) PutBasicLit(n *ast.BasicLit) {
+func (w *Writer) PutBasicLit(n *ast.BasicLit) {
 	goType := TypeOf(n).Underlying().String()
 
 	switch goType {
@@ -65,7 +65,7 @@ func (w *writer) PutBasicLit(n *ast.BasicLit) {
 // 	        Name    string    // identifier name
 // 	        Obj     *Object   // denoted object; or nil
 // 	}
-func (w *writer) PutIdent(id *ast.Ident) {
+func (w *Writer) PutIdent(id *ast.Ident) {
 	if IsBuiltinIdent(id) {
 		w.PutBuiltinIdent(id)
 		return
@@ -77,7 +77,7 @@ func (w *writer) PutIdent(id *ast.Ident) {
 // Emit a unary expression, execpt unary "*".
 // spec:
 // 	unary_op = "+" | "-" | "!" | "^" | "*" | "&" | "<-"
-func (w *writer) PutUnaryExpr(u *ast.UnaryExpr) {
+func (w *Writer) PutUnaryExpr(u *ast.UnaryExpr) {
 	switch u.Op {
 	default:
 		Error(u, "unary ", u.Op, " not supported")
@@ -99,7 +99,7 @@ func (w *writer) PutUnaryExpr(u *ast.UnaryExpr) {
 // 	        Slice3 bool      // true if 3-index slice (2 colons present)
 // 	        Rbrack token.Pos // position of "]"
 // 	}
-func (w *writer) PutSliceExpr(e *ast.SliceExpr) {
+func (w *Writer) PutSliceExpr(e *ast.SliceExpr) {
 	jType := JavaTypeOf(e.X)
 	switch jType {
 	default:
@@ -110,7 +110,7 @@ func (w *writer) PutSliceExpr(e *ast.SliceExpr) {
 }
 
 // Emit code for slicing a string.
-func (w *writer) putStringSlice(e *ast.SliceExpr) {
+func (w *Writer) putStringSlice(e *ast.SliceExpr) {
 	w.Put(e.X, ".substring(")
 	if e.Low == nil {
 		w.Put("0")
@@ -127,14 +127,14 @@ func (w *writer) putStringSlice(e *ast.SliceExpr) {
 	w.Put(")")
 }
 
-func (w *writer) PutSelectorExpr(e *ast.SelectorExpr) {
+func (w *Writer) PutSelectorExpr(e *ast.SelectorExpr) {
 	w.Put(e.X, ".", e.Sel)
 }
 
 // Emit code for a parnthesized expression.
 // TODO: in many other places parens are inserted,
 // do not put parens around parens.
-func (w *writer) PutParenExpr(e *ast.ParenExpr) {
+func (w *Writer) PutParenExpr(e *ast.ParenExpr) {
 	w.Put("(", e.X, ")")
 }
 
@@ -143,7 +143,7 @@ func (w *writer) PutParenExpr(e *ast.ParenExpr) {
 // 	rel_op     = "==" | "!=" | "<" | "<=" | ">" | ">=" .
 // 	add_op     = "+" | "-" | "|" | "^" .
 // 	mul_op     = "*" | "/" | "%" | "<<" | ">>" | "&" | "&^" .
-func (w *writer) PutBinaryExpr(b *ast.BinaryExpr) {
+func (w *Writer) PutBinaryExpr(b *ast.BinaryExpr) {
 	if *flagParens {
 		w.Put("(")
 	}
@@ -183,7 +183,7 @@ func (w *writer) PutBinaryExpr(b *ast.BinaryExpr) {
 // 	        Rparen   token.Pos // position of ")"
 // 	}
 // TODO: handle ellipsis.
-func (w *writer) PutCallExpr(n *ast.CallExpr) {
+func (w *Writer) PutCallExpr(n *ast.CallExpr) {
 	if n.Ellipsis != 0 {
 		Error(n, "cannot handle ellipsis...")
 	}
@@ -208,7 +208,7 @@ func (w *writer) PutCallExpr(n *ast.CallExpr) {
 	w.Put(")")
 }
 
-func (w *writer) PutArgs(args []ast.Expr, ellipsis token.Pos) {
+func (w *Writer) PutArgs(args []ast.Expr, ellipsis token.Pos) {
 	w.Put("(")
 	for i, a := range args {
 		if i != 0 {

@@ -1,4 +1,4 @@
-package main
+package gotojava
 
 import (
 	"go/ast"

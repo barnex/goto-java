@@ -1,4 +1,4 @@
-package main
+package gotojava
 
 import (
 	"flag"
@@ -19,7 +19,7 @@ var (
 	UNUSED          string // base name for translating the blank identifier (flag -blank)
 )
 
-func main() {
+func Main() {
 	log.SetFlags(0)
 	flag.Parse()
 

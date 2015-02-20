@@ -1,8 +1,8 @@
-package main
+package gotojava
 
 import "go/ast"
 
-func (w *writer) PutEmptyInterfaceCast(e ast.Expr) {
+func (w *Writer) PutEmptyInterfaceCast(e ast.Expr) {
 	goType := TypeOf(e).Underlying().String()
 
 	switch goType {

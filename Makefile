@@ -1,4 +1,3 @@
 all:
-	rm -f ./a3
 	goimports -w *.go
-	go install
+	go install github.com/barnex/goto-java/cmd/goto-java

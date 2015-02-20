@@ -1,4 +1,4 @@
-package main
+package gotojava
 
 // Walk the ast and map nodes to their parent
 

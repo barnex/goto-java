@@ -1,4 +1,4 @@
-package main
+package gotojava
 
 // This file handles declarations
 
@@ -11,7 +11,7 @@ import (
 )
 
 // Emit a declaration with optional modifier (like static)
-func (w *writer) PutDecl(mod JModifier, d ast.Decl) {
+func (w *Writer) PutDecl(mod JModifier, d ast.Decl) {
 	switch d := d.(type) {
 	default:
 		panic("unhandled memeber type: " + reflect.TypeOf(d).String())
@@ -33,7 +33,7 @@ func (w *writer) PutDecl(mod JModifier, d ast.Decl) {
 // 	    Type *FuncType     // function signature: parameters, results, and position of "func" keyword
 // 	    Body *BlockStmt    // function body; or nil (forward declaration)
 // 	}
-func (w *writer) PutFuncDecl(n *ast.FuncDecl) {
+func (w *Writer) PutFuncDecl(n *ast.FuncDecl) {
 	if n.Recv == nil {
 		w.PutStaticFunc(n)
 	} else {
@@ -56,7 +56,7 @@ func JavaReturnTypeOf(resultTypes []types.Type) string {
 
 // Emit code for a top-level function (not method) declaration, e.g.:
 // 	func f(a, b int) { ... }
-func (w *writer) PutStaticFunc(f *ast.FuncDecl) {
+func (w *Writer) PutStaticFunc(f *ast.FuncDecl) {
 	w.PutDoc(f.Doc)
 
 	// main is special: need String[] args
@@ -116,7 +116,7 @@ func (w *writer) PutStaticFunc(f *ast.FuncDecl) {
 }
 
 // Emit the main function. Special case in PutStaticFunc.
-func (w *writer) PutMainDecl(n *ast.FuncDecl) {
+func (w *Writer) PutMainDecl(n *ast.FuncDecl) {
 	w.Put("public static void ", n.Name.Name, "(String[] args)")
 	w.PutBlockStmt(n.Body)
 	w.Putln()
@@ -144,7 +144,7 @@ func (w *writer) PutMainDecl(n *ast.FuncDecl) {
 // 	token.TYPE    *TypeSpec
 // 	token.VAR     *ValueSpec
 //
-func (w *writer) PutGenDecl(mod JModifier, d *ast.GenDecl) {
+func (w *Writer) PutGenDecl(mod JModifier, d *ast.GenDecl) {
 	switch d.Tok { // IMPORT, CONST, TYPE, VAR
 	default:
 		Error(d, "cannot handle "+d.Tok.String())
@@ -169,7 +169,7 @@ func (w *writer) PutGenDecl(mod JModifier, d *ast.GenDecl) {
 // 	)
 // with optional modifier (e.g. "static", "final", "static final").
 // The concrete type of specs elements must be *ast.ValueSpec.
-func (w *writer) PutValueSpecs(mod JModifier, specs []ast.Spec) {
+func (w *Writer) PutValueSpecs(mod JModifier, specs []ast.Spec) {
 	for i, spec := range specs {
 		if i != 0 {
 			w.Putln(";")
@@ -194,7 +194,7 @@ func (w *writer) PutValueSpecs(mod JModifier, specs []ast.Spec) {
 // 	}
 // A ValueSpec node represents a constant or variable declaration
 // (ConstSpec or VarSpec production).
-func (w *writer) PutValueSpec(mod JModifier, s *ast.ValueSpec) {
+func (w *Writer) PutValueSpec(mod JModifier, s *ast.ValueSpec) {
 	if s.Type != nil {
 		// var with explicit type: everything on one line, e.g.:
 		// 	int a = 1, b = 2
@@ -227,7 +227,7 @@ func (w *writer) PutValueSpec(mod JModifier, s *ast.ValueSpec) {
 // 	int a = 1;
 // 	a = 2;       // typ = nil
 //  int b = 3;
-func (w *writer) PutValueSpecLine(mod JModifier, typ types.Type, names []*ast.Ident, values []ast.Expr, comment *ast.CommentGroup) {
+func (w *Writer) PutValueSpecLine(mod JModifier, typ types.Type, names []*ast.Ident, values []ast.Expr, comment *ast.CommentGroup) {
 
 	w.Put(mod)
 	if mod != NONE {

@@ -1,4 +1,4 @@
-package main
+package gotojava
 
 // Tuples wrap multiple return values in a java class.
 

@@ -1,15 +1,15 @@
-package main
+package gotojava
 
 // TODO: collect all comments and put in appropriate place
 
 import "go/ast"
 
-func (w *writer) PutDoc(g *ast.CommentGroup) {
+func (w *Writer) PutDoc(g *ast.CommentGroup) {
 	w.PutComment(g) //TODO: translate to slashstarstar
 	w.Putln()
 }
 
-func (w *writer) PutInlineComment(g *ast.CommentGroup) {
+func (w *Writer) PutInlineComment(g *ast.CommentGroup) {
 	if g == nil {
 		return
 	}
@@ -22,7 +22,7 @@ func (w *writer) PutInlineComment(g *ast.CommentGroup) {
 	}
 }
 
-func (w *writer) PutComment(g *ast.CommentGroup) {
+func (w *Writer) PutComment(g *ast.CommentGroup) {
 	if g == nil {
 		return
 	}
