@@ -24,6 +24,8 @@ func javaTypeOf(t types.Type) string {
 		return javaBasicType(t)
 	case *types.Named:
 		return javaNamedType(t)
+	case *types.Pointer:
+		return javaPointerType(t)
 		//case *types.Struct:
 		//	return javaStructType(t)
 	}
@@ -44,6 +46,15 @@ func javaNamedType(t *types.Named) string {
 		return r
 	} else {
 		return obj.Name()
+	}
+}
+
+func javaPointerType(t *types.Pointer) string {
+	switch e := t.Elem().(type) {
+	default:
+		panic("cannot handle pointer to " + reflect.TypeOf(e).String())
+	case *types.Named:
+		return javaNamedType(e) // java reference type used for both pointer and value
 	}
 }
 

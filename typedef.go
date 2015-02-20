@@ -130,9 +130,9 @@ func (w *writer) PutStructDef(def *TypeDef) {
 		w.PutMethodDecl(m)
 	}
 	// Methods on pointer
-	//for _, m := range def.ptrMethods {
-	//	w.PutMethodDecl(m)
-	//}
+	for _, m := range def.ptrMethods {
+		w.PutMethodDecl(m)
+	}
 }
 
 func (w *writer) PutMethodDecl(f *ast.FuncDecl) {
@@ -160,7 +160,10 @@ func (w *writer) PutMethodDecl(f *ast.FuncDecl) {
 	w.indent++
 
 	// body calls static implementation with this as first arg
-	w.Put(f.Name, "(this")
+	if len(retTypes) > 0 {
+		w.Put("return ")
+	}
+	w.Put(f.Name, "(", "this")
 	for i := range argNames {
 		w.Put(", ", argNames[i])
 	}
