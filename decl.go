@@ -66,10 +66,7 @@ func (w *writer) PutStaticFunc(f *ast.FuncDecl) {
 	}
 
 	// modifier
-	mod := STATIC
-	if ast.IsExported(f.Name.Name) {
-		mod |= PUBLIC
-	}
+	mod := STATIC | ModifierFor(f.Name)
 	w.Put(mod, " ")
 
 	// return type
@@ -78,7 +75,25 @@ func (w *writer) PutStaticFunc(f *ast.FuncDecl) {
 
 	// arguments
 	w.Put("(")
+
 	argNames, argTypes := FlattenFields(f.Type.Params)
+
+	// receiver, if any, is first argument
+	if f.Recv != nil {
+		assert(len(f.Recv.List) == 1)
+		field := f.Recv.List[0]
+		name := "unused"
+		if field.Names != nil {
+			assert(len(field.Names) == 1)
+			name = JavaNameFor(field.Names[0])
+		}
+		w.PutTypeExpr(field.Type)
+		w.Put(" ", name)
+		if len(argNames) != 0 {
+			w.Put(", ")
+		}
+	}
+
 	for i := range argNames {
 		w.Put(comma(i), javaTypeOf(argTypes[i]), " ", argNames[i])
 	}
@@ -136,8 +151,7 @@ func (w *writer) PutGenDecl(mod JModifier, d *ast.GenDecl) {
 	case token.CONST:
 		w.PutValueSpecs(mod|FINAL, d.Specs)
 	case token.TYPE:
-		assert(len(d.Specs) == 1)
-		RecordTypeSpec(d.Specs[0].(*ast.TypeSpec))
+		// do nothing. already handled by CollectDefs
 	case token.VAR:
 		w.PutValueSpecs(mod, d.Specs)
 	}

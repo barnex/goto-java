@@ -35,7 +35,7 @@ func HandleFile(fname string) {
 	parent = CollectParents(f)
 	idents = CollectIdents(f)
 	rename = RenameReservedIdents(f)
-	//typedefs = CollectDefs(f)
+	CollectDefs(f)
 
 	// transpile primary class
 	className := fname[:len(fname)-len(path.Ext(fname))]

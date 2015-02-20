@@ -4,14 +4,28 @@ package main
 
 import (
 	"go/ast"
-	"log"
 	"reflect"
+
+	"golang.org/x/tools/go/types"
 )
 
 type TypeDef struct {
 	typeSpec   *ast.TypeSpec
 	valMethods []*ast.FuncDecl
 	ptrMethods []*ast.FuncDecl
+}
+
+func CollectDefs(root ast.Node) {
+	typedefs = make(map[types.Object]*TypeDef)
+	ast.Inspect(root, func(n ast.Node) bool {
+		switch n := n.(type) {
+		default:
+			return true
+		case *ast.TypeSpec:
+			CollectTypeSpec(n)
+		}
+		return true
+	})
 }
 
 // RecordTypeSpec sets the type declaration of the corresponding class (in global classes variable).
@@ -22,11 +36,11 @@ type TypeDef struct {
 // 	        Type    Expr          // *Ident, *ParenExpr, *SelectorExpr, *StarExpr, or any of the *XxxTypes
 // 	        Comment *CommentGroup // line comments; or nil
 // 	}
-func RecordTypeSpec(s *ast.TypeSpec) {
-	log.Println("TODO")
-	//cls := classOf(s.Name)
-	//assert(cls.typeSpec == nil)
-	//cls.typeSpec = s
+func CollectTypeSpec(s *ast.TypeSpec) {
+	Log(s, s.Name)
+	cls := classOf(s.Name)
+	assert(cls.typeSpec == nil)
+	cls.typeSpec = s
 }
 
 // RecordMethodDecl adds a method declaration to the corresponding class's method set (in global classes variable).
@@ -41,8 +55,6 @@ func RecordTypeSpec(s *ast.TypeSpec) {
 func RecordMethodDecl(s *ast.FuncDecl) {
 	rl := s.Recv.List
 	assert(len(rl) == 1)
-	assert(len(rl[0].Names) == 1)
-	//recvName := rl[0].Names[0]
 	recvTyp := rl[0].Type
 
 	// method on value, e.g., func(T)M(){}
@@ -66,22 +78,28 @@ func RecordMethodDecl(s *ast.FuncDecl) {
 // generate code for all defs in global classes variable
 func GenClasses() {
 	for _, c := range typedefs {
-		name := ClassNameFor(c.typeSpec.Name)
-		w := NewWriter(name + ".java")
-		w.PutTypeDef(name, c)
-		w.Close()
+		Log(nil, c.typeSpec.Name)
+
+		GenClass(c)
 	}
 }
 
-func (w *writer) PutTypeDef(name string, c *TypeDef) {
+func GenClass(c *TypeDef) {
+	name := ClassNameFor(c.typeSpec.Name)
+	w := NewWriter(name + ".java")
+	defer w.Close()
+
+	w.PutDoc(c.typeSpec.Doc)
 	w.Putln("public final class ", name, "{")
+	w.Putln()
 	w.indent++
 
-	switch typ := c.typeSpec.Type.(type) {
+	typ := c.typeSpec.Type
+	switch typ.(type) {
 	default:
 		Error(typ, "cannot handle", reflect.TypeOf(typ))
 	case *ast.StructType:
-		w.PutStructDef(typ)
+		w.PutStructDef(c)
 	}
 
 	w.indent--
@@ -93,8 +111,11 @@ func (w *writer) PutTypeDef(name string, c *TypeDef) {
 // 	        Fields     *FieldList // list of field declarations
 // 	        Incomplete bool       // true if (source) fields are missing in the Fields list
 // 	}
-func (w *writer) PutStructDef(c *ast.StructType) {
-	for _, f := range c.Fields.List {
+func (w *writer) PutStructDef(def *TypeDef) {
+	// Fields
+	spec := def.typeSpec.Type.(*ast.StructType)
+	for _, f := range spec.Fields.List {
+		//w.Put(ModifierFor(f.Name))
 		w.PutTypeExpr(f.Type)
 		w.Put(" ")
 		for i, n := range f.Names {
@@ -102,6 +123,52 @@ func (w *writer) PutStructDef(c *ast.StructType) {
 		}
 		w.Putln(";")
 	}
+	w.Putln()
+
+	// Methods on value
+	for _, m := range def.valMethods {
+		w.PutMethodDecl(m)
+	}
+	// Methods on pointer
+	//for _, m := range def.ptrMethods {
+	//	w.PutMethodDecl(m)
+	//}
+}
+
+func (w *writer) PutMethodDecl(f *ast.FuncDecl) {
+
+	// actual implementation with "this" as first receiver
+	w.PutStaticFunc(f)
+	w.Putln()
+
+	w.PutDoc(f.Doc)
+	w.Put(ModifierFor(f.Name), " ")
+
+	// return type
+	_, retTypes := FlattenFields(f.Type.Results)
+	w.Put(JavaReturnTypeOf(retTypes), " ", f.Name)
+
+	// arguments
+	w.Put("(")
+	argNames, argTypes := FlattenFields(f.Type.Params)
+	for i := range argNames {
+		w.Put(comma(i), javaTypeOf(argTypes[i]), " ", argNames[i])
+	}
+	w.Put(")")
+
+	w.Putln("{")
+	w.indent++
+
+	// body calls static implementation with this as first arg
+	w.Put(f.Name, "(this")
+	for i := range argNames {
+		w.Put(", ", argNames[i])
+	}
+	w.Putln(");")
+
+	w.indent--
+	w.Putln("}")
+
 }
 
 func ClassNameFor(typ ast.Expr) string {

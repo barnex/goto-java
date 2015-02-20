@@ -1,5 +1,9 @@
 package main
 
+import (
+	"go/ast"
+)
+
 // JModifier holds a java modifier. E.g.:
 // 	PUBLIC | STATIC | FINAL
 type JModifier uint32
@@ -13,18 +17,30 @@ const (
 	FINAL
 )
 
+func ModifierFor(ident *ast.Ident) JModifier {
+	name := JavaNameFor(ident)
+	if ast.IsExported(name) {
+		return PUBLIC
+	} else {
+		return PROTECTED
+	}
+}
+
 func (m JModifier) String() string {
 	str := ""
-	switch {
-	case m.Is(PRIVATE):
+	if m.Is(PRIVATE) {
 		str = cat(str, "private")
-	case m.Is(PROTECTED):
+	}
+	if m.Is(PROTECTED) {
 		str = cat(str, "protected")
-	case m.Is(PUBLIC):
+	}
+	if m.Is(PUBLIC) {
 		str = cat(str, "public")
-	case m.Is(STATIC):
+	}
+	if m.Is(STATIC) {
 		str = cat(str, "static")
-	case m.Is(FINAL):
+	}
+	if m.Is(FINAL) {
 		str = cat(str, "final")
 	}
 	return str

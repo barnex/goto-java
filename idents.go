@@ -7,7 +7,6 @@ package main
 import (
 	"fmt"
 	"go/ast"
-	"log"
 
 	"golang.org/x/tools/go/types"
 )
@@ -43,7 +42,7 @@ func RenameReservedIdents(n ast.Node) map[types.Object]string {
 			// DEBUG: flag -renameall renames all variables for stress testing.
 			if javaKeyword[obj.Name()] || *flagRenameAll {
 				new := makeNewName(obj.Name())
-				log.Println("renmaing", obj.Name(), "->", new)
+				Log(n, obj.Name(), "->", new)
 				rename[obj] = new
 			}
 
@@ -57,35 +56,16 @@ func RenameReservedIdents(n ast.Node) map[types.Object]string {
 	return rename
 }
 
-// Translate an identifier to its java name.
-// Usually returns the identifier's name unchanged,
-// unless it has been renamed for some reason or when
-// the identifier name is a protected java keyword.
-//func JavaName(id *ast.Ident) string {
-//	obj := ObjectOf(id)
-//
-//	if obj == nil {
-//		Error(id, "undefined:", id.Name)
-//	}
-//
-//	// object has been renamed
-//	if tr, ok := renamed[obj]; ok {
-//		return tr
-//	}
-//
-//	// Name is keyword: rename it and return new name.
-//	// DEBUG: flag -renameall renames all variables for stress testing.
-//	if javaKeyword[obj.Name()] || *flagRenameAll {
-//		new := makeNewName(obj.Name())
-//		log.Println("renmaing", obj.Name(), "->", new)
-//		renamed[obj] = new
-//		return new
-//	}
-//
-//	// nothing special: return original name
-//	// TODO: do we need to filter unicode names?
-//	return obj.Name()
-//}
+// JavaNameFor returns the java name for identifier,
+// possibly renamed to avoid java keywords.
+func JavaNameFor(id *ast.Ident) string {
+	obj := ObjectOf(id)
+	if renamed, ok := rename[obj]; ok {
+		return renamed
+	} else {
+		return obj.Name()
+	}
+}
 
 // Construct a new (java) name for a (go) identifier with original name orig.
 // The new name is globally unique and can be used in any scope.

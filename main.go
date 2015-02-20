@@ -2,7 +2,9 @@ package main
 
 import (
 	"flag"
+	"go/ast"
 	"log"
+	"runtime"
 )
 
 var (
@@ -13,6 +15,7 @@ var (
 	flagParens      = flag.Bool("parens", false, "Emit superfluous parens")
 	flagPrint       = flag.Bool("print", false, "Print ast")
 	flagRenameAll   = flag.Bool("renameall", false, "Rename all variables (debug)")
+	flagVerbose     = flag.Bool("v", true, "verbose logging")
 	UNUSED          string // base name for translating the blank identifier (flag -blank)
 )
 
@@ -36,4 +39,18 @@ func checkUserErr(err error) {
 
 func fatal(msg ...interface{}) {
 	log.Fatal(msg...)
+}
+
+func Log(n ast.Node, msg ...interface{}) {
+	if *flagVerbose {
+		pc, _, _, ok := runtime.Caller(1)
+		if ok {
+			fname := runtime.FuncForPC(pc).Name()[len("main."):]
+			msg = append([]interface{}{fname + ": "}, msg...)
+		}
+		if n != nil {
+			msg = append([]interface{}{PosOf(n).String() + ": "}, msg...)
+		}
+		log.Println(msg...)
+	}
 }
