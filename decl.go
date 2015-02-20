@@ -82,7 +82,7 @@ func (w *writer) PutStaticFunc(f *ast.FuncDecl) {
 	if f.Recv != nil {
 		assert(len(f.Recv.List) == 1)
 		field := f.Recv.List[0]
-		name := "unused"
+		name := makeNewName(UNUSED)
 		if field.Names != nil {
 			assert(len(field.Names) == 1)
 			name = JavaNameFor(field.Names[0])
