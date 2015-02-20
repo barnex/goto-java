@@ -55,8 +55,6 @@ func CollectTypeSpec(s *ast.TypeSpec) {
 func RecordMethodDecl(s *ast.FuncDecl) {
 	rl := s.Recv.List
 	assert(len(rl) == 1)
-	assert(len(rl[0].Names) == 1)
-	//recvName := rl[0].Names[0]
 	recvTyp := rl[0].Type
 
 	// method on value, e.g., func(T)M(){}
@@ -81,22 +79,27 @@ func RecordMethodDecl(s *ast.FuncDecl) {
 func GenClasses() {
 	for _, c := range typedefs {
 		Log(nil, c.typeSpec.Name)
-		name := ClassNameFor(c.typeSpec.Name)
-		w := NewWriter(name + ".java")
-		w.PutTypeDef(name, c)
-		w.Close()
+
+		GenClass(c)
 	}
 }
 
-func (w *writer) PutTypeDef(name string, c *TypeDef) {
+func GenClass(c *TypeDef) {
+	name := ClassNameFor(c.typeSpec.Name)
+	w := NewWriter(name + ".java")
+	defer w.Close()
+
+	w.PutDoc(c.typeSpec.Doc)
 	w.Putln("public final class ", name, "{")
+	w.Putln()
 	w.indent++
 
-	switch typ := c.typeSpec.Type.(type) {
+	typ := c.typeSpec.Type
+	switch typ.(type) {
 	default:
 		Error(typ, "cannot handle", reflect.TypeOf(typ))
 	case *ast.StructType:
-		w.PutStructDef(typ)
+		w.PutStructDef(c)
 	}
 
 	w.indent--
@@ -108,14 +111,22 @@ func (w *writer) PutTypeDef(name string, c *TypeDef) {
 // 	        Fields     *FieldList // list of field declarations
 // 	        Incomplete bool       // true if (source) fields are missing in the Fields list
 // 	}
-func (w *writer) PutStructDef(c *ast.StructType) {
-	for _, f := range c.Fields.List {
+func (w *writer) PutStructDef(def *TypeDef) {
+	// Fields
+	spec := def.typeSpec.Type.(*ast.StructType)
+	for _, f := range spec.Fields.List {
 		w.PutTypeExpr(f.Type)
 		w.Put(" ")
 		for i, n := range f.Names {
 			w.Put(comma(i), n)
 		}
 		w.Putln(";")
+	}
+	w.Putln()
+
+	// Methods
+	for _, m := range def.valMethods {
+		w.PutMethodDecl(m)
 	}
 }
 

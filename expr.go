@@ -67,13 +67,8 @@ func (w *writer) PutIdent(id *ast.Ident) {
 	if IsBuiltinIdent(id) {
 		w.PutBuiltinIdent(id)
 		return
-	}
-
-	obj := ObjectOf(id)
-	if renamed, ok := rename[obj]; ok {
-		w.Put(renamed)
 	} else {
-		w.Put(obj.Name())
+		w.Put(JavaNameFor(id))
 	}
 }
 
