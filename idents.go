@@ -7,7 +7,6 @@ package main
 import (
 	"fmt"
 	"go/ast"
-	"log"
 
 	"golang.org/x/tools/go/types"
 )
@@ -43,7 +42,7 @@ func RenameReservedIdents(n ast.Node) map[types.Object]string {
 			// DEBUG: flag -renameall renames all variables for stress testing.
 			if javaKeyword[obj.Name()] || *flagRenameAll {
 				new := makeNewName(obj.Name())
-				log.Println("renmaing", obj.Name(), "->", new)
+				Log(n, "renmaing", obj.Name(), "->", new)
 				rename[obj] = new
 			}
 

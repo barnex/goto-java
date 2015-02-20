@@ -1,4 +1,4 @@
 all:
 	rm -f ./a3
-	goimports -w *.go
+	#goimports -w *.go
 	go install

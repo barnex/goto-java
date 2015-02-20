@@ -4,7 +4,6 @@ package main
 
 import (
 	"go/ast"
-	"log"
 	"reflect"
 
 	"golang.org/x/tools/go/types"
@@ -38,7 +37,7 @@ func CollectDefs(root ast.Node) {
 // 	        Comment *CommentGroup // line comments; or nil
 // 	}
 func CollectTypeSpec(s *ast.TypeSpec) {
-	Log(s, "CollectTypeSpec", s.Name)
+	Log(s, s.Name)
 	cls := classOf(s.Name)
 	assert(cls.typeSpec == nil)
 	cls.typeSpec = s
@@ -81,7 +80,7 @@ func RecordMethodDecl(s *ast.FuncDecl) {
 // generate code for all defs in global classes variable
 func GenClasses() {
 	for _, c := range typedefs {
-		Log("GenClasses:", c)
+		Log(nil, c.typeSpec.Name)
 		name := ClassNameFor(c.typeSpec.Name)
 		w := NewWriter(name + ".java")
 		w.PutTypeDef(name, c)
