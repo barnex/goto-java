@@ -160,7 +160,7 @@ func (w *writer) PutMethodDecl(f *ast.FuncDecl) {
 	w.indent++
 
 	// body calls static implementation with this as first arg
-	w.Put("\t", f.Name, "(this")
+	w.Put(f.Name, "(this")
 	for i := range argNames {
 		w.Put(", ", argNames[i])
 	}
