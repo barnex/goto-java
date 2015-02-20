@@ -28,18 +28,22 @@ func ModifierFor(ident *ast.Ident) JModifier {
 
 func (m JModifier) String() string {
 	str := ""
-	switch {
-	case m.Is(PRIVATE):
+	if m.Is(PRIVATE) {
 		str = cat(str, "private")
-	case m.Is(PROTECTED):
+	}
+	if m.Is(PROTECTED) {
 		str = cat(str, "protected")
-	case m.Is(PUBLIC):
+	}
+	if m.Is(PUBLIC) {
 		str = cat(str, "public")
-	case m.Is(STATIC):
+	}
+	if m.Is(STATIC) {
 		str = cat(str, "static")
-	case m.Is(FINAL):
+	}
+	if m.Is(FINAL) {
 		str = cat(str, "final")
 	}
+	println(m, str)
 	return str
 }
 

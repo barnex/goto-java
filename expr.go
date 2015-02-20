@@ -31,6 +31,8 @@ func (w *writer) PutExpr(n ast.Expr) {
 		w.PutIdent(e)
 	case *ast.ParenExpr:
 		w.PutParenExpr(e)
+	case *ast.SelectorExpr:
+		w.PutSelectorExpr(e)
 	case *ast.SliceExpr:
 		w.PutSliceExpr(e)
 	case *ast.UnaryExpr:
@@ -123,6 +125,10 @@ func (w *writer) putStringSlice(e *ast.SliceExpr) {
 		w.PutExpr(e.High)
 	}
 	w.Put(")")
+}
+
+func (w *writer) PutSelectorExpr(e *ast.SelectorExpr) {
+	w.Put(e.X, ".", e.Sel)
 }
 
 // Emit code for a parnthesized expression.
