@@ -87,40 +87,65 @@ func GenClasses() {
 	for _, c := range typedefs {
 		Log(nil, c.typeSpec.Name)
 
-		GenClass(c)
+		switch tdef := c.typeSpec.Type.(type) {
+		default:
+			panic("cannot handle: " + reflect.TypeOf(tdef).String())
+		case *ast.StructType:
+			GenStructClass(c)
+			GenStructValueClass(c)
+		}
 	}
 }
 
-func GenClass(c *TypeDef) {
-	name := ClassNameFor(c.typeSpec.Name)
+func GenStructClass(d *TypeDef) {
+	spec := d.typeSpec
+	name := ClassNameFor(spec.Name)
 	w := NewWriter(name + ".java")
 	defer w.Close()
 
-	w.PutDoc(c.typeSpec.Doc)
+	w.PutDoc(spec.Doc)
 	w.Putln("public final class ", name, "{")
 	w.Putln()
 	w.indent++
 
-	typ := c.typeSpec.Type
-	switch typ.(type) {
-	default:
-		Error(typ, "cannot handle", reflect.TypeOf(typ))
-	case *ast.StructType:
-		w.PutStructDef(c)
+	// Fields
+	w.PutStructFields(spec.Type.(*ast.StructType))
+	w.Putln()
+
+	// Methods on pointer
+	for _, m := range d.ptrMethods {
+		w.PutMethodDecl(m)
 	}
 
 	w.indent--
 	w.Putln("}")
 }
 
-// 	type StructType struct {
-// 	        Struct     token.Pos  // position of "struct" keyword
-// 	        Fields     *FieldList // list of field declarations
-// 	        Incomplete bool       // true if (source) fields are missing in the Fields list
-// 	}
-func (w *Writer) PutStructDef(def *TypeDef) {
+func GenStructValueClass(d *TypeDef) {
+	spec := d.typeSpec
+	name := ClassNameFor(spec.Name) + "Value" // TODO
+	w := NewWriter(name + ".java")
+	defer w.Close()
+
+	w.Putln("/** Alias for ", ClassNameFor(spec.Name), " when used with Go value semantics. */")
+	w.Putln("public final class ", name, "{")
+	w.Putln()
+	w.indent++
+
 	// Fields
-	spec := def.typeSpec.Type.(*ast.StructType)
+	w.PutStructFields(spec.Type.(*ast.StructType))
+	w.Putln()
+
+	// Methods on value
+	for _, m := range d.valMethods {
+		w.PutMethodDecl(m)
+	}
+
+	w.indent--
+	w.Putln("}")
+}
+
+func (w *Writer) PutStructFields(spec *ast.StructType) {
 	names, types := FlattenFields(spec.Fields)
 	for i, n := range names {
 		t := types[i]
@@ -129,12 +154,14 @@ func (w *Writer) PutStructDef(def *TypeDef) {
 		w.Putln(" ", n, " = ", ZeroValue(t), ";")
 		// TODO Docs
 	}
-	w.Putln()
+}
 
-	// Methods on pointer
-	for _, m := range def.ptrMethods {
-		w.PutMethodDecl(m)
-	}
+// 	type StructType struct {
+// 	        Struct     token.Pos  // position of "struct" keyword
+// 	        Fields     *FieldList // list of field declarations
+// 	        Incomplete bool       // true if (source) fields are missing in the Fields list
+// 	}
+func (w *Writer) PutStructDef(def *TypeDef) {
 }
 
 func (w *Writer) PutMethodDecl(f *ast.FuncDecl) {

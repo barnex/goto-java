@@ -141,6 +141,7 @@ func (w *Writer) PutSelectorExpr(e *ast.SelectorExpr) {
 	case *types.Struct:
 		if _, ok := ObjectOf(e.Sel).(*types.Func); ok {
 			// value method on java class: pass copy
+			// TODO: func value?
 			w.Put(e.X, ".value().", e.Sel)
 		} else {
 			w.Put(e.X, ".", e.Sel)
