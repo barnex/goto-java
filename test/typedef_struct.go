@@ -42,4 +42,14 @@ func main() {
 	println(v.x.val)
 	println(v.y.val)
 
+	v.v = 7
+	v.x.val = 19
+	println(v.v)
+	println(v.x.val)
+	println(v.y.val)
+
+	println(v.ValMethod()) // must not modify v
+	println(v.v)
+	println(v.x.val)
+	println(v.y.val)
 }
