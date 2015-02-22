@@ -28,4 +28,18 @@ func main() {
 	s = new(Struct)
 	println(s == nil)
 
+	println(s.v)
+	println(s.x.val)
+	println(s.y.val)
+
+	s.PtrMethod(42)
+	println(s.v)
+	println(s.x.val)
+	println(s.y.val)
+
+	var v Struct
+	println(v.v)
+	println(v.x.val)
+	println(v.y.val)
+
 }
