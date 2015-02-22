@@ -224,7 +224,7 @@ func (w *Writer) PutBlockStmt(b *ast.BlockStmt) {
 func (w *Writer) PutStmtList(list []ast.Stmt) {
 	for _, n := range list {
 		w.PutStmt(n)
-		if needSemicolon(n) {
+		if NeedSemicolon(n) {
 			w.Putln(";")
 		} else {
 			w.Putln()
@@ -233,12 +233,14 @@ func (w *Writer) PutStmtList(list []ast.Stmt) {
 }
 
 // does this statement need a terminating semicolon if part of a statement list?
-func needSemicolon(s ast.Stmt) bool {
-	switch s.(type) {
+func NeedSemicolon(s ast.Stmt) bool {
+	switch s := s.(type) {
 	default:
 		return true
 	case *ast.BlockStmt, *ast.ForStmt, *ast.IfStmt, *ast.SwitchStmt:
 		return false
+	case *ast.DeclStmt:
+		return s.Decl.(*ast.GenDecl).Tok != token.TYPE
 	}
 }
 
