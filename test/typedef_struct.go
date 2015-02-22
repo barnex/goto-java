@@ -23,7 +23,9 @@ func (s *Struct) PtrMethod(v int) {
 func main() {
 
 	var s *Struct
+	println(s == nil)
 
+	s = new(Struct)
 	println(s == nil)
 
 }

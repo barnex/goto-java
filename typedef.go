@@ -131,10 +131,6 @@ func (w *Writer) PutStructDef(def *TypeDef) {
 	}
 	w.Putln()
 
-	// Methods on value
-	for _, m := range def.valMethods {
-		w.PutMethodDecl(m)
-	}
 	// Methods on pointer
 	for _, m := range def.ptrMethods {
 		w.PutMethodDecl(m)

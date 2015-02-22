@@ -4,6 +4,7 @@ package gotojava
 
 import (
 	"go/ast"
+	"reflect"
 
 	"golang.org/x/tools/go/types"
 )
@@ -53,8 +54,10 @@ func (w *Writer) PutBuiltinCall(c *ast.CallExpr) {
 		Error(c, "cannot handle builtin: ", name)
 	case "len":
 		w.PutLenExpr(c)
+	case "new":
+		w.PutNewCall(c)
 	case "print", "println":
-		w.PutBuiltinPrintCall(c)
+		w.PutPrintCall(c)
 		//case "byte", "uint8", "int8", "uint16", "int16", "uint32", "int32", "uint", "int", "uint64", "int64":
 		//	if len(c.Args) != 1 {
 		//		Error(c, "too many arguments to conversion to", name)
@@ -63,8 +66,20 @@ func (w *Writer) PutBuiltinCall(c *ast.CallExpr) {
 	}
 }
 
+// Emit code for built-in new(...) call.
+func (w *Writer) PutNewCall(c *ast.CallExpr) {
+	assert(len(c.Args) == 1)
+	arg := c.Args[0]
+	switch t := TypeOf(arg).(type) {
+	default:
+		panic("cannot handle new " + reflect.TypeOf(t).String())
+	case *types.Named:
+		w.Put("new ", JavaTypeOf(TypeOf(arg)), "()")
+	}
+}
+
 // Emit code for built-in print, prinln calls.
-func (w *Writer) PutBuiltinPrintCall(c *ast.CallExpr) {
+func (w *Writer) PutPrintCall(c *ast.CallExpr) {
 	name := StripParens(c.Fun).(*ast.Ident).Name
 	switch name {
 	default:
