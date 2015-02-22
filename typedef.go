@@ -9,12 +9,15 @@ import (
 	"golang.org/x/tools/go/types"
 )
 
+// TypeDef represents a type+methods definition.
 type TypeDef struct {
-	typeSpec   *ast.TypeSpec
-	valMethods []*ast.FuncDecl
-	ptrMethods []*ast.FuncDecl
+	typeSpec   *ast.TypeSpec   // type definition
+	valMethods []*ast.FuncDecl // value methods
+	ptrMethods []*ast.FuncDecl // pointer methods
 }
 
+// Collect all type definitions in the AST rooted at root.
+// Save them to global typedefs map.
 func CollectDefs(root ast.Node) {
 	typedefs = make(map[types.Object]*TypeDef)
 	ast.Inspect(root, func(n ast.Node) bool {
@@ -23,12 +26,16 @@ func CollectDefs(root ast.Node) {
 			return true
 		case *ast.TypeSpec:
 			CollectTypeSpec(n)
+		case *ast.FuncDecl:
+			if n.Recv != nil {
+				CollectMethodDecl(n)
+			}
 		}
 		return true
 	})
 }
 
-// RecordTypeSpec sets the type declaration of the corresponding class (in global classes variable).
+// CollectTypeSpec sets the type declaration of the corresponding class (in global typedefs variable).
 // Code generation is deferred until all methods are known.
 // 	type TypeSpec struct {
 // 	        Doc     *CommentGroup // associated documentation; or nil
@@ -43,7 +50,7 @@ func CollectTypeSpec(s *ast.TypeSpec) {
 	cls.typeSpec = s
 }
 
-// RecordMethodDecl adds a method declaration to the corresponding class's method set (in global classes variable).
+// CollectMethodDecl adds a method declaration to the corresponding class's method set (in global typedefs variable).
 // Code generation is deferred until all methods are known.
 // 	type FuncDecl struct {
 // 	        Doc  *CommentGroup // associated documentation; or nil
@@ -52,7 +59,7 @@ func CollectTypeSpec(s *ast.TypeSpec) {
 // 	        Type *FuncType     // function signature: parameters, results, and position of "func" keyword
 // 	        Body *BlockStmt    // function body; or nil (forward declaration)
 // 	}
-func RecordMethodDecl(s *ast.FuncDecl) {
+func CollectMethodDecl(s *ast.FuncDecl) {
 	rl := s.Recv.List
 	assert(len(rl) == 1)
 	recvTyp := rl[0].Type
@@ -75,7 +82,7 @@ func RecordMethodDecl(s *ast.FuncDecl) {
 	Error(s, "invalid receiver: "+reflect.TypeOf(recvTyp).String())
 }
 
-// generate code for all defs in global classes variable
+// generate code for all defs in global typedefs variable
 func GenClasses() {
 	for _, c := range typedefs {
 		Log(nil, c.typeSpec.Name)

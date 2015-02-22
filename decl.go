@@ -37,7 +37,7 @@ func (w *Writer) PutFuncDecl(n *ast.FuncDecl) {
 	if n.Recv == nil {
 		w.PutStaticFunc(n)
 	} else {
-		RecordMethodDecl(n)
+		// ignore method, handled by CollectDefs.
 	}
 }
 
