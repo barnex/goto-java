@@ -6,6 +6,8 @@ import (
 	"go/ast"
 	"go/token"
 	"reflect"
+
+	"golang.org/x/tools/go/types"
 )
 
 // Emit code for an expression.
@@ -127,8 +129,23 @@ func (w *Writer) putStringSlice(e *ast.SliceExpr) {
 	w.Put(")")
 }
 
+// Emit code for selector expression: a.b. Godoc:
+// 	type SelectorExpr struct {
+// 	        X   Expr   // expression
+// 	        Sel *Ident // field selector
+// 	}
 func (w *Writer) PutSelectorExpr(e *ast.SelectorExpr) {
-	w.Put(e.X, ".", e.Sel)
+	switch TypeOf(e.X).Underlying().(type) {
+	default:
+		w.Put(e.X, ".", e.Sel)
+	case *types.Struct:
+		if _, ok := ObjectOf(e.Sel).(*types.Func); ok {
+			// value method on java class: pass copy
+			w.Put(e.X, ".value().", e.Sel)
+		} else {
+			w.Put(e.X, ".", e.Sel)
+		}
+	}
 }
 
 // Emit code for a parnthesized expression.

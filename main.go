@@ -4,6 +4,7 @@ import (
 	"flag"
 	"go/ast"
 	"log"
+	"path"
 	"runtime"
 )
 
@@ -45,7 +46,8 @@ func Log(n ast.Node, msg ...interface{}) {
 	if *flagVerbose {
 		pc, _, _, ok := runtime.Caller(1)
 		if ok {
-			fname := runtime.FuncForPC(pc).Name()[len("main."):]
+			fname := path.Ext(runtime.FuncForPC(pc).Name()) // strip package prefix
+			fname = fname[1:]                               // strip "."
 			msg = append([]interface{}{fname + ": "}, msg...)
 		}
 		if n != nil {
