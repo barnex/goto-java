@@ -87,19 +87,17 @@ func (w *Writer) PutStaticFunc(f *ast.FuncDecl) {
 			assert(len(field.Names) == 1)
 			name = JavaNameFor(field.Names[0])
 		}
+
 		w.PutTypeExpr(field.Type)
+
 		w.Put(" ", name)
 		if len(argNames) != 0 {
 			w.Put(", ")
 		}
 	}
 
-	for i := range argNames {
-		w.Put(comma(i), JavaTypeOf(argTypes[i]), " ", argNames[i])
-	}
-	w.Put(")")
-
-	w.Putln("{")
+	w.PutParams(argNames, argTypes)
+	w.Putln("){")
 	w.indent++
 
 	// declare named return values, if any
@@ -113,6 +111,12 @@ func (w *Writer) PutStaticFunc(f *ast.FuncDecl) {
 
 	w.indent--
 	w.Putln("}")
+}
+
+func (w *Writer) PutParams(names []*ast.Ident, types []types.Type) {
+	for i := range names {
+		w.Put(comma(i), JavaTypeOf(types[i]), " ", names[i])
+	}
 }
 
 // Emit the main function. Special case in PutStaticFunc.

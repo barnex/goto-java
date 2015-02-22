@@ -109,13 +109,25 @@ func GenStructClass(d *TypeDef) {
 	w.indent++
 
 	// Fields
-	w.PutStructFields(spec.Type.(*ast.StructType))
+	fields := spec.Type.(*ast.StructType).Fields
+	w.PutStructFields(fields)
 	w.Putln()
 
 	// Methods on pointer
 	for _, m := range d.ptrMethods {
 		w.PutMethodDecl(m)
 	}
+
+	names, _ := FlattenFields(fields)
+	w.Putln("public ", name+"Value", " value(){")
+	w.indent++
+	w.Put("return new ", name+"Value", "(")
+	for i, n := range names {
+		w.Put(comma(i), n)
+	}
+	w.Putln(");")
+	w.indent--
+	w.Putln("}")
 
 	w.indent--
 	w.Putln("}")
@@ -133,8 +145,21 @@ func GenStructValueClass(d *TypeDef) {
 	w.indent++
 
 	// Fields
-	w.PutStructFields(spec.Type.(*ast.StructType))
+	fields := spec.Type.(*ast.StructType).Fields
+	w.PutStructFields(fields)
 	w.Putln()
+
+	// Constructor
+	names, types := FlattenFields(fields)
+	w.Put("public ", name, "(")
+	w.PutParams(names, types)
+	w.Putln("){")
+	w.indent++
+	for _, n := range names {
+		w.Putln("this.", n, " = ", n, ";")
+	}
+	w.indent--
+	w.Putln("}")
 
 	// Methods on value
 	for _, m := range d.valMethods {
@@ -145,8 +170,8 @@ func GenStructValueClass(d *TypeDef) {
 	w.Putln("}")
 }
 
-func (w *Writer) PutStructFields(spec *ast.StructType) {
-	names, types := FlattenFields(spec.Fields)
+func (w *Writer) PutStructFields(fields *ast.FieldList) {
+	names, types := FlattenFields(fields)
 	for i, n := range names {
 		t := types[i]
 		w.Put(ModifierFor(n), " ")
@@ -166,10 +191,12 @@ func (w *Writer) PutStructDef(def *TypeDef) {
 
 func (w *Writer) PutMethodDecl(f *ast.FuncDecl) {
 
-	// actual implementation with "this" as first receiver
+	// (1) Put static implementation with "this" as first receiver
+	// TODO: some doc
 	w.PutStaticFunc(f)
 	w.Putln()
 
+	// (2) Put method, calling static implementation
 	w.PutDoc(f.Doc)
 	w.Put(ModifierFor(f.Name), " ")
 
@@ -180,12 +207,8 @@ func (w *Writer) PutMethodDecl(f *ast.FuncDecl) {
 	// arguments
 	w.Put("(")
 	argNames, argTypes := FlattenFields(f.Type.Params)
-	for i := range argNames {
-		w.Put(comma(i), JavaTypeOf(argTypes[i]), " ", argNames[i])
-	}
-	w.Put(")")
-
-	w.Putln("{")
+	w.PutParams(argNames, argTypes)
+	w.Putln("){")
 	w.indent++
 
 	// body calls static implementation with this as first arg
