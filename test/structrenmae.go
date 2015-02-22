@@ -3,8 +3,9 @@ package main
 // test struct type renaming.
 // AST points to different objects, wtf?
 
-type private struct{
-
+type private struct {
 }
 
 var b private
+
+func main() {}
