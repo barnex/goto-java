@@ -1,41 +1,29 @@
 package main
 
-var s Struct
+type Int struct {
+	val int
+}
 
 // A test struct.
 type Struct struct {
-	a, b int
-	s    string
+	x, y Int
+	v    int
 }
 
-func (s Struct) ValMethod1() {}
-
-func (s Struct) ValMethod2(a, b int) int {
-	return s.a + b
+func (s Struct) ValMethod() int {
+	s.v *= 2
+	s.x.val += 10
+	return s.x.val + s.y.val + s.v
 }
 
-func (Struct) valmethod() {}
 
-func (s *Struct) PtrMethod1() {}
-
-func (s *Struct) PtrMethod2(a, b int) {
-	s.a = a
-	s.b = b
+func (s *Struct) PtrMethod(v int) {
+	s.v = v
 }
-
-func (*Struct) ptrmethod() {}
 
 func main() {
+
 	var s Struct
+	var sptr := &s
 
-	println(s.a)
-
-	s.ValMethod1()
-	println(s.ValMethod2(1, 2))
-	s.valmethod()
-
-	s.PtrMethod1()
-	s.PtrMethod2(1, 2)
-	println(s.a)
-	s.ptrmethod()
 }
