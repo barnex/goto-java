@@ -91,56 +91,54 @@ func GenClasses() {
 		default:
 			panic("cannot handle: " + reflect.TypeOf(tdef).String())
 		case *ast.StructType:
-			GenStructClass(c)
+			GenStructPointerClass(c)
 			GenStructValueClass(c)
 		}
 	}
 }
 
-func GenStructClass(d *TypeDef) {
+// Generate java class for Go pointer-to-named-struct type.
+func GenStructPointerClass(d *TypeDef) {
 	spec := d.typeSpec
-	name := ClassNameFor(spec.Name)
+	name := ClassNameFor(spec.Name) + "Ptr"
 	w := NewWriter(name + ".java")
 	defer w.Close()
 
 	w.PutDoc(spec.Doc)
-	w.Putln("public final class ", name, "{")
+	base := ClassNameFor(spec.Name)
+	w.Putln("public final class ", name, " extends ", base, "{")
 	w.Putln()
 	w.indent++
-
-	// Fields
-	fields := spec.Type.(*ast.StructType).Fields
-	w.PutStructFields(fields)
-	w.Putln()
 
 	// Methods on pointer
 	for _, m := range d.ptrMethods {
 		w.PutMethodDecl(m)
 	}
 
-	names, _ := FlattenFields(fields)
-	w.Putln("public ", name+"Value", " value(){")
-	w.indent++
-	w.Put("return new ", name+"Value", "(")
-	for i, n := range names {
-		w.Put(comma(i), n)
-	}
-	w.Putln(");")
-	w.indent--
-	w.Putln("}")
+	// .value() method
+	//names, _ := FlattenFields(fields)
+	//w.Putln("public ", name, " value(){")
+	//w.indent++
+	//w.Put("return new ", name+"Value", "(")
+	//for i, n := range names {
+	//	w.Put(comma(i), n)
+	//}
+	//w.Putln(");")
+	//w.indent--
+	//w.Putln("}")
 
 	w.indent--
 	w.Putln("}")
 }
 
+// Generate java class for Go named struct type (value semantics).
 func GenStructValueClass(d *TypeDef) {
 	spec := d.typeSpec
-	name := ClassNameFor(spec.Name) + "Value" // TODO
+	name := ClassNameFor(spec.Name)
 	w := NewWriter(name + ".java")
 	defer w.Close()
 
-	w.Putln("/** Alias for ", ClassNameFor(spec.Name), " when used with Go value semantics. */")
-	w.Putln("public final class ", name, "{")
+	w.Putln("public class ", name, "{")
 	w.Putln()
 	w.indent++
 
@@ -149,7 +147,9 @@ func GenStructValueClass(d *TypeDef) {
 	w.PutStructFields(fields)
 	w.Putln()
 
-	// Constructor
+	// Constructors
+	w.Putln("public ", name, "(){}\n")
+
 	names, types := FlattenFields(fields)
 	w.Put("public ", name, "(")
 	w.PutParams(names, types)
@@ -226,15 +226,15 @@ func (w *Writer) PutMethodDecl(f *ast.FuncDecl) {
 
 }
 
-func ClassNameFor(typ ast.Expr) string {
-	switch typ := typ.(type) {
-	default:
-		Error(typ, "cannot handle", reflect.TypeOf(typ))
-		panic("")
-	case *ast.Ident:
-		return typ.Name // TODO: rename
-	}
-}
+//func ClassNameFor(typ ast.Expr) string {
+//	switch typ := typ.(type) {
+//	default:
+//		Error(typ, "cannot handle", reflect.TypeOf(typ))
+//		panic("")
+//	case *ast.Ident:
+//		return typ.Name // TODO: rename
+//	}
+//}
 
 func classOf(typeId *ast.Ident) *TypeDef {
 	cls := ObjectOf(typeId)

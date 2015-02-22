@@ -53,7 +53,7 @@ func javaPointerType(t *types.Pointer) string {
 	default:
 		panic("cannot handle pointer to " + reflect.TypeOf(e).String())
 	case *types.Named:
-		return javaNamedType(e) // java reference type used for both pointer and value
+		return javaNamedType(e) + "Ptr" // TODO
 	}
 }
 
