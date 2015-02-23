@@ -85,13 +85,23 @@ func (w *Writer) PutLenExpr(n *ast.CallExpr) {
 	if len(n.Args) != 1 {
 		Error(n, "too many arguments to len")
 	}
-	argT := JavaTypeOfExpr(n.Args[0])
-	switch argT {
+	arg := n.Args[0]
+
+	switch t := TypeOf(arg).(type) {
 	default:
-		Error(n, "invalid argument (type ", argT, ") for len")
-	case "String":
-		w.Put("(", n.Args[0], ").length()")
+		goto ERR
+	case *types.Basic:
+		if t.Info()&types.IsString != 0 {
+			w.Put("(", n.Args[0], ").length()")
+		} else {
+			goto ERR
+		}
 	}
+
+	return
+
+ERR:
+	Error(n, "invalid argument (type ", TypeOf(arg), ") for len")
 }
 
 // maps Go primitives to java

@@ -17,6 +17,8 @@ func JavaTypeOfPtr(elemExpr ast.Expr) string {
 	return JavaTypeOfExpr(elemExpr) + "Ptr"
 }
 
+// TODO: IsStringType(), IsMapType(), IsSliceType, IsArrayType(), ...
+
 // Array, Basic, Chan, Signature, Interface, Map, Named, Pointer, Slice, Struct, Tuple
 // TODO: pass expr, if *ident: rename?  Or rename types in pre-processing?
 func JavaType(t types.Type) string {
