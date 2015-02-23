@@ -52,4 +52,17 @@ func main() {
 	println(v.v)
 	println(v.x.val)
 	println(v.y.val)
+
+	var u, w Struct
+	println(u == w)
+	println(v == w)
+	println(u == v)
+
+	u = v
+	println(u == w)
+	println(v == w)
+	println(u == v)
+
+	v.v = 34
+	println(u.v)
 }
