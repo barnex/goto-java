@@ -18,7 +18,8 @@ func IsBuiltin(e ast.Expr) bool {
 	e = StripParens(e)
 	if id, ok := e.(*ast.Ident); ok {
 		obj := ObjectOf(id)
-		return (obj.Parent() == types.Universe) && (builtins[id.Name] == true)
+		_, ok := obj.(*types.Builtin)
+		return ok
 	}
 	return false
 }
@@ -35,7 +36,6 @@ func (w *Writer) PutBuiltinIdent(id *ast.Ident) {
 // Generate code for built-in call, like len(x)
 func (w *Writer) PutBuiltinCall(c *ast.CallExpr) {
 	name := StripParens(c.Fun).(*ast.Ident).Name
-	//Log(c, "OBJECT:", ObjectOf(StripParens(c.Fun).(*ast.Ident)))
 	switch name {
 	default:
 		Error(c, "cannot handle builtin: ", name)
@@ -94,49 +94,6 @@ func (w *Writer) PutLenExpr(n *ast.CallExpr) {
 		w.PutExpr(n.Args[0])
 		w.Put(").length()")
 	}
-}
-
-// Set of Go built-ins
-var builtins = map[string]bool{
-	"append":  true,
-	"cap":     true,
-	"close":   true,
-	"complex": true,
-	"copy":    true,
-	"delete":  true,
-	"false":   true,
-	"imag":    true,
-	"iota":    true,
-	"len":     true,
-	"make":    true,
-	"new":     true,
-	"nil":     true,
-	"panic":   true,
-	"print":   true,
-	"println": true,
-	"real":    true,
-	"recover": true,
-	"true":    true,
-
-	"bool":       true,
-	"byte":       true,
-	"complex128": true,
-	"error":      true,
-	"float32":    true,
-	"float64":    true,
-	"int":        true,
-	"int16":      true,
-	"int32":      true,
-	"int64":      true,
-	"int8":       true,
-	"rune":       true,
-	"string":     true,
-	"uint":       true,
-	"uint16":     true,
-	"uint32":     true,
-	"uint64":     true,
-	"uint8":      true,
-	"uintptr":    true,
 }
 
 // maps Go primitives to java
