@@ -90,9 +90,7 @@ func (w *Writer) PutLenExpr(n *ast.CallExpr) {
 	default:
 		Error(n, "invalid argument (type ", argT, ") for len")
 	case "String":
-		w.Put("(")
-		w.PutExpr(n.Args[0])
-		w.Put(").length()")
+		w.Put("(", n.Args[0], ").length()")
 	}
 }
 
