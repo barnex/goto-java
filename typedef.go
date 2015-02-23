@@ -179,7 +179,7 @@ func (w *Writer) PutStructFields(fields *ast.FieldList) {
 	for i, n := range names {
 		t := types[i]
 		w.Put(ModifierFor(n), " ")
-		w.Put(JavaTypeOf(t))
+		w.Put(JavaType(t))
 		w.Putln(" ", n, " = ", ZeroValue(t), ";")
 		// TODO Docs
 	}

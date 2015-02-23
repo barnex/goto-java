@@ -10,7 +10,7 @@ import (
 )
 
 func JavaTypeOfExpr(typeExpr ast.Expr) string {
-	return JavaTypeOf(TypeOf(typeExpr))
+	return JavaType(TypeOf(typeExpr))
 }
 
 func JavaTypeOfPtr(elemExpr ast.Expr) string {
@@ -19,7 +19,7 @@ func JavaTypeOfPtr(elemExpr ast.Expr) string {
 
 // Array, Basic, Chan, Signature, Interface, Map, Named, Pointer, Slice, Struct, Tuple
 // TODO: pass expr, if *ident: rename?  Or rename types in pre-processing?
-func JavaTypeOf(t types.Type) string {
+func JavaType(t types.Type) string {
 	switch t := t.(type) {
 	default:
 		panic("cannot handle type " + reflect.TypeOf(t).String())
@@ -36,7 +36,7 @@ func JavaTypeOf(t types.Type) string {
 }
 
 func javaBasicType(t *types.Basic) string {
-	if transl, ok := javaBasic[t.String()]; ok {
+	if transl, ok := builtin2java[t.String()]; ok {
 		return transl
 	} else {
 		panic("cannot handle basic type " + t.String())

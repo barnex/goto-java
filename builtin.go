@@ -26,7 +26,7 @@ func IsBuiltin(e ast.Expr) bool {
 
 // Emit code for a built-in identifer
 func (w *Writer) PutBuiltinIdent(id *ast.Ident) {
-	if transl, ok := javaBasic[id.Name]; ok {
+	if transl, ok := builtin2java[id.Name]; ok {
 		w.Put(transl)
 	} else {
 		Error(id, "built-in identifier not supported: ", id.Name)
@@ -97,7 +97,7 @@ func (w *Writer) PutLenExpr(n *ast.CallExpr) {
 }
 
 // maps Go primitives to java
-var javaBasic = map[string]string{
+var builtin2java = map[string]string{
 	"bool":    "boolean",
 	"byte":    "byte",
 	"float32": "float",
