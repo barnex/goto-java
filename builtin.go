@@ -9,23 +9,16 @@ import (
 	"golang.org/x/tools/go/types"
 )
 
-// IsBuiltinIdent returns true if id refers to a Go built-in identifier.
-// The result is scope-sensitive, as built-ins may be shadowed by
-// other declarations (e.g. len := 7).
-func IsBuiltinIdent(id *ast.Ident) bool {
-	obj := ObjectOf(id)
-	return (obj.Parent() == types.Universe) && (builtins[id.Name] == true)
-}
-
-// IsBuiltinExpr returns true if expression e refers to a built-in identifer. E.g.:
+// IsBuiltin returns true if expression e refers to a built-in identifer. E.g.:
 // 	print
 // 	(print)
-// 	...
-func IsBuiltinExpr(e ast.Expr) bool {
+// The result is scope-sensitive, as built-ins may be shadowed by
+// other declarations (e.g. len := 7).
+func IsBuiltin(e ast.Expr) bool {
 	e = StripParens(e)
-	// identifier
 	if id, ok := e.(*ast.Ident); ok {
-		return IsBuiltinIdent(id)
+		obj := ObjectOf(id)
+		return (obj.Parent() == types.Universe) && (builtins[id.Name] == true)
 	}
 	return false
 }

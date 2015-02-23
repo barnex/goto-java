@@ -66,7 +66,7 @@ func (w *Writer) PutBasicLit(n *ast.BasicLit) {
 // 	        Obj     *Object   // denoted object; or nil
 // 	}
 func (w *Writer) PutIdent(id *ast.Ident) {
-	if IsBuiltinIdent(id) {
+	if IsBuiltin(id) {
 		w.PutBuiltinIdent(id)
 		return
 	} else {
@@ -192,7 +192,7 @@ func (w *Writer) PutCallExpr(n *ast.CallExpr) {
 	if n.Ellipsis != 0 {
 		Error(n, "cannot handle ellipsis...")
 	}
-	if IsBuiltinExpr(n.Fun) {
+	if IsBuiltin(n.Fun) {
 		w.PutBuiltinCall(n)
 		return
 	}
