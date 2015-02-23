@@ -109,22 +109,3 @@ func (w *Writer) PutImplicitCast(dst types.Type, e ast.Expr) {
 //		panic("cannot convert type to java: " + goType.String())
 //	}
 //}
-
-// maps Go primitives to java
-var javaBasic = map[string]string{
-	"bool":    "boolean",
-	"byte":    "byte",
-	"float32": "float",
-	"float64": "double",
-	"int":     "int",
-	"int16":   "short",
-	"int32":   "int",
-	"int64":   "long",
-	"int8":    "byte",
-	"string":  "String",
-	"uint":    "int",
-	"uint16":  "short",
-	"uint32":  "int",
-	"uint64":  "long",
-	"uint8":   "byte",
-}

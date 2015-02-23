@@ -23,16 +23,9 @@ func IsBuiltin(e ast.Expr) bool {
 	return false
 }
 
-// maps go built-in identifiers to Java
-var lit2java = map[string]string{
-	"false": "false",
-	"nil":   "null", //? need to type!
-	"true":  "true",
-}
-
 // Emit code for a built-in identifer
 func (w *Writer) PutBuiltinIdent(id *ast.Ident) {
-	if transl, ok := lit2java[id.Name]; ok {
+	if transl, ok := javaBasic[id.Name]; ok {
 		w.Put(transl)
 	} else {
 		Error(id, "built-in identifier not supported: ", id.Name)
@@ -42,6 +35,7 @@ func (w *Writer) PutBuiltinIdent(id *ast.Ident) {
 // Generate code for built-in call, like len(x)
 func (w *Writer) PutBuiltinCall(c *ast.CallExpr) {
 	name := StripParens(c.Fun).(*ast.Ident).Name
+	//Log(c, "OBJECT:", ObjectOf(StripParens(c.Fun).(*ast.Ident)))
 	switch name {
 	default:
 		Error(c, "cannot handle builtin: ", name)
@@ -143,4 +137,27 @@ var builtins = map[string]bool{
 	"uint64":     true,
 	"uint8":      true,
 	"uintptr":    true,
+}
+
+// maps Go primitives to java
+var javaBasic = map[string]string{
+	"bool":    "boolean",
+	"byte":    "byte",
+	"float32": "float",
+	"float64": "double",
+	"int":     "int",
+	"int16":   "short",
+	"int32":   "int",
+	"int64":   "long",
+	"int8":    "byte",
+	"string":  "String",
+	"uint":    "int",
+	"uint16":  "short",
+	"uint32":  "int",
+	"uint64":  "long",
+	"uint8":   "byte",
+
+	"true":  "true",
+	"false": "false",
+	"nil":   "null",
 }
