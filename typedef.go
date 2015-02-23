@@ -102,32 +102,20 @@ func GenStructPointerClass(d *TypeDef) {
 	spec := d.typeSpec
 
 	name := JavaTypeOfPtr(spec.Name)
+	base := JavaTypeOfExpr(spec.Name)
 
 	w := NewWriter(name + ".java")
 	defer w.Close()
 
 	w.PutDoc(spec.Doc)
-	base := JavaTypeOfExpr(spec.Name)
 	w.Putln("public final class ", name, " extends ", base, "{")
 	w.Putln()
 	w.indent++
 
 	// Methods on pointer
 	for _, m := range d.ptrMethods {
-		w.PutMethodDecl(m)
+		w.PutMethodDecl(m, false)
 	}
-
-	// .value() method
-	//names, _ := FlattenFields(fields)
-	//w.Putln("public ", name, " value(){")
-	//w.indent++
-	//w.Put("return new ", name+"Value", "(")
-	//for i, n := range names {
-	//	w.Put(comma(i), n)
-	//}
-	//w.Putln(");")
-	//w.indent--
-	//w.Putln("}")
 
 	w.indent--
 	w.Putln("}")
@@ -163,9 +151,23 @@ func GenStructValueClass(d *TypeDef) {
 	w.indent--
 	w.Putln("}")
 
+	w.Putln("public ", name, "(", name, " other", "){")
+	w.indent++
+	for _, n := range names {
+		w.Putln("this.", n, " = ", "other.", n, ";")
+	}
+	w.indent--
+	w.Putln("}")
+
+	w.Putln("public ", name, " copy(){")
+	w.indent++
+	w.Put("return new ", name, "(this);")
+	w.indent--
+	w.Putln("}")
+
 	// Methods on value
 	for _, m := range d.valMethods {
-		w.PutMethodDecl(m)
+		w.PutMethodDecl(m, true)
 	}
 
 	w.indent--
@@ -191,7 +193,7 @@ func (w *Writer) PutStructFields(fields *ast.FieldList) {
 func (w *Writer) PutStructDef(def *TypeDef) {
 }
 
-func (w *Writer) PutMethodDecl(f *ast.FuncDecl) {
+func (w *Writer) PutMethodDecl(f *ast.FuncDecl, copyRecv bool) {
 
 	// (1) Put static implementation with "this" as first receiver
 	// TODO: some doc
@@ -218,6 +220,9 @@ func (w *Writer) PutMethodDecl(f *ast.FuncDecl) {
 		w.Put("return ")
 	}
 	w.Put(f.Name, "(", "this")
+	if copyRecv {
+		w.Put(".copy()")
+	}
 	for i := range argNames {
 		w.Put(", ", argNames[i])
 	}
