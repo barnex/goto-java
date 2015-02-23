@@ -100,12 +100,14 @@ func GenClasses() {
 // Generate java class for Go pointer-to-named-struct type.
 func GenStructPointerClass(d *TypeDef) {
 	spec := d.typeSpec
-	name := ClassNameFor(spec.Name) + "Ptr"
+
+	name := JavaTypeOfPtr(spec.Name)
+
 	w := NewWriter(name + ".java")
 	defer w.Close()
 
 	w.PutDoc(spec.Doc)
-	base := ClassNameFor(spec.Name)
+	base := JavaTypeOfExpr(spec.Name)
 	w.Putln("public final class ", name, " extends ", base, "{")
 	w.Putln()
 	w.indent++
@@ -134,7 +136,7 @@ func GenStructPointerClass(d *TypeDef) {
 // Generate java class for Go named struct type (value semantics).
 func GenStructValueClass(d *TypeDef) {
 	spec := d.typeSpec
-	name := ClassNameFor(spec.Name)
+	name := JavaTypeOfExpr(spec.Name)
 	w := NewWriter(name + ".java")
 	defer w.Close()
 

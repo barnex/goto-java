@@ -74,7 +74,7 @@ func (w *Writer) PutNewCall(c *ast.CallExpr) {
 	default:
 		panic("cannot handle new " + reflect.TypeOf(t).String())
 	case *types.Named:
-		w.Put("new ", JavaTypeOf(TypeOf(arg)), "()")
+		w.Put("new ", JavaTypeOfPtr(arg), "()")
 	}
 }
 

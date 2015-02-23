@@ -13,6 +13,10 @@ func JavaTypeOfExpr(typeExpr ast.Expr) string {
 	return JavaTypeOf(TypeOf(typeExpr))
 }
 
+func JavaTypeOfPtr(elemExpr ast.Expr) string {
+	return JavaTypeOfExpr(elemExpr) + "Ptr"
+}
+
 // Array, Basic, Chan, Signature, Interface, Map, Named, Pointer, Slice, Struct, Tuple
 // TODO: pass expr, if *ident: rename?  Or rename types in pre-processing?
 func JavaTypeOf(t types.Type) string {
