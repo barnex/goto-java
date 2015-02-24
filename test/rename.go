@@ -1,11 +1,13 @@
 package main
 
+// Test variable re-naming
+
 var (
 	static_2  = 3 // try to trigger collision with renamed variable
 	private_1 = 4 // try to trigger collision with renamed variable
-	new       = 4
 	static    = 7 // try to trigger global/local collision
 	final     = 8 // try to trigger global/local collision
+	new       = 4
 )
 
 func private(a int, b int) int {
@@ -41,4 +43,11 @@ func main() {
 	new := 6
 	println(new)
 
+	true1 := 1 // try to mix up with rename true -> true1
+	println(true)
+	true := false
+	println(true)
+
+	println(true)
+	println(true1)
 }
