@@ -24,6 +24,11 @@ func (w *Writer) PutIdent(id *ast.Ident) {
 		return
 	}
 
+	if new, ok := rename[ObjectOf(id)]; ok {
+		w.Put(new)
+		return
+	}
+
 	switch id := ObjectOf(id).(type) {
 	default:
 		panic("cannot handle " + reflect.TypeOf(id).String())
@@ -77,7 +82,7 @@ func RenameReservedIdents(n ast.Node) map[types.Object]string {
 
 			// Name is keyword: rename it and return new name.
 			// DEBUG: flag -renameall renames all variables for stress testing.
-			if javaKeyword[obj.Name()] || *flagRenameAll {
+			if canRename(obj) && (javaKeyword[obj.Name()] || *flagRenameAll) {
 				new := makeNewName(obj.Name())
 				Log(n, obj.Name(), "->", new)
 				rename[obj] = new
@@ -87,6 +92,17 @@ func RenameReservedIdents(n ast.Node) map[types.Object]string {
 	})
 
 	return rename
+}
+
+func canRename(obj types.Object) bool {
+	isBuiltin := (obj.Parent() == types.Universe)
+	if isBuiltin {
+		return false
+	}
+
+	_, isVar := obj.(*types.Var)
+	_, isConst := obj.(*types.Const)
+	return (isVar || isConst)
 }
 
 // JavaNameFor returns the java name for identifier,

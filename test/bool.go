@@ -1,7 +1,22 @@
 package main
 
+func f1() {
+	// test mind-bending const name
+	const true = false
+	println(true)
+}
+
+func f2() {
+	// test mind-bending const name
+	const false = true
+	println(false)
+}
+
 // test boolean variables, initialisation and ops.
 func main() {
+	f1()
+	f2()
+
 	var a bool
 	b := a
 
