@@ -6,7 +6,8 @@ func f(x int) int {
 
 func main() {
 	x := 1
+	println(f)
 	println(f(x))
 	println((f)(x))
-	println((f)(x))
+	println(((f))(x))
 }
