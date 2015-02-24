@@ -3,6 +3,8 @@ package gotojava
 import (
 	"go/ast"
 	"go/token"
+
+	"golang.org/x/tools/go/types"
 )
 
 // Emit an assignment or a short variable declaration.
@@ -41,12 +43,18 @@ func (w *Writer) PutAssignStmt(n *ast.AssignStmt) {
 		}
 		// blank identifer: need to put type. E.g.:
 		// 	int _4 = f(x);
+		var typeOfLHS types.Type
 		if IsBlank(lhs) {
 			w.Put(JavaTypeOfExpr(n.Rhs[i]), " ")
 			lhs = StripParens(lhs) // border case, go allows "(_) = x"
+			typeOfLHS = TypeOf(n.Rhs[i])
+		} else {
+			typeOfLHS = TypeOf(lhs)
 		}
 		w.Put(lhs, " ", n.Tok, " ")
-		w.PutImplicitCast(TypeOf(lhs), n.Rhs[i])
+
+		w.PutImplicitCast(typeOfLHS, n.Rhs[i])
+
 	}
 }
 
