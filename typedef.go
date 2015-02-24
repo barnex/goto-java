@@ -164,6 +164,7 @@ func GenStructValueClass(d *TypeDef) {
 	w.indent--
 	w.Putln("}")
 
+	// copy method
 	w.Putln("public ", name, " copy(){")
 	w.indent++
 	w.Put("return new ", name, "(this);")
@@ -188,14 +189,6 @@ func (w *Writer) PutStructFields(fields *ast.FieldList) {
 		w.Putln(" ", n, " = ", ZeroValue(t), ";")
 		// TODO Docs
 	}
-}
-
-// 	type StructType struct {
-// 	        Struct     token.Pos  // position of "struct" keyword
-// 	        Fields     *FieldList // list of field declarations
-// 	        Incomplete bool       // true if (source) fields are missing in the Fields list
-// 	}
-func (w *Writer) PutStructDef(def *TypeDef) {
 }
 
 func (w *Writer) PutMethodDecl(f *ast.FuncDecl, copyRecv bool) {
@@ -237,16 +230,6 @@ func (w *Writer) PutMethodDecl(f *ast.FuncDecl, copyRecv bool) {
 	w.Putln("}")
 
 }
-
-//func ClassNameFor(typ ast.Expr) string {
-//	switch typ := typ.(type) {
-//	default:
-//		Error(typ, "cannot handle", reflect.TypeOf(typ))
-//		panic("")
-//	case *ast.Ident:
-//		return typ.Name // TODO: rename
-//	}
-//}
 
 func classOf(typeId *ast.Ident) *TypeDef {
 	cls := ObjectOf(typeId)
