@@ -88,7 +88,7 @@ func (w *Writer) PutStaticFunc(f *ast.FuncDecl) {
 			name = JavaNameFor(field.Names[0])
 		}
 
-		w.PutTypeExpr(field.Type)
+		w.Put(JavaTypeOf(field.Type))
 
 		w.Put(" ", name)
 		if len(argNames) != 0 {

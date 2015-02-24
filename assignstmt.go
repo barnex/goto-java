@@ -31,9 +31,12 @@ func (w *Writer) PutAssignStmt(n *ast.AssignStmt) {
 // 	+= -= *= /= ...
 func (w *Writer) putAssignOp(lhs ast.Expr, tok token.Token, rhs ast.Expr) {
 	if tok == token.AND_NOT_ASSIGN {
-		w.Put(lhs, " &= ", " ~", "(", rhs, ")")
+		w.Put(lhs, " &= ", " ~", "(")
+		w.PutRHS(rhs, TypeOf(lhs), false)
+		w.Put(")")
 	} else {
-		w.Put(lhs, tok, rhs)
+		w.Put(lhs, tok)
+		w.PutRHS(rhs, TypeOf(lhs), false)
 	}
 }
 
@@ -53,15 +56,14 @@ func (w *Writer) putAssign(n *ast.AssignStmt) {
 		// 	int _4 = f(x);
 		var typeOfLHS types.Type
 		if IsBlank(lhs) {
-			w.Put(JavaTypeOfExpr(n.Rhs[i]), " ")
+			w.Put(JavaTypeOf(n.Rhs[i]), " ")
 			lhs = StripParens(lhs) // border case, go allows "(_) = x"
 			typeOfLHS = TypeOf(n.Rhs[i])
 		} else {
 			typeOfLHS = TypeOf(lhs)
 		}
 		w.Put(lhs, " ", n.Tok, " ")
-
-		w.PutImplicitCast(typeOfLHS, n.Rhs[i])
+		w.PutRHS(n.Rhs[i], typeOfLHS, false)
 
 	}
 }
