@@ -33,6 +33,10 @@ func main() {
 	println(H)
 	println(I)
 	println(J)
+	println(X)
+	println(Y)
+	println(Z)
+	println(U)
 }
 
 const B int = 10
@@ -43,4 +47,11 @@ const (
 	G    int = 50
 	H        = 60
 	I, J     = 70, 80
+)
+
+const (
+	X = 1
+	Y = X + 2
+	Z = len("hello")
+	U = 2 * X << Y
 )
