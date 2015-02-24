@@ -8,6 +8,8 @@ var _ = 3
 var _0 = 4
 var _1 = 5
 
+var _ = new(Padded)
+
 func main() {
 	_ = f(1)
 	_ = f(1)
@@ -34,3 +36,14 @@ func f2(_ int, _ int) int {
 	println(_2)
 	return 42
 }
+
+type Padded struct {
+	x int
+	_ int
+	_ int
+}
+
+func (Padded) f1()    {}
+func (_ Padded) f2()  {}
+func (*Padded) f3()   {}
+func (_ *Padded) f4() {}
