@@ -137,20 +137,25 @@ func GenStructValueClass(d *TypeDef) {
 	w.PutStructFields(fields)
 	w.Putln()
 
-	// Constructors
+	// Constructors:
+	// (1) no arguments
 	w.Putln("public ", name, "(){}\n")
 
+	// (2) fields as individual values
 	names, types := FlattenFields(fields)
-	w.Put("public ", name, "(")
-	w.PutParams(names, types)
-	w.Putln("){")
-	w.indent++
-	for _, n := range names {
-		w.Putln("this.", n, " = ", n, ";")
+	if len(names) > 0 {
+		w.Put("public ", name, "(")
+		w.PutParams(names, types)
+		w.Putln("){")
+		w.indent++
+		for _, n := range names {
+			w.Putln("this.", n, " = ", n, ";")
+		}
+		w.indent--
+		w.Putln("}")
 	}
-	w.indent--
-	w.Putln("}")
 
+	// (3) copy constructor
 	w.Putln("public ", name, "(", name, " other", "){")
 	w.indent++
 	for _, n := range names {

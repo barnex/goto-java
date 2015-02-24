@@ -1,5 +1,12 @@
 package main
 
+type Empty struct{}
+
+var (
+	e Empty
+	f *Empty
+)
+
 type Int struct {
 	val int
 }

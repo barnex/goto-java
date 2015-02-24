@@ -8,6 +8,8 @@ var (
 	static    = 7 // try to trigger global/local collision
 	final     = 8 // try to trigger global/local collision
 	new       = 4
+	x         protected
+	y         *protected
 )
 
 func private(a int, b int) int {
@@ -51,3 +53,5 @@ func main() {
 	println(true)
 	println(true1)
 }
+
+type protected struct{}
