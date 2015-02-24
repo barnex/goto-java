@@ -7,8 +7,7 @@ import (
 	"golang.org/x/tools/go/types"
 )
 
-// Emit an assignment or a short variable declaration.
-// AssignStmt godoc:
+// Emit an assignment or a short variable declaration. Godoc:
 // 	type AssignStmt struct {
 // 	        Lhs    []Expr
 // 	        TokPos token.Pos   // position of Tok
@@ -16,24 +15,33 @@ import (
 // 	        Rhs    []Expr
 // 	}
 func (w *Writer) PutAssignStmt(n *ast.AssignStmt) {
+	lhs, rhs := n.Lhs, n.Rhs
+	switch n.Tok {
+	case token.ASSIGN:
+		w.putAssign(n)
+	case token.DEFINE:
+		w.putShortDefine(NONE, n)
+	default:
+		assert(len(lhs) == 1 && len(rhs) == 1)
+		w.putAssignOp(lhs[0], n.Tok, rhs[0])
+	}
+}
+
+// Emit assign statement with operation, e.g.:
+// 	+= -= *= /= ...
+func (w *Writer) putAssignOp(lhs ast.Expr, tok token.Token, rhs ast.Expr) {
+	if tok == token.AND_NOT_ASSIGN {
+		w.Put(lhs, " &= ", " ~", "(", rhs, ")")
+	} else {
+		w.Put(lhs, tok, rhs)
+	}
+}
+
+// Emit simple assign statement:
+// 	a = b
+func (w *Writer) putAssign(n *ast.AssignStmt) {
 	if len(n.Lhs) != len(n.Rhs) {
 		Error(n, "assignment count mismatch:", len(n.Lhs), "!=", len(n.Rhs))
-		// TODO: function with multiple returns
-	}
-
-	// java does not have &^=, translate
-	if n.Tok == token.AND_NOT_ASSIGN {
-		if len(n.Lhs) != 1 || len(n.Rhs) != 1 {
-			// should have been caught by type checker.
-			Error(n, n.Tok.String(), " requires single argument")
-		}
-		w.Put(n.Lhs[0], " &= ", " ~", "(", n.Rhs[0], ")") // TODO: implicit conv
-		return
-	}
-
-	if n.Tok == token.DEFINE {
-		w.putDefine(JModifier(NONE), n)
-		return
 	}
 
 	// multiple assign: put one per line
@@ -60,8 +68,11 @@ func (w *Writer) PutAssignStmt(n *ast.AssignStmt) {
 
 // Emit a short variable declaration, e.g.:
 // 	a := 1
-// Special case of PutAssignStmt
-func (w *Writer) putDefine(mod JModifier, a *ast.AssignStmt) {
+func (w *Writer) putShortDefine(mod JModifier, a *ast.AssignStmt) {
+	if len(a.Lhs) != len(a.Rhs) {
+		Error(a, "assignment count mismatch:", len(a.Lhs), "!=", len(a.Rhs))
+		// TODO: function with multiple returns
+	}
 	for i, n := range a.Lhs {
 		var value ast.Expr = nil
 		if i < len(a.Rhs) {

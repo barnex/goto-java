@@ -39,8 +39,8 @@ func f2(_ int, _ int) int {
 
 type Padded struct {
 	x int
-	_ int
-	_ int
+	//_ int  // TODO
+	//_ int
 }
 
 func (Padded) f1()    {}
