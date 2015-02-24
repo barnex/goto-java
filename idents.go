@@ -46,9 +46,9 @@ func RenameReservedIdents(n ast.Node) map[types.Object]string {
 				rename[obj] = new
 			}
 
-			if IsBlank(id) {
-				rename[obj] = makeNewName(UNUSED)
-			}
+			//if IsBlank(id) {
+			//	rename[obj] = makeNewName(UNUSED)
+			//}
 		}
 		return true
 	})
