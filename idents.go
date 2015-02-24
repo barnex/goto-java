@@ -7,9 +7,46 @@ package gotojava
 import (
 	"fmt"
 	"go/ast"
+	"reflect"
 
 	"golang.org/x/tools/go/types"
 )
+
+// Emit an identifier, honoring the global rename map. Godoc:
+// 	type Ident struct {
+// 	        NamePos token.Pos // identifier position
+// 	        Name    string    // identifier name
+// 	        Obj     *Object   // denoted object; or nil
+// 	}
+func (w *Writer) PutIdent(id *ast.Ident) {
+	if IsBlank(id) {
+		w.Put(makeNewName(UNUSED))
+		return
+	}
+
+	switch id := ObjectOf(id).(type) {
+	default:
+		panic("cannot handle " + reflect.TypeOf(id).String())
+	case *types.Const:
+		w.Put(id.Name())
+	case *types.Func:
+		w.Put(id.Name())
+	case *types.Nil:
+		w.Put("null")
+	case *types.Var:
+		w.Put(id.Name())
+	}
+}
+
+// Is e the blank identifier?
+// Also handles the corner case of parenthesized blank ident (_)
+func IsBlank(e ast.Expr) bool {
+	e = StripParens(e)
+	if id, ok := e.(*ast.Ident); ok {
+		return id.Name == "_"
+	}
+	return false
+}
 
 // Collect the names of all identifiers in the AST and maps them to a counter set to 0.
 // Later this counter can be incremented to create an new, unused, identifier name.
@@ -45,10 +82,6 @@ func RenameReservedIdents(n ast.Node) map[types.Object]string {
 				Log(n, obj.Name(), "->", new)
 				rename[obj] = new
 			}
-
-			//if IsBlank(id) {
-			//	rename[obj] = makeNewName(UNUSED)
-			//}
 		}
 		return true
 	})
