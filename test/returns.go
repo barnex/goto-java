@@ -1,8 +1,14 @@
 package main
 
-// test return of one value, named and unnamed
+// test empty return
+func f() {
+	return
+}
 
 func main() {
+	f()
+
+	// test return of one value, named and unnamed
 	println(div(10, 3))
 	println(div2(20, 4))
 	println(div3(30, 5))
