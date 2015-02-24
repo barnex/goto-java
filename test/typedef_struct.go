@@ -27,7 +27,6 @@ func main() {
 
 	s = new(Struct)
 	println(s == nil)
-
 	println(s.v)
 	println(s.x.val)
 	println(s.y.val)

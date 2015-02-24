@@ -6,6 +6,8 @@ import (
 	"go/ast"
 	"go/token"
 	"reflect"
+
+	"golang.org/x/tools/go/types"
 )
 
 // Emit code for an expression.
@@ -66,12 +68,31 @@ func (w *Writer) PutBasicLit(n *ast.BasicLit) {
 // 	        Obj     *Object   // denoted object; or nil
 // 	}
 func (w *Writer) PutIdent(id *ast.Ident) {
-	if IsBuiltin(id) {
-		w.PutBuiltinIdent(id)
+	if IsBlank(id) {
+		w.Put(makeNewName(UNUSED))
 		return
-	} else {
-		w.Put(JavaNameFor(id))
 	}
+
+	switch id := ObjectOf(id).(type) {
+	default:
+		panic("cannot handle " + reflect.TypeOf(id).String())
+	case *types.Func:
+		w.Put(id.Name())
+	case *types.Nil:
+		w.Put("null")
+	case *types.Var:
+		w.Put(id.Name())
+	}
+}
+
+// Is e the blank identifier?
+// Also handles the corner case of parenthesized blank ident (_)
+func IsBlank(e ast.Expr) bool {
+	e = StripParens(e)
+	if id, ok := e.(*ast.Ident); ok {
+		return id.Name == "_"
+	}
+	return false
 }
 
 // Emit a unary expression, execpt unary "*".
