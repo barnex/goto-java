@@ -31,7 +31,13 @@ func JavaTypeOfPtr(elemExpr ast.Expr) string {
 }
 
 func javaBasicType(t *types.Basic) string {
-	if transl, ok := builtin2java[t.String()]; ok {
+	// remove "untyped "
+	name := t.Name()
+	if t.Info()&types.IsUntyped != 0 {
+		name = name[len("untyped "):]
+	}
+
+	if transl, ok := builtin2java[name]; ok {
 		return transl
 	} else {
 		panic("cannot handle basic type " + t.String())

@@ -91,7 +91,7 @@ func RenameReservedIdents(n ast.Node) map[types.Object]string {
 
 // JavaNameFor returns the java name for identifier,
 // possibly renamed to avoid java keywords.
-func JavaNameFor(id *ast.Ident) string {
+func JavaName(id *ast.Ident) string {
 	obj := ObjectOf(id)
 	if renamed, ok := rename[obj]; ok {
 		return renamed

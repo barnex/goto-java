@@ -18,8 +18,7 @@ const (
 )
 
 func ModifierFor(ident *ast.Ident) JModifier {
-	name := JavaNameFor(ident)
-	if ast.IsExported(name) {
+	if ident.IsExported() {
 		return PUBLIC
 	} else {
 		return PROTECTED

@@ -85,7 +85,7 @@ func (w *Writer) PutStaticFunc(f *ast.FuncDecl) {
 		name := makeNewName(UNUSED)
 		if field.Names != nil {
 			assert(len(field.Names) == 1)
-			name = JavaNameFor(field.Names[0])
+			name = JavaName(field.Names[0])
 		}
 
 		w.Put(JavaTypeOf(field.Type))
