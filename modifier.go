@@ -18,6 +18,7 @@ const (
 )
 
 func ModifierFor(ident *ast.Ident) JModifier {
+	// TODO: emit final for struct (value) type?
 	if ident.IsExported() {
 		return PUBLIC
 	} else {
@@ -27,19 +28,19 @@ func ModifierFor(ident *ast.Ident) JModifier {
 
 func (m JModifier) String() string {
 	str := ""
-	if m.Is(PRIVATE) {
+	if m&PRIVATE != 0 {
 		str = cat(str, "private")
 	}
-	if m.Is(PROTECTED) {
+	if m&PROTECTED != 0 {
 		str = cat(str, "protected")
 	}
-	if m.Is(PUBLIC) {
+	if m&PUBLIC != 0 {
 		str = cat(str, "public")
 	}
-	if m.Is(STATIC) {
+	if m&STATIC != 0 {
 		str = cat(str, "static")
 	}
-	if m.Is(FINAL) {
+	if m&FINAL != 0 {
 		str = cat(str, "final")
 	}
 	return str
@@ -52,10 +53,4 @@ func cat(a, b string) string {
 	} else {
 		return a + b
 	}
-}
-
-// Returns true if m contains b. E.g.:
-// 	m.Is(PUBLIC) // true if m is public
-func (m JModifier) Is(b JModifier) bool {
-	return m&b != 0
 }
