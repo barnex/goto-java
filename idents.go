@@ -96,13 +96,7 @@ func RenameReservedIdents(n ast.Node) map[types.Object]string {
 
 func canRename(obj types.Object) bool {
 	isBuiltin := (obj.Parent() == types.Universe)
-	if isBuiltin {
-		return false
-	}
-
-	_, isVar := obj.(*types.Var)
-	_, isConst := obj.(*types.Const)
-	return (isVar || isConst)
+	return !isBuiltin
 }
 
 // JavaNameFor returns the java name for identifier,
