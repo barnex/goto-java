@@ -18,7 +18,8 @@ type JType struct {
 //func(t JType)String()string{return t.JavaName}
 
 func (t JType) IsStructValue() bool {
-	return false //TODO
+	_, ok := t.GoType.Underlying().(*types.Struct)
+	return ok
 }
 
 func JavaType(t types.Type) JType {

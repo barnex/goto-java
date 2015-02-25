@@ -159,13 +159,7 @@ func GenStructValueClass(d *TypeDef) {
 	// (3) copy constructor
 	w.Putln("public ", name, "(", name, " other", "){")
 	w.indent++
-	for _, n := range names {
-		if JavaType(TypeOf(n)).IsStructValue() {
-			w.Putln("this.", n, ".set(", "other.", n, ");")
-		} else {
-			w.Putln("this.", n, " = ", "other.", n, ";")
-		}
-	}
+	w.Putln("this.set(other);")
 	w.indent--
 	w.Putln("}")
 
@@ -189,7 +183,17 @@ func GenStructValueClass(d *TypeDef) {
 	w.Putln("}")
 
 	// set method
-	// ...
+	w.Putln("public void set(", name, " other){")
+	w.indent++
+	for _, n := range names {
+		if JavaType(TypeOf(n)).IsStructValue() {
+			w.Putln("this.", n, ".set(", "other.", n, ");")
+		} else {
+			w.Putln("this.", n, " = ", "other.", n, ";")
+		}
+	}
+	w.indent--
+	w.Putln("}")
 
 	w.indent--
 	w.Putln("}")
