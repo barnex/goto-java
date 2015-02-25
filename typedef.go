@@ -108,8 +108,7 @@ func GenStructPointerClass(d *TypeDef) {
 	defer w.Close()
 
 	w.PutDoc(spec.Doc)
-	w.Putln("public final class ", name, " extends ", base, "{")
-	w.Putln()
+	w.Putf(`public final class %v extends %v {`, name, base)
 	w.indent++
 
 	// Methods on pointer
@@ -200,6 +199,8 @@ func GenStructValueClass(d *TypeDef) {
 
 	// equals method
 	w.Putf(`
+	/** @Override
+		Deep equals test for equality of all fields. */
 	public boolean equals(Object o){
 		if (o instanceof %v){	
 			%v other = (%v)o;
