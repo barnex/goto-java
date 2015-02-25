@@ -53,13 +53,21 @@ func javaNamedType(t *types.Named) string {
 	}
 }
 
+// java type for Go pointer type. E.g.
+// 	*int -> IntPtr
 func javaPointerType(t *types.Pointer) string {
 	switch e := t.Elem().(type) {
 	default:
 		panic("cannot handle pointer to " + reflect.TypeOf(e).String())
 	case *types.Named:
 		return javaNamedType(e) + "Ptr"
+	case *types.Basic:
+		return export(javaBasicType(e) + "Ptr")
 	}
+}
+
+func export(name string) string {
+	return name
 }
 
 // explicit type cast in input file, e.g.:

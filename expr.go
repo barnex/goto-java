@@ -3,9 +3,13 @@ package gotojava
 // This file handles expressions.
 
 import (
+	"fmt"
 	"go/ast"
 	"go/token"
 	"reflect"
+	"strconv"
+
+	"golang.org/x/tools/go/types"
 )
 
 // Emit code for an expression.
@@ -48,14 +52,22 @@ func (w *Writer) PutExpr(n ast.Expr) {
 // 	        Value    string      // literal string; e.g. 42, 0x7f, 3.14, 1e-9, 2.4i, 'a', '\x7f', "foo" or `\m\n\o`
 // 	}
 func (w *Writer) PutBasicLit(n *ast.BasicLit) {
-	goType := TypeOf(n).Underlying().String()
-
-	switch goType {
+	typ := TypeOf(n).(*types.Basic)
+	switch typ.Kind() {
 	default:
-		w.Put(n.Value)
-	case "int64":
-		w.Put(n.Value, "L")
+		panic(fmt.Sprint("cannot handle", typ.Kind()))
+	case types.String:
+		str, err := strconv.Unquote(n.Value)
+		checkUserErr(err)
+		w.Put(fmt.Sprintf("%q", str)) // TODO: flag for "%q"?
 	}
+
+	//	switch goType {
+	//	default:
+	//		w.Put(n.Value)
+	//	case "int64":
+	//		w.Put(n.Value, "L")
+	//	}
 }
 
 // Emit a unary expression, execpt unary "*".
