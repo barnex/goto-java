@@ -104,7 +104,7 @@ func GenStructPointerClass(d *TypeDef) {
 	name := JavaPointerName(spec.Name)
 	base := JavaTypeOf(spec.Name)
 
-	w := NewWriter(name + ".java")
+	w := NewWriterFile(name + ".java")
 	defer w.Close()
 
 	w.PutDoc(spec.Doc)
@@ -126,7 +126,7 @@ func GenStructValueClass(d *TypeDef) {
 	spec := d.typeSpec
 	name := JavaTypeOf(spec.Name).JavaName
 	ptrname := JavaPointerName(spec.Name)
-	w := NewWriter(name + ".java")
+	w := NewWriterFile(name + ".java")
 	defer w.Close()
 
 	w.Putln("public class ", name, "{")

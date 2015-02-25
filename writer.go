@@ -1,7 +1,6 @@
 package gotojava
 
 import (
-	"bufio"
 	"fmt"
 	"go/ast"
 	"go/token"
@@ -12,30 +11,33 @@ import (
 
 // A writer takes AST nodes and outPuts java source
 type Writer struct {
-	out        *bufio.Writer
-	f          io.WriteCloser
+	out        io.Writer
 	indent     int
 	needIndent bool
 }
 
-func NewWriter(fname string) *Writer {
+func NewWriterFile(fname string) *Writer {
 	f, err := os.Create(fname)
 	checkUserErr(err)
-	out := bufio.NewWriter(f)
-	return &Writer{out: out, f: f}
+	//out := bufio.NewWriter(f)
+	return &Writer{out: f}
+}
+
+func NewWriter(out io.WriteCloser) *Writer {
+	return &Writer{out: out}
 }
 
 func (w *Writer) Close() {
-	err := w.out.Flush()
-	checkUserErr(err)
-	err = w.f.Close()
-	checkUserErr(err)
+	if closer, ok := w.out.(io.Closer); ok {
+		err := closer.Close()
+		checkUserErr(err)
+	}
 }
 
-//func SPutln(tokens ...interface{})string{
+//func J(tokens ...interface{})string{
 //	return SPut(append(tokens, "\n")...)
 //}
-//
+
 //func SPut(tokens ...interface{})string{
 //	buf := bytes.NewBuffer()
 //

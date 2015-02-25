@@ -39,7 +39,7 @@ func HandleFile(fname string) {
 
 	// transpile primary class
 	className := fname[:len(fname)-len(path.Ext(fname))]
-	w := NewWriter(className + ".java")
+	w := NewWriterFile(className + ".java")
 	defer w.Close()
 	w.PutClass(className, f)
 

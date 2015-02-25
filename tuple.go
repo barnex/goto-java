@@ -31,7 +31,7 @@ func JavaTupleType(types []types.Type) string {
 func GenTupleDef(name string, types []types.Type) {
 	classGen[name] = true
 
-	w := NewWriter(name + ".java")
+	w := NewWriterFile(name + ".java")
 	defer w.Close()
 
 	w.Putln("public final class ", name, "{\n")
