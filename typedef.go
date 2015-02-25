@@ -157,11 +157,11 @@ func GenStructValueClass(d *TypeDef) {
 	}
 
 	// (3) copy constructor
-	w.Putln("public ", name, "(", name, " other", "){")
-	w.indent++
-	w.Putln("this.set(other);")
-	w.indent--
-	w.Putln("}")
+	w.Putf(`
+public %s(%s other){
+	this.set(other);
+}
+`, name, name)
 
 	// Methods on value
 	for _, m := range d.valMethods {
@@ -169,18 +169,18 @@ func GenStructValueClass(d *TypeDef) {
 	}
 
 	// copy method
-	w.Putln("public ", name, " copy(){")
-	w.indent++
-	w.Put("return new ", name, "(this);")
-	w.indent--
-	w.Putln("}")
+	w.Putf(`
+public %s copy(){
+	return new %s(this);
+}
+`, name, name)
 
 	// addr method
-	w.Putln("public ", ptrname, " addr(){")
-	w.indent++
-	w.Put("return (", ptrname, ")", "this;")
-	w.indent--
-	w.Putln("}")
+	w.Putf(`
+public %s addr(){
+	return (%s)this;
+}
+`, ptrname, ptrname)
 
 	// set method
 	w.Putln("public void set(", name, " other){")

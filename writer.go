@@ -1,6 +1,7 @@
 package gotojava
 
 import (
+	"bytes"
 	"fmt"
 	"go/ast"
 	"go/token"
@@ -8,6 +9,26 @@ import (
 	"os"
 	"reflect"
 )
+
+// J is a convenience function that transpiles (presumably tiny) code snippets to java.
+// Inteded to feed to Writer.Putf(). E.g.:
+// 	w.Putf(`public class %s {`, spec.Name)
+// Large code blocks should be transpiled with Writer.Put(...).
+func puts(tokens ...interface{}) string {
+	buf := bytes.NewBuffer(nil)
+	w := NewWriter(buf)
+	defer w.Close()
+	w.Put(tokens...)
+	return buf.String()
+}
+
+func (w *Writer) Putf(format string, tokens ...interface{}) {
+	compiled := make([]interface{}, 0, len(tokens))
+	for i := range tokens {
+		compiled = append(compiled, puts(tokens[i]))
+	}
+	fmt.Fprintf(w.out, format, compiled...)
+}
 
 // A writer takes AST nodes and outPuts java source
 type Writer struct {
@@ -23,7 +44,7 @@ func NewWriterFile(fname string) *Writer {
 	return &Writer{out: f}
 }
 
-func NewWriter(out io.WriteCloser) *Writer {
+func NewWriter(out io.Writer) *Writer {
 	return &Writer{out: out}
 }
 
@@ -33,10 +54,6 @@ func (w *Writer) Close() {
 		checkUserErr(err)
 	}
 }
-
-//func J(tokens ...interface{})string{
-//	return SPut(append(tokens, "\n")...)
-//}
 
 //func SPut(tokens ...interface{})string{
 //	buf := bytes.NewBuffer()
