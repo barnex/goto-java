@@ -32,6 +32,9 @@ func JavaType(t types.Type) JType {
 		return JType{t, javaNamedType(t)}
 	case *types.Pointer:
 		return JType{t, javaPointerType(t)}
+	case *types.Signature:
+		Log(nil, "TODO: Signature")
+		return JType{t, "**SIGNATURE**"}
 	}
 }
 

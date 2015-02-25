@@ -228,8 +228,7 @@ func (w *Writer) PutStructFields(fields *ast.FieldList) {
 	names, types := FlattenFields(fields)
 	for i, n := range names {
 		t := types[i]
-		w.Put(ModifierFor(n), " ")
-		w.Put(JavaType(t))
+		w.Put(ModifierFor(n), JavaType(t))
 		w.Putln(" ", n, " = ", ZeroValue(t), ";")
 		// TODO Docs
 	}
@@ -244,7 +243,7 @@ func (w *Writer) PutMethodDecl(f *ast.FuncDecl, copyRecv bool) {
 
 	// (2) Put method, calling static implementation
 	w.PutDoc(f.Doc)
-	w.Put(ModifierFor(f.Name), " ")
+	w.Put(ModifierFor(f.Name))
 
 	// return type
 	_, retTypes := FlattenFields(f.Type.Results)

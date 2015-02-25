@@ -17,15 +17,24 @@ const (
 	FINAL
 )
 
+// Returns a suited java modifier (public, ...) for the definition of ident. E.g.:
+// 	x -> NONE   (package private)
+// 	X -> PUBLIC (exported)
+// Modifier is also final for struct types (implemented as final java references)
 func ModifierFor(ident *ast.Ident) JModifier {
-	// TODO: emit final for struct (value) type?
+	mod := NONE
 	if ident.IsExported() {
-		return PUBLIC
-	} else {
-		return PROTECTED
+		mod |= PUBLIC
 	}
+	if JavaType(TypeOf(ident)).IsStructValue() {
+		mod |= FINAL
+	}
+	return mod
 }
 
+// String representation of modifier, followed by space unless empty. E.g.:
+// 	"private static"
+// 	""                // package private
 func (m JModifier) String() string {
 	str := ""
 	if m&PRIVATE != 0 {
@@ -42,6 +51,9 @@ func (m JModifier) String() string {
 	}
 	if m&FINAL != 0 {
 		str = cat(str, "final")
+	}
+	if str != "" {
+		str += " "
 	}
 	return str
 }

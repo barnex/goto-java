@@ -228,9 +228,6 @@ func (w *Writer) PutValueSpecLine(mod JModifier, typ types.Type, names []*ast.Id
 	}
 
 	w.Put(mod)
-	if mod != NONE {
-		w.Put(" ")
-	}
 
 	if typ != nil {
 		jType := JavaType(typ)

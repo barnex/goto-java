@@ -15,6 +15,7 @@ type Int struct {
 type Struct struct {
 	x, y Int
 	v    int
+	Exported int
 }
 
 func (s Struct) ValMethod() int {
