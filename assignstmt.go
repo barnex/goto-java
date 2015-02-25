@@ -84,7 +84,7 @@ func (w *Writer) MakeEquals(ltyp JType, lhs interface{}, rtyp JType, rhs interfa
 	default:
 		w.Put(lhs, " == ", rhs) // TODO: panic
 	case ltyp.IsStructValue() && rtyp.IsStructValue():
-		w.Put(lhs, "._equals(", rhs, ")")
+		w.Put(lhs, ".equals(", rhs, ")")
 	}
 }
 

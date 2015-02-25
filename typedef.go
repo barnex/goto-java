@@ -200,9 +200,11 @@ func GenStructValueClass(d *TypeDef) {
 
 	// equals method
 	w.Putf(`
-	public boolean _equals(%v other){
-`, name)
-	w.indent++
+	public boolean equals(Object o){
+		if (o instanceof %v){	
+			%v other = (%v)o;
+`, name, name, name)
+	w.indent += 2
 	if len(fieldNames) == 0 {
 		w.Put("return true") // struct{}{} == struct{}{}
 	} else {
@@ -215,6 +217,8 @@ func GenStructValueClass(d *TypeDef) {
 		}
 	}
 	w.Putln(";")
+	w.indent--
+	w.Putln("} else { return false; }")
 	w.indent--
 	w.Putln("}")
 
