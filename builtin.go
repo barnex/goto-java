@@ -45,11 +45,7 @@ func (w *Writer) PutBuiltinCall(c *ast.CallExpr) {
 		w.PutNewCall(c)
 	case "print", "println":
 		w.PutPrintCall(c)
-		//case "byte", "uint8", "int8", "uint16", "int16", "uint32", "int32", "uint", "int", "uint64", "int64":
-		//	if len(c.Args) != 1 {
-		//		Error(c, "too many arguments to conversion to", name)
-		//	}
-		//	w.PutTypecast(name, c.Args[0])
+	// IsType(c): cast
 	}
 }
 
@@ -61,6 +57,10 @@ func (w *Writer) PutNewCall(c *ast.CallExpr) {
 	default:
 		panic("cannot handle new " + reflect.TypeOf(t).String())
 	case *types.Named:
+		w.Put("new ", JavaTypeOfPtr(arg), "()")
+	case *types.Basic:
+		w.Put("new ", JavaTypeOfPtr(arg), "()")
+	case *types.Pointer:
 		w.Put("new ", JavaTypeOfPtr(arg), "()")
 	}
 }

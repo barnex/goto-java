@@ -39,6 +39,8 @@ func (w *Writer) PutExpr(n ast.Expr) {
 		w.PutSelectorExpr(e)
 	case *ast.SliceExpr:
 		w.PutSliceExpr(e)
+	case *ast.StarExpr:
+		w.PutStarExpr(e)
 	case *ast.UnaryExpr:
 		w.PutUnaryExpr(e)
 	}
@@ -77,11 +79,21 @@ func (w *Writer) PutUnaryExpr(u *ast.UnaryExpr) {
 	switch u.Op {
 	default:
 		Error(u, "unary ", u.Op, " not supported")
+	case token.AND:
+		w.PutAddressOf(u.X)
 	case token.ADD, token.SUB, token.NOT:
 		w.Put(u.Op.String(), u.X)
 	case token.XOR:
 		w.Put("~", u.X)
 	}
+}
+
+func(w*Writer)PutAddressOf(x ast.Expr){
+	w.Put(x, ".addr()")
+}
+
+func(w*Writer)PutStarExpr(x *ast.StarExpr){
+	w.Put(x.X, ".value()")
 }
 
 // Emit code for a slice expression.

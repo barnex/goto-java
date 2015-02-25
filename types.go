@@ -59,8 +59,8 @@ func javaPointerType(t *types.Pointer) string {
 	switch e := t.Elem().(type) {
 	default:
 		panic("cannot handle pointer to " + reflect.TypeOf(e).String())
-	case *types.Named:
-		return javaNamedType(e) + "Ptr"
+	case *types.Named, *types.Pointer:
+		return JavaType(e) + "Ptr"
 	case *types.Basic:
 		return Export(javaBasicType(e) + "Ptr")
 	}
