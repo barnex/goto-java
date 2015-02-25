@@ -53,21 +53,21 @@ func (w *Writer) PutExpr(n ast.Expr) {
 // 	}
 func (w *Writer) PutBasicLit(n *ast.BasicLit) {
 	typ := TypeOf(n).(*types.Basic)
-	switch typ.Kind() {
+	info := typ.Info()
+	switch  {
 	default:
-		panic(fmt.Sprint("cannot handle", typ.Kind()))
-	case types.String:
+		panic("cannot handle " + n.Value)
+	case info&types.IsUnsigned!=0:
+		panic("unsigned")
+	case info&types.IsInteger!=0:
+		w.Put(n.Value)
+	case info&types.IsFloat!=0:
+		w.Put(n.Value)
+	case info&types.IsString!=0:
 		str, err := strconv.Unquote(n.Value)
 		checkUserErr(err)
 		w.Put(fmt.Sprintf("%q", str)) // TODO: flag for "%q"?
 	}
-
-	//	switch goType {
-	//	default:
-	//		w.Put(n.Value)
-	//	case "int64":
-	//		w.Put(n.Value, "L")
-	//	}
 }
 
 // Emit a unary expression, execpt unary "*".
