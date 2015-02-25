@@ -1,10 +1,12 @@
 package main
 
+// test named basic types
+
 type MyInt int
 type A MyInt 
 
 func (i MyInt) square() int {
-	i = i * i // try to mute
+	i = i * i // try to mutate
 	return int(i)
 }
 
@@ -23,7 +25,7 @@ func main() {
 
 	j := i
 	println(j)
-	(&i).inc()
+	i.inc()
 	println(i)
 
 	x := 0
