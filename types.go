@@ -9,6 +9,11 @@ import (
 	"golang.org/x/tools/go/types"
 )
 
+//func IsType(x ast.Expr)bool{
+//tv, err := types.EvalNode(fset, x, pkg,
+//func EvalNode(fset *token.FileSet, node ast.Expr, pkg *Package, scope *Scope) (tv TypeAndValue, err error)
+//}
+
 func JavaType(t types.Type) string {
 	switch t := t.(type) {
 	default:

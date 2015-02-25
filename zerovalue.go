@@ -26,11 +26,11 @@ func ZeroValue(typ types.Type) string {
 }
 
 func namedZeroValue(t *types.Named) string {
-	switch typ := typ.Underlying().(type) {
+	switch u := t.Underlying().(type) {
 	default:
-		panic("cannot make zero value for named " + reflect.TypeOf(typ).String())
+		panic("cannot make zero value for named " + reflect.TypeOf(u).String())
 	case *types.Struct:
-		return "new " + JavaType(t) + "Ptr" + "()" // constructor // TODO Ptr, underlying
+		return "new " + JavaType(t) + "Ptr" + "()"
 	}
 }
 
