@@ -45,7 +45,7 @@ func (w *Writer) PutBuiltinCall(c *ast.CallExpr) {
 		w.PutNewCall(c)
 	case "print", "println":
 		w.PutPrintCall(c)
-	// IsType(c): cast
+		// IsType(c): cast
 	}
 }
 

@@ -43,13 +43,13 @@ func StripParens(e ast.Expr) ast.Expr {
 // Export turns the first character to upper case.
 func Export(name string) string {
 	rune, width := utf8.DecodeRuneInString(name)
-	return string(unicode.ToUpper(rune))+ name[width:]
+	return string(unicode.ToUpper(rune)) + name[width:]
 }
 
 // Unexport turns the first character to lower case.
 func Unexport(name string) string {
 	rune, width := utf8.DecodeRuneInString(name)
-	return string(unicode.ToLower(rune))+ name[width:]
+	return string(unicode.ToLower(rune)) + name[width:]
 }
 
 // Returns a comma if i!=0.

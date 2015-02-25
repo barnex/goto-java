@@ -184,7 +184,6 @@ func GenStructValueClass(d *TypeDef) {
 	w.indent--
 	w.Putln("}")
 
-
 	w.indent--
 	w.Putln("}")
 }

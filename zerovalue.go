@@ -1,5 +1,7 @@
 package gotojava
 
+// Generate zero values (initial values) for each type.
+
 import (
 	"reflect"
 
@@ -17,9 +19,18 @@ func ZeroValue(typ types.Type) string {
 	case *types.Basic:
 		return basicZeroValue(typ)
 	case *types.Named:
-		return "new " + JavaType(typ) + "Ptr" + "()" // constructor // TODO Ptr, underlying
+		return namedZeroValue(typ)
 	case *types.Pointer:
 		return "null"
+	}
+}
+
+func namedZeroValue(t *types.Named) string {
+	switch typ := typ.Underlying().(type) {
+	default:
+		panic("cannot make zero value for named " + reflect.TypeOf(typ).String())
+	case *types.Struct:
+		return "new " + JavaType(t) + "Ptr" + "()" // constructor // TODO Ptr, underlying
 	}
 }
 
