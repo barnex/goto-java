@@ -54,16 +54,16 @@ func (w *Writer) PutExpr(n ast.Expr) {
 func (w *Writer) PutBasicLit(n *ast.BasicLit) {
 	typ := TypeOf(n).(*types.Basic)
 	info := typ.Info()
-	switch  {
+	switch {
 	default:
 		panic("cannot handle " + n.Value)
-	case info&types.IsUnsigned!=0:
+	case info&types.IsUnsigned != 0:
 		panic("unsigned")
-	case info&types.IsInteger!=0:
+	case info&types.IsInteger != 0:
 		w.Put(n.Value)
-	case info&types.IsFloat!=0:
+	case info&types.IsFloat != 0:
 		w.Put(n.Value)
-	case info&types.IsString!=0:
+	case info&types.IsString != 0:
 		str, err := strconv.Unquote(n.Value)
 		checkUserErr(err)
 		w.Put(fmt.Sprintf("%q", str)) // TODO: flag for "%q"?

@@ -62,12 +62,8 @@ func javaPointerType(t *types.Pointer) string {
 	case *types.Named:
 		return javaNamedType(e) + "Ptr"
 	case *types.Basic:
-		return export(javaBasicType(e) + "Ptr")
+		return Export(javaBasicType(e) + "Ptr")
 	}
-}
-
-func export(name string) string {
-	return name
 }
 
 // explicit type cast in input file, e.g.:

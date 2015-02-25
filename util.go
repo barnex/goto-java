@@ -1,7 +1,10 @@
 package gotojava
 
 import (
+	"fmt"
 	"go/ast"
+	"unicode"
+	"unicode/utf8"
 
 	"golang.org/x/tools/go/types"
 )
@@ -36,6 +39,18 @@ func StripParens(e ast.Expr) ast.Expr {
 	} else {
 		return e
 	}
+}
+
+// Export turns the first character to upper case.
+func Export(name string) string {
+	rune, width := utf8.DecodeRuneInString(name)
+	return fmt.Sprint(unicode.ToUpper(rune), name[width:])
+}
+
+// Unexport turns the first character to lower case.
+func Unexport(name string) string {
+	rune, width := utf8.DecodeRuneInString(name)
+	return fmt.Sprint(unicode.ToLower(rune), name[width:])
 }
 
 // Returns a comma if i!=0.
