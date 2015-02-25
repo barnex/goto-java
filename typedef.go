@@ -64,6 +64,8 @@ func CollectMethodDecl(s *ast.FuncDecl) {
 	assert(len(rl) == 1)
 	recvTyp := rl[0].Type
 
+	// TODO: switch
+
 	// method on value, e.g., func(T)M(){}
 	if id, ok := recvTyp.(*ast.Ident); ok {
 		classDef := classOf(id)
@@ -200,7 +202,7 @@ func GenStructValueClass(d *TypeDef) {
 	// equals method
 	w.Putf(`
 	/** @Override
-		Deep equals test for equality of all fields. */
+		Deep equality test of all fields. */
 	public boolean equals(Object o){
 		if (o instanceof %v){	
 			%v other = (%v)o;
@@ -213,13 +215,16 @@ func GenStructValueClass(d *TypeDef) {
 		for i, n := range fieldNames {
 			if i > 0 {
 				w.Putln(" &&")
+				w.Put("\t")
 			}
 			w.MakeEquals(JavaType(TypeOf(n)), Transpile("this.", n), JavaType(TypeOf(n)), Transpile("other.", n))
 		}
 	}
 	w.Putln(";")
 	w.indent--
-	w.Putln("} else { return false; }")
+	w.Putln(`} else {
+			return false;
+		}`)
 	w.indent--
 	w.Putln("}")
 
