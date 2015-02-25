@@ -17,7 +17,7 @@ func ZeroValue(typ types.Type) string {
 	case *types.Basic:
 		return basicZeroValue(typ)
 	case *types.Named:
-		return "new " + JavaType(typ) + "()" // constructor
+		return "new " + JavaType(typ) + "Ptr" + "()" // constructor // TODO Ptr, underlying
 	case *types.Pointer:
 		return "null"
 	}

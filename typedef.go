@@ -125,6 +125,7 @@ func GenStructPointerClass(d *TypeDef) {
 func GenStructValueClass(d *TypeDef) {
 	spec := d.typeSpec
 	name := JavaTypeOf(spec.Name)
+	ptrname := JavaTypeOfPtr(spec.Name)
 	w := NewWriter(name + ".java")
 	defer w.Close()
 
@@ -164,6 +165,11 @@ func GenStructValueClass(d *TypeDef) {
 	w.indent--
 	w.Putln("}")
 
+	// Methods on value
+	for _, m := range d.valMethods {
+		w.PutMethodDecl(m, true)
+	}
+
 	// copy method
 	w.Putln("public ", name, " copy(){")
 	w.indent++
@@ -171,10 +177,13 @@ func GenStructValueClass(d *TypeDef) {
 	w.indent--
 	w.Putln("}")
 
-	// Methods on value
-	for _, m := range d.valMethods {
-		w.PutMethodDecl(m, true)
-	}
+	// addr method
+	w.Putln("public ", ptrname, " addr(){")
+	w.indent++
+	w.Put("return (", ptrname, ")", "this;")
+	w.indent--
+	w.Putln("}")
+
 
 	w.indent--
 	w.Putln("}")
