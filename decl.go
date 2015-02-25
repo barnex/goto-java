@@ -220,6 +220,13 @@ func (w *Writer) PutValueSpec(mod JModifier, s *ast.ValueSpec) {
 //  int b = 3;
 func (w *Writer) PutValueSpecLine(mod JModifier, typ types.Type, names []*ast.Ident, values []ast.Expr, comment *ast.CommentGroup) {
 
+	if typ != nil {
+		jType := JavaType(typ)
+		if jType.IsStructValue() {
+			mod |= FINAL
+		}
+	}
+
 	w.Put(mod)
 	if mod != NONE {
 		w.Put(" ")

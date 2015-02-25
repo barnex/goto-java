@@ -10,11 +10,11 @@ import (
 	"reflect"
 )
 
-// J is a convenience function that transpiles (presumably tiny) code snippets to java.
+// Convenience function transpiles (presumably tiny) code snippets to java.
 // Inteded to feed to Writer.Putf(). E.g.:
 // 	w.Putf(`public class %s {`, spec.Name)
 // Large code blocks should be transpiled with Writer.Put(...).
-func puts(tokens ...interface{}) string {
+func Transpile(tokens ...interface{}) string {
 	buf := bytes.NewBuffer(nil)
 	w := NewWriter(buf)
 	defer w.Close()
@@ -25,7 +25,7 @@ func puts(tokens ...interface{}) string {
 func (w *Writer) Putf(format string, tokens ...interface{}) {
 	compiled := make([]interface{}, 0, len(tokens))
 	for i := range tokens {
-		compiled = append(compiled, puts(tokens[i]))
+		compiled = append(compiled, Transpile(tokens[i]))
 	}
 	fmt.Fprintf(w.out, format, compiled...)
 }

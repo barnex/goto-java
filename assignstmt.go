@@ -40,8 +40,7 @@ func (w *Writer) putAssignOp(lhs ast.Expr, tok token.Token, rhs ast.Expr) {
 	}
 }
 
-// Emit simple assign statement:
-// 	a = b
+// Emit pure assign statement ('=' token)
 func (w *Writer) putAssign(n *ast.AssignStmt) {
 	if len(n.Lhs) != len(n.Rhs) {
 		Error(n, "assignment count mismatch:", len(n.Lhs), "!=", len(n.Rhs))
@@ -49,6 +48,7 @@ func (w *Writer) putAssign(n *ast.AssignStmt) {
 
 	// multiple assign: put one per line
 	for i, lhs := range n.Lhs {
+		rhs := n.Rhs[i]
 		if i != 0 {
 			w.Putln(";")
 		}
@@ -56,15 +56,24 @@ func (w *Writer) putAssign(n *ast.AssignStmt) {
 		// 	int _4 = f(x);
 		var typeOfLHS types.Type
 		if IsBlank(lhs) {
-			w.Put(JavaTypeOf(n.Rhs[i]), " ")
+			w.Put(JavaTypeOf(rhs), " ")
 			lhs = StripParens(lhs) // border case, go allows "(_) = x"
-			typeOfLHS = TypeOf(n.Rhs[i])
+			typeOfLHS = TypeOf(rhs)
 		} else {
 			typeOfLHS = TypeOf(lhs)
 		}
-		w.Put(lhs, " ", n.Tok, " ")
-		w.PutRHS(n.Rhs[i], typeOfLHS, false)
+		w.MakeAssign(JavaType(typeOfLHS), lhs, JavaType(TypeOf(rhs)), rhs)
+	}
+}
 
+// TODO: other name
+// TODO: cast RHS
+func (w *Writer) MakeAssign(ltyp JType, lhs interface{}, rtyp JType, rhs interface{}) {
+	switch {
+	default:
+		w.Put(lhs, " = ", rhs) // TODO: panic
+	case ltyp.IsStructValue() && rtyp.IsStructValue():
+		w.Put(lhs, ".set(", rhs, ")")
 	}
 }
 

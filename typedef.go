@@ -143,13 +143,13 @@ func GenStructValueClass(d *TypeDef) {
 	w.Putln("public ", name, "(){}\n")
 
 	// (2) fields as individual values
-	names, types := FlattenFields(fields)
-	if len(names) > 0 {
+	fieldNames, fieldTypes := FlattenFields(fields)
+	if len(fieldNames) > 0 {
 		w.Put("public ", name, "(")
-		w.PutParams(names, types)
+		w.PutParams(fieldNames, fieldTypes)
 		w.Putln("){")
 		w.indent++
-		for _, n := range names {
+		for _, n := range fieldNames {
 			w.Putln("this.", n, " = ", n, ";")
 		}
 		w.indent--
@@ -183,14 +183,13 @@ public %s addr(){
 `, ptrname, ptrname)
 
 	// set method
-	w.Putln("public void set(", name, " other){")
+	w.Putf(`
+public void set(%v other){
+`, name)
 	w.indent++
-	for _, n := range names {
-		if JavaType(TypeOf(n)).IsStructValue() {
-			w.Putln("this.", n, ".set(", "other.", n, ");")
-		} else {
-			w.Putln("this.", n, " = ", "other.", n, ";")
-		}
+	for _, n := range fieldNames {
+		w.MakeAssign(JavaType(TypeOf(n)), Transpile("this.", n), JavaType(TypeOf(n)), Transpile("other.", n))
+		w.Putln(";")
 	}
 	w.indent--
 	w.Putln("}")
