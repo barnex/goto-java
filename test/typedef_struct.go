@@ -71,4 +71,8 @@ func main() {
 
 	v.v = 34
 	println(u.v)
+
+	ptr := &v
+	ptr.v = 17
+	println(v.v)
 }

@@ -89,7 +89,10 @@ func (w *Writer) PutUnaryExpr(u *ast.UnaryExpr) {
 }
 
 func(w*Writer)PutAddressOf(x ast.Expr){
-	w.Put(x, ".addr()")
+	switch t := TypeOf(x).Underlying().(type){
+		default: panic("cannot take address of "+ reflect.TypeOf(t).String())
+	case *types.Struct: w.Put(x, ".addr()")
+	}
 }
 
 func(w*Writer)PutStarExpr(x *ast.StarExpr){
