@@ -77,6 +77,17 @@ func (w *Writer) MakeAssign(ltyp JType, lhs interface{}, rtyp JType, rhs interfa
 	}
 }
 
+// TODO: other name
+// TODO: cast RHS
+func (w *Writer) MakeEquals(ltyp JType, lhs interface{}, rtyp JType, rhs interface{}) {
+	switch {
+	default:
+		w.Put(lhs, " == ", rhs) // TODO: panic
+	case ltyp.IsStructValue() && rtyp.IsStructValue():
+		w.Put(lhs, "._equals(", rhs, ")")
+	}
+}
+
 // Emit a short variable declaration, e.g.:
 // 	a := 1
 func (w *Writer) putShortDefine(mod JModifier, a *ast.AssignStmt) {

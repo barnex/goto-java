@@ -149,8 +149,10 @@ func GenStructValueClass(d *TypeDef) {
 		w.PutParams(fieldNames, fieldTypes)
 		w.Putln("){")
 		w.indent++
-		for _, n := range fieldNames {
-			w.Putln("this.", n, " = ", n, ";")
+		for i, n := range fieldNames {
+			t := fieldTypes[i]
+			w.MakeAssign(JavaType(t), Transpile("this.", n), JavaType(t), Transpile(n))
+			w.Putln(";")
 		}
 		w.indent--
 		w.Putln("}")
@@ -158,9 +160,9 @@ func GenStructValueClass(d *TypeDef) {
 
 	// (3) copy constructor
 	w.Putf(`
-public %s(%s other){
-	this.set(other);
-}
+	public %s(%s other){
+		this.set(other);
+	}
 `, name, name)
 
 	// Methods on value
@@ -168,23 +170,25 @@ public %s(%s other){
 		w.PutMethodDecl(m, true)
 	}
 
+	// TODO: override some for PtrType, panic if they should not be called.
+
 	// copy method
 	w.Putf(`
-public %s copy(){
-	return new %s(this);
-}
+	public %s copy(){
+		return new %s(this);
+	}
 `, name, name)
 
 	// addr method
 	w.Putf(`
-public %s addr(){
-	return (%s)this;
-}
+	public %s addr(){
+		return (%s)this;
+	}
 `, ptrname, ptrname)
 
 	// set method
 	w.Putf(`
-public void set(%v other){
+	public void set(%v other){
 `, name)
 	w.indent++
 	for _, n := range fieldNames {
@@ -193,6 +197,28 @@ public void set(%v other){
 	}
 	w.indent--
 	w.Putln("}")
+
+	// equals method
+	w.Putf(`
+	public boolean _equals(%v other){
+`, name)
+	w.indent++
+	if len(fieldNames) == 0 {
+		w.Put("return true") // struct{}{} == struct{}{}
+	} else {
+		w.Put("return ")
+		for i, n := range fieldNames {
+			if i > 0 {
+				w.Putln(" &&")
+			}
+			w.MakeEquals(JavaType(TypeOf(n)), Transpile("this.", n), JavaType(TypeOf(n)), Transpile("other.", n))
+		}
+	}
+	w.Putln(";")
+	w.indent--
+	w.Putln("}")
+
+	// todo hashCode
 
 	w.indent--
 	w.Putln("}")

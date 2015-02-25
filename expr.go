@@ -159,6 +159,8 @@ func (w *Writer) PutBinaryExpr(b *ast.BinaryExpr) {
 	switch b.Op {
 	default:
 		w.Put(b.X, b.Op.String(), b.Y)
+	case token.EQL:
+		w.MakeEquals(JavaType(TypeOf(b.X)), b.X, JavaType(TypeOf(b.Y)), b.Y)
 	case token.LSS, token.GTR, token.LEQ, token.GEQ, token.QUO, token.REM:
 		if unsigned {
 			w.PutUnsignedOp(b.X, b.Op, b.Y)
@@ -176,7 +178,6 @@ func (w *Writer) PutBinaryExpr(b *ast.BinaryExpr) {
 	if *flagParens {
 		w.Put(")")
 	}
-
 }
 
 // Emit code for a call expression.
