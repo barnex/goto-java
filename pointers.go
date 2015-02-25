@@ -40,7 +40,7 @@ func IsLocal(id *ast.Ident) bool {
 }
 
 func (w *Writer) putAddressOfLocal(id *ast.Ident) {
-	panic("not yet")
+	w.putAddressOfStruct(id) // id implemented as struct value
 }
 
 func (w *Writer) putAddressOfGlobal(id *ast.Ident) {

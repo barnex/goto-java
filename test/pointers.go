@@ -10,10 +10,10 @@ var (
 //}
 
 func main() {
-//	i := 0
-//	x := &i
-//	(*x)++
-//	println(i)
+	i := 0
+	x := &i
+	(*x)++
+	println(i)
 
 	println(global)
 //	inc(&global)

@@ -36,6 +36,7 @@ func HandleFile(fname string) {
 	idents = CollectIdents(f)
 	rename = RenameReservedIdents(f)
 	CollectDefs(f)
+	EscapeAnalysis(f)
 
 	// transpile primary class
 	className := fname[:len(fname)-len(path.Ext(fname))]
