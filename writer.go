@@ -32,35 +32,14 @@ func (w *Writer) Close() {
 	checkUserErr(err)
 }
 
-// Outputs a class with given name based on go file.
-func (w *Writer) PutClass(className string, f *ast.File) {
-
-	if !*flagNoPkg {
-		pkg := f.Name.Name
-		w.Putln("package ", pkg, ";")
-		w.Putln()
-	}
-
-	w.Putln("import go.*;")
-	w.Putln()
-
-	w.Putln("public final class ", className, " {")
-	w.Putln()
-	w.indent++
-
-	for _, d := range f.Decls {
-		w.PutDecl(STATIC, d)
-
-		switch d.(type) {
-		default: // no semi
-		case *ast.GenDecl:
-			w.Putln(";")
-		}
-	}
-
-	w.indent--
-	w.Putln("}")
-}
+//func SPutln(tokens ...interface{})string{
+//	return SPut(append(tokens, "\n")...)
+//}
+//
+//func SPut(tokens ...interface{})string{
+//	buf := bytes.NewBuffer()
+//
+//}
 
 func (w *Writer) Putln(tokens ...interface{}) {
 	w.Put(append(tokens, "\n")...)
@@ -83,6 +62,11 @@ func (w *Writer) put(t interface{}) {
 
 	if t, ok := t.(ast.Node); ok {
 		w.PutNode(t)
+		return
+	}
+
+	if t, ok := t.(JType); ok {
+		w.Put(t.JavaName)
 		return
 	}
 	panic("writer: cannot put type " + reflect.TypeOf(t).String())

@@ -101,7 +101,7 @@ func GenClasses() {
 func GenStructPointerClass(d *TypeDef) {
 	spec := d.typeSpec
 
-	name := JavaTypeOfPtr(spec.Name)
+	name := JavaPointerName(spec.Name)
 	base := JavaTypeOf(spec.Name)
 
 	w := NewWriter(name + ".java")
@@ -124,8 +124,8 @@ func GenStructPointerClass(d *TypeDef) {
 // Generate java class for Go named struct type (value semantics).
 func GenStructValueClass(d *TypeDef) {
 	spec := d.typeSpec
-	name := JavaTypeOf(spec.Name)
-	ptrname := JavaTypeOfPtr(spec.Name)
+	name := JavaTypeOf(spec.Name).JavaName
+	ptrname := JavaPointerName(spec.Name)
 	w := NewWriter(name + ".java")
 	defer w.Close()
 
@@ -160,7 +160,11 @@ func GenStructValueClass(d *TypeDef) {
 	w.Putln("public ", name, "(", name, " other", "){")
 	w.indent++
 	for _, n := range names {
-		w.Putln("this.", n, " = ", "other.", n, ";")
+		if JavaType(TypeOf(n)).IsStructValue() {
+			w.Putln("this.", n, ".set(", "other.", n, ");")
+		} else {
+			w.Putln("this.", n, " = ", "other.", n, ";")
+		}
 	}
 	w.indent--
 	w.Putln("}")
@@ -183,6 +187,9 @@ func GenStructValueClass(d *TypeDef) {
 	w.Put("return (", ptrname, ")", "this;")
 	w.indent--
 	w.Putln("}")
+
+	// set method
+	// ...
 
 	w.indent--
 	w.Putln("}")

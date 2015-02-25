@@ -57,11 +57,11 @@ func (w *Writer) PutNewCall(c *ast.CallExpr) {
 	default:
 		panic("cannot handle new " + reflect.TypeOf(t).String())
 	case *types.Named:
-		w.Put("new ", JavaTypeOfPtr(arg), "()")
+		w.Put("new ", JavaPointerName(arg), "()")
 	case *types.Basic:
-		w.Put("new ", JavaTypeOfPtr(arg), "()")
+		w.Put("new ", JavaPointerName(arg), "()")
 	case *types.Pointer:
-		w.Put("new ", JavaTypeOfPtr(arg), "()")
+		w.Put("new ", JavaPointerName(arg), "()")
 	}
 }
 

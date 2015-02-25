@@ -115,3 +115,8 @@ func isShortRedefine(id *ast.Ident) bool {
 	}
 	return false
 }
+
+// Emit code for rhs, possibly converting to make it assignable to lhs.
+func (w *Writer) PutRHS(rhs ast.Expr, lhs types.Type, inmethod bool) {
+	w.PutExpr(rhs)
+}

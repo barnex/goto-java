@@ -12,7 +12,6 @@ import (
 // E.g.:
 // 	var x int  ->  int x = 0;
 func ZeroValue(typ types.Type) string {
-
 	switch typ := typ.(type) {
 	default:
 		panic("cannot make zero value for " + reflect.TypeOf(typ).String())
@@ -30,7 +29,9 @@ func namedZeroValue(t *types.Named) string {
 	default:
 		panic("cannot make zero value for named " + reflect.TypeOf(u).String())
 	case *types.Struct:
-		return "new " + JavaType(t) + "Ptr" + "()"
+		// always load Struct with StructPtr (extends Struct),
+		// so we can take address of value by typecasting.
+		return "new " + javaPointerNameForElem(t) + "()"
 	}
 }
 

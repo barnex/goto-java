@@ -41,19 +41,6 @@ func (w *Writer) PutFuncDecl(n *ast.FuncDecl) {
 	}
 }
 
-// Java return type for a function that returns given types.
-// For multiple return types, a Tuple type is returned
-func JavaReturnTypeOf(resultTypes []types.Type) string {
-	switch len(resultTypes) {
-	case 0:
-		return "void"
-	case 1:
-		return JavaType(resultTypes[0])
-	default:
-		return JavaTupleType(resultTypes)
-	}
-}
-
 // Emit code for a top-level function (not method) declaration, e.g.:
 // 	func f(a, b int) { ... }
 func (w *Writer) PutStaticFunc(f *ast.FuncDecl) {

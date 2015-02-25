@@ -100,13 +100,14 @@ func (w *Writer) PutUnaryExpr(u *ast.UnaryExpr) {
 // 	        Rbrack token.Pos // position of "]"
 // 	}
 func (w *Writer) PutSliceExpr(e *ast.SliceExpr) {
-	jType := JavaTypeOf(e.X)
-	switch jType {
-	default:
-		Error(e, "cannot slice type ", jType)
-	case "String":
-		w.putStringSlice(e)
-	}
+	panic("no slice expr yet")
+	//jType := JavaTypeOf(e.X)
+	//switch jType {
+	//default:
+	//	Error(e, "cannot slice type ", jType)
+	//case "String":
+	//	w.putStringSlice(e)
+	//}
 }
 
 // Emit code for slicing a string.
@@ -226,3 +227,14 @@ func (w *Writer) PutArgs(args []ast.Expr, ellipsis token.Pos) {
 	}
 	w.Put(")")
 }
+
+// explicit type cast in input file, e.g.:
+// 	a := int(b)
+func (w *Writer) PutTypecast(goType types.Type, e ast.Expr) {
+	panic("no typecast yet")
+}
+
+//func IsType(x ast.Expr)bool{
+//tv, err := types.EvalNode(fset, x, pkg,
+//func EvalNode(fset *token.FileSet, node ast.Expr, pkg *Package, scope *Scope) (tv TypeAndValue, err error)
+//}
