@@ -136,24 +136,15 @@ func GenStructValueClass(d *TypeDef) {
 
 	// Fields
 	fields := spec.Type.(*ast.StructType).Fields
-	fieldNames, fieldTypes := FlattenFields(fields)
 	w.PutStructFields(fields)
 	w.Putln()
 
 	// Constructors:
 	// (1) no arguments
-	w.Putln("public ", name, "(){")
-	w.indent++
-	for i, n := range fieldNames {
-		t := fieldTypes[i]
-		//if NeedInit(t) {
-		w.Putln(n, " = ", ZeroValue(t), ";")
-		//}
-	}
-	w.indent--
-	w.Putln("}")
+	w.Putln("public ", name, "(){}\n")
 
 	// (2) fields as individual values
+	fieldNames, fieldTypes := FlattenFields(fields)
 	if len(fieldNames) > 0 {
 		w.Put("public ", name, "(")
 		w.PutParams(fieldNames, fieldTypes)
