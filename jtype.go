@@ -22,6 +22,17 @@ func (t JType) IsStructValue() bool {
 	return ok
 }
 
+func (t JType) IsValue() bool {
+	switch t := t.GoType.Underlying().(type) {
+	default:
+		panic("cannot handle " + reflect.TypeOf(t).String())
+	case *types.Struct, *types.Basic:
+		return true
+	case *types.Pointer:
+		return false
+	}
+}
+
 func JavaType(t types.Type) JType {
 	switch t := t.(type) {
 	default:

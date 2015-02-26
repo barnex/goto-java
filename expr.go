@@ -134,7 +134,29 @@ func (w *Writer) putStringSlice(e *ast.SliceExpr) {
 // 	        Sel *Ident // field selector
 // 	}
 func (w *Writer) PutSelectorExpr(e *ast.SelectorExpr) {
-	w.Put(e.X, ".", e.Sel)
+	if JavaType(TypeOf(e.X)).IsValue() && IsPtrMethod(e.Sel) {
+		// Pointer method on addressable value:
+		// compiler inserts address of receiver.
+		// https://golang.org/doc/effective_go.html#pointers_vs_values
+		w.PutAddressOf(e.X)
+		w.Put(".", e.Sel)
+	} else {
+		w.Put(e.X, ".", e.Sel)
+	}
+}
+
+func IsPtrMethod(id *ast.Ident) bool {
+	obj := TypeOf(id)
+	if sig, ok := obj.(*types.Signature); ok {
+		return sig.Recv() != nil && IsPtrType(sig.Recv().Type())
+	} else {
+		return false
+	}
+}
+
+func IsPtrType(t types.Type) bool {
+	_, ok := t.(*types.Pointer)
+	return ok
 }
 
 // Emit code for a parnthesized expression.
