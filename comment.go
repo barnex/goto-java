@@ -1,35 +1,21 @@
 package gotojava
 
-// TODO: collect all comments and put in appropriate place
+// Handling of comments
+// TODO: collect all (non-doc) comments and put in appropriate place
+// TODO: Emit all doc comments.
 
 import "go/ast"
 
-func (w *Writer) PutDoc(g *ast.CommentGroup) {
-	w.PutComment(g) //TODO: translate to slashstarstar
-	w.Putln()
-}
-
-func (w *Writer) PutInlineComment(g *ast.CommentGroup) {
-	if g == nil {
-		return
-	}
-	w.Put("\t")
-	for i, c := range g.List {
-		w.Put(c.Text)
-		if i != len(g.List)-1 {
-			w.Putln()
-		}
-	}
-}
-
-func (w *Writer) PutComment(g *ast.CommentGroup) {
-	if g == nil {
-		return
-	}
-	for i, c := range g.List {
-		w.Put(c.Text)
-		if i != len(g.List)-1 {
-			w.Putln()
-		}
+// Emit a doc comment. ast godoc:
+// 	type CommentGroup struct {
+// 	        List []*Comment // len(List) > 0
+// 	}
+// 	type Comment struct {
+// 	        Slash token.Pos // position of "/" starting the comment
+// 	        Text  string    // comment text (excluding '\n' for //-style comments)
+// 	}
+func (w *Writer) PutDoc(cg *ast.CommentGroup) {
+	if cg != nil {
+		w.Putln("/** ", cg.Text(), "*/") // TODO: wrap long lines
 	}
 }

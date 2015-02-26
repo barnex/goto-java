@@ -1,5 +1,6 @@
 package main
 
+// Empty struct
 type Empty struct{}
 
 var (
@@ -7,6 +8,7 @@ var (
 	f *Empty
 )
 
+// Wraps an int
 type Int struct {
 	val int
 }

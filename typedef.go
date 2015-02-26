@@ -109,7 +109,7 @@ func GenStructPointerClass(d *TypeDef) {
 	w := NewWriterFile(name + ".java")
 	defer w.Close()
 
-	w.PutDoc(spec.Doc)
+	w.Putf("/** %v extends %v with pointer methods. */\n", name, base)
 	w.Putf(`public final class %v extends %v {`, name, base)
 	w.indent++
 
@@ -130,6 +130,7 @@ func GenStructValueClass(d *TypeDef) {
 	w := NewWriterFile(name + ".java")
 	defer w.Close()
 
+	w.PutDoc(spec.Doc)
 	w.Putln("public class ", name, "{")
 	w.Putln()
 	w.indent++
@@ -250,7 +251,7 @@ func (w *Writer) PutStructFields(fields *ast.FieldList) {
 func (w *Writer) PutMethodDecl(f *ast.FuncDecl, copyRecv bool) {
 
 	// (1) Put static implementation with "this" as first receiver
-	// TODO: some doc
+	w.Putf("\t/** Implementation for method %v, with receiver as first argument. */\n", f.Name)
 	w.PutStaticFunc(f)
 	w.Putln()
 

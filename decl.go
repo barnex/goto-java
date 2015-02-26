@@ -139,10 +139,10 @@ func (w *Writer) PutGenDecl(mod JModifier, d *ast.GenDecl) {
 	switch d.Tok { // IMPORT, CONST, TYPE, VAR
 	default:
 		Error(d, "cannot handle "+d.Tok.String())
-	case token.CONST:
-		w.PutValueSpecs(mod|FINAL, d.Specs)
 	case token.TYPE:
 		// do nothing. already handled by CollectDefs
+	case token.CONST:
+		w.PutValueSpecs(mod|FINAL, d.Specs)
 	case token.VAR:
 		w.PutValueSpecs(mod, d.Specs)
 	}
