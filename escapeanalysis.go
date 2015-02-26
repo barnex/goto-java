@@ -1,11 +1,16 @@
 package gotojava
 
-import "go/ast"
+import (
+	"go/ast"
+	"go/token"
+
+	"golang.org/x/tools/go/types"
+)
 
 // Rudimentary escape analysis detects:
 // 	address of local variable
 
-var escapes = make(map[*ast.Ident]bool)
+var escapes = make(map[types.Object]bool)
 
 func EscapeAnalysis(root ast.Node) {
 	ast.Inspect(root, func(n ast.Node) bool {
@@ -14,10 +19,11 @@ func EscapeAnalysis(root ast.Node) {
 		default:
 			return true
 		case *ast.UnaryExpr:
-			if id, ok := n.X.(*ast.Ident); ok {
+			// check address of local identifier
+			if id, ok := n.X.(*ast.Ident); ok && n.Op == token.AND {
 				if IsLocal(id) {
 					Log(id, id.Name, "escapes to java heap")
-					escapes[id] = true
+					escapes[ObjectOf(id)] = true
 				}
 			}
 		}
