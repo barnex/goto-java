@@ -76,4 +76,7 @@ func main() {
 	ptr := &v
 	ptr.v = 17
 	println(v.v)
+
+	v.PtrMethod(89) // pointer method on addressable value
+	println(v.v)
 }
