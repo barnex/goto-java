@@ -1,6 +1,6 @@
 package gotojava
 
-// Handle Go built-ins.
+// Handle Go built-ins and pre-defined types
 
 import (
 	"go/ast"
@@ -12,6 +12,8 @@ import (
 // IsBuiltin returns true if expression e refers to a built-in identifer. E.g.:
 // 	print
 // 	(print)
+// 	bool
+// 	...
 // The result is scope-sensitive, as built-ins may be shadowed by
 // other declarations (e.g. len := 7).
 func IsBuiltin(e ast.Expr) bool {
@@ -24,16 +26,18 @@ func IsBuiltin(e ast.Expr) bool {
 	return false
 }
 
-// Emit code for a built-in identifer
+// Emit code for a built-in identifer. E.g.:
+// 	bool -> boolean
 func (w *Writer) PutBuiltinIdent(id *ast.Ident) {
 	if transl, ok := builtin2java[id.Name]; ok {
 		w.Put(transl)
 	} else {
-		Error(id, "built-in identifier not supported: ", id.Name)
+		panic("cannot handle built-in identifier: " + id.Name)
 	}
 }
 
-// Generate code for built-in call, like len(x)
+// Generate code for built-in call. E.g.:
+// 	len(x)
 func (w *Writer) PutBuiltinCall(c *ast.CallExpr) {
 	name := StripParens(c.Fun).(*ast.Ident).Name
 	switch name {
@@ -42,15 +46,15 @@ func (w *Writer) PutBuiltinCall(c *ast.CallExpr) {
 	case "len":
 		w.PutLenExpr(c)
 	case "new":
-		w.PutNewCall(c)
+		w.putNewCall(c)
 	case "print", "println":
-		w.PutPrintCall(c)
+		w.putPrintCall(c)
 		// IsType(c): cast
 	}
 }
 
 // Emit code for built-in new(...) call.
-func (w *Writer) PutNewCall(c *ast.CallExpr) {
+func (w *Writer) putNewCall(c *ast.CallExpr) {
 	assert(len(c.Args) == 1)
 	arg := c.Args[0]
 	switch t := TypeOf(arg).(type) {
@@ -66,7 +70,7 @@ func (w *Writer) PutNewCall(c *ast.CallExpr) {
 }
 
 // Emit code for built-in print, prinln calls.
-func (w *Writer) PutPrintCall(c *ast.CallExpr) {
+func (w *Writer) putPrintCall(c *ast.CallExpr) {
 	name := StripParens(c.Fun).(*ast.Ident).Name
 	switch name {
 	default:
