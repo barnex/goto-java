@@ -153,7 +153,7 @@ func GenStructValueClass(d *TypeDef) {
 		w.indent++
 		for i, n := range fieldNames {
 			t := fieldTypes[i]
-			w.PutJAssign(javaType(t), Transpile("this.", n), javaType(t), Transpile(n))
+			w.PutJAssign(t, Transpile("this.", n), t, n)
 			w.Putln(";")
 		}
 		w.indent--
@@ -239,7 +239,7 @@ func (w *Writer) PutStructFields(fields *ast.FieldList) {
 	names, types := FlattenFields(fields)
 	for i, n := range names {
 		t := types[i]
-		w.Put(ModifierFor(n), javaType(t), " ", n)
+		w.Put(ModifierFor(n), t, " ", n)
 		if ModifierFor(n)&FINAL != 0 {
 			w.Put(" = ", ZeroValue(t))
 		}

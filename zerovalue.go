@@ -12,9 +12,8 @@ import (
 // E.g.:
 // 	var x int  ->  int x = 0;
 // TODO: JType
-func ZeroValue(typ types.Type) string {
-	//typ := TypeOf(id)
-	switch typ := typ.(type) {
+func ZeroValue(typ JType) string {
+	switch typ := typ.GoType.(type) {
 	default:
 		panic("cannot make zero value for " + reflect.TypeOf(typ).String())
 	case *types.Basic:

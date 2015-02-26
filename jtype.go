@@ -71,12 +71,12 @@ func JavaPointerName(elemExpr ast.Expr) string {
 
 // Java return type for a function that returns given types.
 // For multiple return types, a Tuple type is returned
-func JavaReturnTypeOf(resultTypes []types.Type) JType {
+func JavaReturnTypeOf(resultTypes []JType) JType {
 	switch len(resultTypes) {
 	case 0:
 		return JType{nil, "void"}
 	case 1:
-		return javaType(resultTypes[0])
+		return resultTypes[0]
 	default:
 		panic("multiple returns")
 		//return JavaTupleType(resultTypes)

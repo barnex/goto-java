@@ -6,8 +6,6 @@ import (
 	"go/ast"
 	"go/token"
 	"reflect"
-
-	"golang.org/x/tools/go/types"
 )
 
 // Emit a declaration with optional modifier (like static)
@@ -93,7 +91,7 @@ func (w *Writer) PutStaticFunc(f *ast.FuncDecl) {
 	// declare named return values, if any
 	for i := range retNames {
 		if retNames[i] != nil {
-			w.Putln(javaType(retTypes[i]), " ", retNames[i], ";")
+			w.Putln(retTypes[i], " ", retNames[i], ";")
 		}
 	}
 
@@ -107,9 +105,9 @@ func (w *Writer) PutStaticFunc(f *ast.FuncDecl) {
 // Emit a parameter list, e.g.:
 // 	(type1 name1, type2 name2)
 // Types  and names typically obtained by FlattenFields().
-func (w *Writer) PutParams(names []*ast.Ident, types []types.Type) {
+func (w *Writer) PutParams(names []*ast.Ident, types []JType) {
 	for i := range names {
-		w.Put(comma(i), javaType(types[i]), " ", names[i])
+		w.Put(comma(i), types[i], " ", names[i])
 	}
 }
 
@@ -189,7 +187,7 @@ func (w *Writer) PutValueSpec(mod JModifier, s *ast.ValueSpec) {
 	if s.Type != nil {
 		// var with explicit type: everything on one line, e.g.:
 		// 	int a = 1, b = 2
-		w.MakeVarDecl(mod, JTypeOf(s.Type), s.Names, s.Values, s.Comment)
+		w.PutJVarDecl(mod, JTypeOf(s.Type), s.Names, s.Values, s.Comment)
 	} else {
 		// var with infered type: specs on separate line, e.g.:
 		// 	int a = 1;
@@ -202,7 +200,7 @@ func (w *Writer) PutValueSpec(mod JModifier, s *ast.ValueSpec) {
 			if i != 0 {
 				w.Putln(";")
 			}
-			w.MakeVarDecl(mod, JTypeOf(n), s.Names[i:i+1], []ast.Expr{value}, s.Comment)
+			w.PutJVarDecl(mod, JTypeOf(n), s.Names[i:i+1], []ast.Expr{value}, s.Comment)
 		}
 	}
 }
@@ -219,21 +217,18 @@ func (w *Writer) putShortDefine(mod JModifier, a *ast.AssignStmt) {
 			w.Putln(";")
 		}
 
-		id := a.Lhs[i].(*ast.Ident) // should be
+		id := a.Lhs[i].(*ast.Ident)
 
-		typ := JTypeOf(id)
-		if isShortRedefine(id) {
-			// TODO: for short redefine: call PutJAssign(), continue
-			typ.GoType = nil
-			typ.JavaName = ""
-		}
-
-		var value ast.Expr = nil
+		var rhs ast.Expr = nil
 		if i < len(a.Rhs) {
-			value = a.Rhs[i]
+			rhs = a.Rhs[i]
 		}
 
-		w.MakeVarDecl(mod, typ, []*ast.Ident{id}, []ast.Expr{value}, nil)
+		if isShortRedefine(id) {
+			w.PutJAssign(JTypeOf(id), id, JTypeOf(rhs), rhs)
+		} else {
+			w.PutJVarDecl(mod, JTypeOf(id), []*ast.Ident{id}, []ast.Expr{rhs}, nil)
+		}
 	}
 }
 
@@ -270,7 +265,7 @@ func isShortRedefine(id *ast.Ident) bool {
 // 	int a = 1;
 // 	a = 2;       // typ = nil
 //  int b = 3;
-func (w *Writer) MakeVarDecl(mod JModifier, jType JType, names []*ast.Ident, values []ast.Expr, comment *ast.CommentGroup) {
+func (w *Writer) PutJVarDecl(mod JModifier, jType JType, names []*ast.Ident, values []ast.Expr, comment *ast.CommentGroup) {
 
 	if jType.IsStructValue() {
 		mod |= FINAL
@@ -285,7 +280,7 @@ func (w *Writer) MakeVarDecl(mod JModifier, jType JType, names []*ast.Ident, val
 		if i < len(values) {
 			w.PutExpr(values[i])
 		} else {
-			w.Put(ZeroValue(TypeOf(n)))
+			w.Put(ZeroValue(JTypeOf(n)))
 		}
 
 		if i != len(names)-1 {
