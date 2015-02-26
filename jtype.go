@@ -13,9 +13,46 @@ import (
 type JType struct {
 	GoType   types.Type
 	JavaName string
+	Escaped  bool or ZeroValue string ?
 }
 
-//func(t JType)String()string{return t.JavaName}
+func JTypeOf(x ast.Expr) JType {
+
+	if id, ok := x.(*ast.Ident); ok {
+		if escapes[ObjectOf(id)] {
+			return javaEscapedType(id)
+		}
+	}
+
+	switch t := t.(type) {
+	default:
+		panic("cannot handle type " + reflect.TypeOf(t).String())
+	case *types.Basic:
+		return JType{t, javaBasicType(t)}
+	case *types.Named:
+		return JType{t, javaNamedType(t)}
+	case *types.Pointer:
+		return JType{t, javaPointerType(t)}
+	case *types.Signature:
+		Log(nil, "TODO: Signature")
+		return JType{t, "**SIGNATURE**"}
+	}
+}
+
+// Java return type for a function that returns given types.
+// For multiple return types, a Tuple type is returned
+func JavaReturnTypeOf(resultTypes []JType) JType {
+	switch len(resultTypes) {
+	case 0:
+		return JType{nil, "void"}
+	case 1:
+		return resultTypes[0]
+	default:
+		panic("multiple returns")
+		//return JavaTupleType(resultTypes)
+	}
+}
+
 
 func (t JType) IsStructValue() bool {
 	_, ok := t.GoType.Underlying().(*types.Struct)
@@ -33,55 +70,18 @@ func (t JType) IsValue() bool {
 	}
 }
 
-func javaType(t types.Type) JType {
-	switch t := t.(type) {
-	default:
-		panic("cannot handle type " + reflect.TypeOf(t).String())
-	case *types.Basic:
-		return JType{t, javaBasicType(t)}
-	case *types.Named:
-		return JType{t, javaNamedType(t)}
-	case *types.Pointer:
-		return JType{t, javaPointerType(t)}
-	case *types.Signature:
-		Log(nil, "TODO: Signature")
-		return JType{t, "**SIGNATURE**"}
-	}
-}
-
-func JTypeOf(x ast.Expr) JType {
-	if id, ok := x.(*ast.Ident); ok {
-		if escapes[ObjectOf(id)] {
-			return javaEscapedType(id)
-		}
-	}
-	return javaType(TypeOf(x))
-}
-
 func javaEscapedType(id *ast.Ident) JType {
 	return JType{
-		GoType:   types.NewStruct(nil, nil),
+		GoType:   ???
 		JavaName: "go.IntPtr", // TODO
 	}
 }
+
 
 func JavaPointerName(elemExpr ast.Expr) string {
 	return JTypeOf(elemExpr).JavaName + "Ptr"
 }
 
-// Java return type for a function that returns given types.
-// For multiple return types, a Tuple type is returned
-func JavaReturnTypeOf(resultTypes []JType) JType {
-	switch len(resultTypes) {
-	case 0:
-		return JType{nil, "void"}
-	case 1:
-		return resultTypes[0]
-	default:
-		panic("multiple returns")
-		//return JavaTupleType(resultTypes)
-	}
-}
 
 func javaBasicType(t *types.Basic) string {
 	// remove "untyped "
