@@ -5,7 +5,7 @@
 
 set -e
 
-w=15
+w=20
 f=$1
 basename=$(basename -s ".go" $f)
 gofile=$basename.go

@@ -41,9 +41,25 @@ func main() {
 //	println(**z)
 //
 //	println(*makePtr())
+	testShortRedefine()
 }
 
 //func makePtr() *int {
 //	i := 42
 //	return &i
+//}
+
+//func testShortRedefine(){
+//	a := ptrTo(1)
+//	a, b := ptrTo(2), ptrTo(3)
+//	c, a, b := ptrTo(4), ptrTo(5), ptrTo(6)
+//
+//	println(*a)
+//	println(*b)
+//	println(*c)
+//}
+//
+//func ptrTo(x int)*int{
+//	a := x
+//	return &a
 //}
