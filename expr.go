@@ -182,7 +182,7 @@ func (w *Writer) PutBinaryExpr(b *ast.BinaryExpr) {
 	default:
 		w.Put(b.X, b.Op.String(), b.Y)
 	case token.EQL:
-		w.MakeEquals(JTypeOf(b.X), b.X, JTypeOf(b.Y), b.Y)
+		w.PutJEquals(JTypeOf(b.X), b.X, JTypeOf(b.Y), b.Y)
 	case token.LSS, token.GTR, token.LEQ, token.GEQ, token.QUO, token.REM:
 		if unsigned {
 			w.PutUnsignedOp(b.X, b.Op, b.Y)
@@ -261,3 +261,16 @@ func (w *Writer) PutTypecast(goType types.Type, e ast.Expr) {
 //tv, err := types.EvalNode(fset, x, pkg,
 //func EvalNode(fset *token.FileSet, node ast.Expr, pkg *Package, scope *Scope) (tv TypeAndValue, err error)
 //}
+
+// Emit code for Go's "lhs == rhs", with given java types for both sides.
+// May emit, e.g.:
+// 	lhs == rhs      // basic and pointer types
+// 	lhs.equals(rhs) // struct value types
+func (w *Writer) PutJEquals(ltyp JType, lhs interface{}, rtyp JType, rhs interface{}) {
+	switch {
+	default:
+		w.Put(lhs, " == ", rhs) // TODO: panic
+	case ltyp.IsStructValue() && rtyp.IsStructValue():
+		w.Put(lhs, ".equals(", rhs, ")")
+	}
+}

@@ -152,7 +152,7 @@ func GenStructValueClass(d *TypeDef) {
 		w.indent++
 		for i, n := range fieldNames {
 			t := fieldTypes[i]
-			w.MakeAssign(javaType(t), Transpile("this.", n), javaType(t), Transpile(n))
+			w.PutJAssign(javaType(t), Transpile("this.", n), javaType(t), Transpile(n))
 			w.Putln(";")
 		}
 		w.indent--
@@ -193,7 +193,7 @@ func GenStructValueClass(d *TypeDef) {
 `, name)
 	w.indent++
 	for _, n := range fieldNames {
-		w.MakeAssign(JTypeOf(n), Transpile("this.", n), JTypeOf(n), Transpile("other.", n))
+		w.PutJAssign(JTypeOf(n), Transpile("this.", n), JTypeOf(n), Transpile("other.", n))
 		w.Putln(";")
 	}
 	w.indent--
@@ -217,7 +217,7 @@ func GenStructValueClass(d *TypeDef) {
 				w.Putln(" &&")
 				w.Put("\t")
 			}
-			w.MakeEquals(JTypeOf(n), Transpile("this.", n), JTypeOf(n), Transpile("other.", n))
+			w.PutJEquals(JTypeOf(n), Transpile("this.", n), JTypeOf(n), Transpile("other.", n))
 		}
 	}
 	w.Putln(";")
@@ -238,8 +238,11 @@ func (w *Writer) PutStructFields(fields *ast.FieldList) {
 	names, types := FlattenFields(fields)
 	for i, n := range names {
 		t := types[i]
-		w.Put(ModifierFor(n), javaType(t))
-		w.Putln(" ", n, " = ", ZeroValue(t), ";")
+		w.Put(ModifierFor(n), javaType(t), " ", n)
+		if ModifierFor(n)&FINAL != 0 {
+			w.Put(" = ", ZeroValue(t))
+		}
+		w.Putln(";")
 		// TODO Docs
 	}
 }

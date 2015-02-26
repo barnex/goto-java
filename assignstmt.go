@@ -62,29 +62,7 @@ func (w *Writer) putAssign(n *ast.AssignStmt) {
 		} else {
 			typeOfLHS = JTypeOf(lhs)
 		}
-		w.MakeAssign(typeOfLHS, lhs, JTypeOf(rhs), rhs)
-	}
-}
-
-// TODO: other name
-// TODO: cast RHS
-func (w *Writer) MakeAssign(ltyp JType, lhs interface{}, rtyp JType, rhs interface{}) {
-	switch {
-	default:
-		w.Put(lhs, " = ", rhs) // TODO: panic
-	case ltyp.IsStructValue() && rtyp.IsStructValue():
-		w.Put(lhs, ".set(", rhs, ")")
-	}
-}
-
-// TODO: other name
-// TODO: cast RHS
-func (w *Writer) MakeEquals(ltyp JType, lhs interface{}, rtyp JType, rhs interface{}) {
-	switch {
-	default:
-		w.Put(lhs, " == ", rhs) // TODO: panic
-	case ltyp.IsStructValue() && rtyp.IsStructValue():
-		w.Put(lhs, ".equals(", rhs, ")")
+		w.PutJAssign(typeOfLHS, lhs, JTypeOf(rhs), rhs)
 	}
 }
 
@@ -139,5 +117,19 @@ func isShortRedefine(id *ast.Ident) bool {
 
 // Emit code for rhs, possibly converting to make it assignable to lhs.
 func (w *Writer) PutRHS(rhs ast.Expr, lhs types.Type, inmethod bool) {
+	// TODO
 	w.PutExpr(rhs)
+}
+
+// Emit code for Go's "lhs = rhs", with given java types for both sides.
+// May emit, e.g.:
+// 	a = b    // basic and pointer types
+// 	a.set(b) // struct values
+func (w *Writer) PutJAssign(ltyp JType, lhs interface{}, rtyp JType, rhs interface{}) {
+	switch {
+	default:
+		w.Put(lhs, " = ", rhs) // TODO: panic
+	case ltyp.IsStructValue() && rtyp.IsStructValue():
+		w.Put(lhs, ".set(", rhs, ")")
+	}
 }
