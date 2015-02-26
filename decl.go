@@ -35,10 +35,22 @@ func (w *Writer) PutDecl(mod JModifier, d ast.Decl) {
 // 	}
 func (w *Writer) PutFuncDecl(n *ast.FuncDecl) {
 	if n.Recv == nil {
-		w.PutStaticFunc(n)
+		// main is special: need String[] args
+		if n.Name.Name == "main" {
+			w.PutMainDecl(n)
+		} else {
+			w.PutStaticFunc(n)
+		}
 	} else {
 		// ignore method, handled by CollectDefs.
 	}
+}
+
+// Emit the main function. Special case in PutFuncDecl.
+func (w *Writer) PutMainDecl(n *ast.FuncDecl) {
+	w.Put("public static void ", n.Name.Name, "(String[] args)")
+	w.PutBlockStmt(n.Body)
+	w.Putln()
 }
 
 // Emit code for a top-level function (not method) declaration, e.g.:
@@ -46,38 +58,29 @@ func (w *Writer) PutFuncDecl(n *ast.FuncDecl) {
 func (w *Writer) PutStaticFunc(f *ast.FuncDecl) {
 	w.PutDoc(f.Doc)
 
-	// main is special: need String[] args
-	if f.Name.Name == "main" {
-		w.PutMainDecl(f)
-		return
-	}
-
 	// modifier
-	mod := STATIC | ModifierFor(f.Name)
-	w.Put(mod, " ")
+	w.Put(STATIC | ModifierFor(f.Name))
 
 	// return type
 	retNames, retTypes := FlattenFields(f.Type.Results)
 	w.Put(JavaReturnTypeOf(retTypes), " ", f.Name)
 
 	// arguments
-	w.Put("(")
-
 	argNames, argTypes := FlattenFields(f.Type.Params)
+	w.Put("(")
 
 	// receiver, if any, is first argument
 	if f.Recv != nil {
 		assert(len(f.Recv.List) == 1)
-		field := f.Recv.List[0]
-		name := makeNewName(UNUSED)
-		if field.Names != nil {
-			assert(len(field.Names) == 1)
-			name = JavaName(field.Names[0])
+		recv := f.Recv.List[0]
+		name := ""
+		if recv.Names != nil {
+			assert(len(recv.Names) == 1)
+			name = JavaName(recv.Names[0])
+		} else {
+			name = makeNewName(UNUSED)
 		}
-
-		w.Put(JTypeOf(field.Type))
-
-		w.Put(" ", name)
+		w.Put(JTypeOf(recv.Type), " ", name)
 		if len(argNames) != 0 {
 			w.Put(", ")
 		}
@@ -94,23 +97,20 @@ func (w *Writer) PutStaticFunc(f *ast.FuncDecl) {
 		}
 	}
 
+	// rest of body
 	w.PutStmtList(f.Body.List)
 
 	w.indent--
 	w.Putln("}")
 }
 
+// Emit a parameter list, e.g.:
+// 	(type1 name1, type2 name2)
+// Types  and names typically obtained by FlattenFields().
 func (w *Writer) PutParams(names []*ast.Ident, types []types.Type) {
 	for i := range names {
 		w.Put(comma(i), javaType(types[i]), " ", names[i])
 	}
-}
-
-// Emit the main function. Special case in PutStaticFunc.
-func (w *Writer) PutMainDecl(n *ast.FuncDecl) {
-	w.Put("public static void ", n.Name.Name, "(String[] args)")
-	w.PutBlockStmt(n.Body)
-	w.Putln()
 }
 
 // Emit a generic declaration (import, constant, type or variable)
