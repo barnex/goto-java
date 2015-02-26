@@ -26,7 +26,7 @@ func ModifierFor(ident *ast.Ident) JModifier {
 	if ident.IsExported() {
 		mod |= PUBLIC
 	}
-	if JavaType(TypeOf(ident)).IsStructValue() {
+	if JTypeOf(ident).IsStructValue() {
 		mod |= FINAL
 	}
 	return mod

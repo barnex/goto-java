@@ -54,15 +54,15 @@ func (w *Writer) putAssign(n *ast.AssignStmt) {
 		}
 		// blank identifer: need to put type. E.g.:
 		// 	int _4 = f(x);
-		var typeOfLHS types.Type
+		var typeOfLHS JType
 		if IsBlank(lhs) {
-			w.Put(JavaTypeOf(rhs), " ")
+			w.Put(JTypeOf(rhs), " ")
 			lhs = StripParens(lhs) // border case, go allows "(_) = x"
-			typeOfLHS = TypeOf(rhs)
+			typeOfLHS = JTypeOf(rhs)
 		} else {
-			typeOfLHS = TypeOf(lhs)
+			typeOfLHS = JTypeOf(lhs)
 		}
-		w.MakeAssign(JavaType(typeOfLHS), lhs, JavaType(TypeOf(rhs)), rhs)
+		w.MakeAssign(typeOfLHS, lhs, JTypeOf(rhs), rhs)
 	}
 }
 
@@ -105,12 +105,13 @@ func (w *Writer) putShortDefine(mod JModifier, a *ast.AssignStmt) {
 		}
 		id := a.Lhs[i].(*ast.Ident) // should be
 
-		typ := TypeOf(n)
+		typ := JTypeOf(n)
 		if isShortRedefine(id) {
-			typ = nil
+			typ.GoType = nil
+			typ.JavaName = ""
 		}
 
-		w.PutValueSpecLine(mod, typ, []*ast.Ident{id}, []ast.Expr{value}, nil)
+		w.MakeVarDecl(mod, typ, []*ast.Ident{id}, []ast.Expr{value}, nil)
 	}
 }
 

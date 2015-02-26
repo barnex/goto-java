@@ -75,7 +75,7 @@ func (w *Writer) PutStaticFunc(f *ast.FuncDecl) {
 			name = JavaName(field.Names[0])
 		}
 
-		w.Put(JavaTypeOf(field.Type))
+		w.Put(JTypeOf(field.Type))
 
 		w.Put(" ", name)
 		if len(argNames) != 0 {
@@ -90,7 +90,7 @@ func (w *Writer) PutStaticFunc(f *ast.FuncDecl) {
 	// declare named return values, if any
 	for i := range retNames {
 		if retNames[i] != nil {
-			w.Putln(JavaType(retTypes[i]), " ", retNames[i], " = ", ZeroValue(retTypes[i]), ";")
+			w.Putln(javaType(retTypes[i]), " ", retNames[i], ";")
 		}
 	}
 
@@ -102,7 +102,7 @@ func (w *Writer) PutStaticFunc(f *ast.FuncDecl) {
 
 func (w *Writer) PutParams(names []*ast.Ident, types []types.Type) {
 	for i := range names {
-		w.Put(comma(i), JavaType(types[i]), " ", names[i])
+		w.Put(comma(i), javaType(types[i]), " ", names[i])
 	}
 }
 
@@ -189,7 +189,7 @@ func (w *Writer) PutValueSpec(mod JModifier, s *ast.ValueSpec) {
 	if s.Type != nil {
 		// var with explicit type: everything on one line, e.g.:
 		// 	int a = 1, b = 2
-		w.PutValueSpecLine(mod, TypeOf(s.Type), s.Names, s.Values, s.Comment)
+		w.MakeVarDecl(mod, JTypeOf(s.Type), s.Names, s.Values, s.Comment)
 	} else {
 		// var with infered type: specs on separate line, e.g.:
 		// 	int a = 1;
@@ -202,7 +202,7 @@ func (w *Writer) PutValueSpec(mod JModifier, s *ast.ValueSpec) {
 			if i != 0 {
 				w.Putln(";")
 			}
-			w.PutValueSpecLine(mod, TypeOf(n), s.Names[i:i+1], []ast.Expr{value}, s.Comment)
+			w.MakeVarDecl(mod, JTypeOf(n), s.Names[i:i+1], []ast.Expr{value}, s.Comment)
 		}
 	}
 }
@@ -218,21 +218,13 @@ func (w *Writer) PutValueSpec(mod JModifier, s *ast.ValueSpec) {
 // 	int a = 1;
 // 	a = 2;       // typ = nil
 //  int b = 3;
-func (w *Writer) PutValueSpecLine(mod JModifier, typ types.Type, names []*ast.Ident, values []ast.Expr, comment *ast.CommentGroup) {
+func (w *Writer) MakeVarDecl(mod JModifier, jType JType, names []*ast.Ident, values []ast.Expr, comment *ast.CommentGroup) {
 
-	if typ != nil {
-		jType := JavaType(typ)
-		if jType.IsStructValue() {
-			mod |= FINAL
-		}
+	if jType.IsStructValue() {
+		mod |= FINAL
 	}
 
-	w.Put(mod)
-
-	if typ != nil {
-		jType := JavaType(typ)
-		w.Put(jType)
-	}
+	w.Put(mod, jType)
 
 	for i, n := range names {
 

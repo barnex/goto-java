@@ -134,7 +134,7 @@ func (w *Writer) putStringSlice(e *ast.SliceExpr) {
 // 	        Sel *Ident // field selector
 // 	}
 func (w *Writer) PutSelectorExpr(e *ast.SelectorExpr) {
-	if JavaType(TypeOf(e.X)).IsValue() && IsPtrMethod(e.Sel) {
+	if JTypeOf(e.X).IsValue() && IsPtrMethod(e.Sel) {
 		// Pointer method on addressable value:
 		// compiler inserts address of receiver.
 		// https://golang.org/doc/effective_go.html#pointers_vs_values
@@ -182,7 +182,7 @@ func (w *Writer) PutBinaryExpr(b *ast.BinaryExpr) {
 	default:
 		w.Put(b.X, b.Op.String(), b.Y)
 	case token.EQL:
-		w.MakeEquals(JavaType(TypeOf(b.X)), b.X, JavaType(TypeOf(b.Y)), b.Y)
+		w.MakeEquals(JTypeOf(b.X), b.X, JTypeOf(b.Y), b.Y)
 	case token.LSS, token.GTR, token.LEQ, token.GEQ, token.QUO, token.REM:
 		if unsigned {
 			w.PutUnsignedOp(b.X, b.Op, b.Y)

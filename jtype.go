@@ -33,7 +33,7 @@ func (t JType) IsValue() bool {
 	}
 }
 
-func JavaType(t types.Type) JType {
+func javaType(t types.Type) JType {
 	switch t := t.(type) {
 	default:
 		panic("cannot handle type " + reflect.TypeOf(t).String())
@@ -49,12 +49,24 @@ func JavaType(t types.Type) JType {
 	}
 }
 
-func JavaTypeOf(typeExpr ast.Expr) JType {
-	return JavaType(TypeOf(typeExpr))
+func JTypeOf(x ast.Expr) JType {
+	if id, ok := x.(*ast.Ident); ok {
+		if escapes[ObjectOf(id)] {
+			return javaEscapedType(id)
+		}
+	}
+	return javaType(TypeOf(x))
+}
+
+func javaEscapedType(id *ast.Ident) JType {
+	return JType{
+		GoType:   types.NewStruct(nil, nil),
+		JavaName: "go.IntPtr", // TODO
+	}
 }
 
 func JavaPointerName(elemExpr ast.Expr) string {
-	return JavaTypeOf(elemExpr).JavaName + "Ptr"
+	return JTypeOf(elemExpr).JavaName + "Ptr"
 }
 
 // Java return type for a function that returns given types.
@@ -64,7 +76,7 @@ func JavaReturnTypeOf(resultTypes []types.Type) JType {
 	case 0:
 		return JType{nil, "void"}
 	case 1:
-		return JavaType(resultTypes[0])
+		return javaType(resultTypes[0])
 	default:
 		panic("multiple returns")
 		//return JavaTupleType(resultTypes)
@@ -105,7 +117,7 @@ func javaPointerNameForElem(e types.Type) string {
 	default:
 		panic("cannot handle pointer to " + reflect.TypeOf(e).String())
 	case *types.Named, *types.Pointer:
-		return JavaType(e).JavaName + "Ptr"
+		return javaType(e).JavaName + "Ptr"
 	case *types.Basic:
 		return Export(javaBasicType(e) + "Ptr")
 	}
