@@ -66,55 +66,6 @@ func (w *Writer) putAssign(n *ast.AssignStmt) {
 	}
 }
 
-// Emit a short variable declaration, e.g.:
-// 	a := 1
-func (w *Writer) putShortDefine(mod JModifier, a *ast.AssignStmt) {
-	if len(a.Lhs) != len(a.Rhs) {
-		Error(a, "assignment count mismatch:", len(a.Lhs), "!=", len(a.Rhs))
-		// TODO: function with multiple returns
-	}
-	for i, n := range a.Lhs {
-		var value ast.Expr = nil
-		if i < len(a.Rhs) {
-			value = a.Rhs[i]
-		}
-		if i != 0 {
-			w.Putln(";")
-		}
-		id := a.Lhs[i].(*ast.Ident) // should be
-
-		typ := JTypeOf(n)
-		if isShortRedefine(id) {
-			typ.GoType = nil
-			typ.JavaName = ""
-		}
-
-		w.MakeVarDecl(mod, typ, []*ast.Ident{id}, []ast.Expr{value}, nil)
-	}
-}
-
-// Is the identifier already defined its scope?
-// Detects redeclaration in a short variable declaration, e.g.:
-// 	a := 1
-// 	a, b := 2, 3  // IsShortRedefine(a): true
-// See: https://golang.org/doc/effective_go.html#redeclaration
-func isShortRedefine(id *ast.Ident) bool {
-	if IsBlank(id) {
-		return false // blank identifier _ is never redefined
-	}
-	obj := ObjectOf(id)
-	pos := id.Pos()
-	scope := obj.Parent()
-	names := scope.Names()
-	// TODO: names is sorted, could binary search
-	for _, n := range names {
-		if n == id.Name && pos > scope.Lookup(n).Pos() {
-			return true
-		}
-	}
-	return false
-}
-
 // Emit code for rhs, possibly converting to make it assignable to lhs.
 func (w *Writer) PutRHS(rhs ast.Expr, lhs types.Type, inmethod bool) {
 	// TODO

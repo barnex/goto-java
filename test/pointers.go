@@ -14,6 +14,18 @@ func main() {
 	x := &i
 	(*x)++
 	println(i)
+	i = 666
+	println(i)
+
+	var j int
+	x = &j
+	(*x)++
+	println(j)
+
+	var k int = 387
+	x = &k	
+	(*x)++
+	println(k)
 
 	println(global)
 //	inc(&global)
@@ -41,7 +53,7 @@ func main() {
 //	println(**z)
 //
 //	println(*makePtr())
-	testShortRedefine()
+	//testShortRedefine()
 }
 
 //func makePtr() *int {

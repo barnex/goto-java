@@ -207,6 +207,58 @@ func (w *Writer) PutValueSpec(mod JModifier, s *ast.ValueSpec) {
 	}
 }
 
+// Emit a short variable declaration, e.g.:
+// 	a := 1
+func (w *Writer) putShortDefine(mod JModifier, a *ast.AssignStmt) {
+	if len(a.Lhs) != len(a.Rhs) {
+		Error(a, "assignment count mismatch:", len(a.Lhs), "!=", len(a.Rhs))
+		// TODO: function with multiple returns
+	}
+	for i := range a.Lhs {
+		if i != 0 {
+			w.Putln(";")
+		}
+
+		id := a.Lhs[i].(*ast.Ident) // should be
+
+		typ := JTypeOf(id)
+		if isShortRedefine(id) {
+			// TODO: for short redefine: call PutJAssign(), continue
+			typ.GoType = nil
+			typ.JavaName = ""
+		}
+
+		var value ast.Expr = nil
+		if i < len(a.Rhs) {
+			value = a.Rhs[i]
+		}
+
+		w.MakeVarDecl(mod, typ, []*ast.Ident{id}, []ast.Expr{value}, nil)
+	}
+}
+
+// Is the identifier already defined its scope?
+// Detects redeclaration in a short variable declaration, e.g.:
+// 	a := 1
+// 	a, b := 2, 3  // IsShortRedefine(a): true
+// See: https://golang.org/doc/effective_go.html#redeclaration
+func isShortRedefine(id *ast.Ident) bool {
+	if IsBlank(id) {
+		return false // blank identifier _ is never redefined
+	}
+	obj := ObjectOf(id)
+	pos := id.Pos()
+	scope := obj.Parent()
+	names := scope.Names()
+	// TODO: names is sorted, could binary search
+	for _, n := range names {
+		if n == id.Name && pos > scope.Lookup(n).Pos() {
+			return true
+		}
+	}
+	return false
+}
+
 // Put a value spec where all variables have the same, explicit, type, e.g.:
 // 	var x, y int = 1, 2
 // Translates to java:
