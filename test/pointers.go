@@ -14,6 +14,7 @@ func main() {
 	i = 1
 	i++
 	println(i)
+	println(i == 1)
 
 	x := &i
 	(*x)++

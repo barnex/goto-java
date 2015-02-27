@@ -47,20 +47,41 @@ func JavaReturnTypeOf(resultTypes []JType) JType {
 	}
 }
 
+// Returns whether t represents a Go basic type that was moved to the heap. E.g.:
+//  i := 0
+// 	x := &i
+// 	IsEscapedBasic(JTypeOf(i)) // true
+// In such case the java primitive (e.g. int) is replaced by a wrapper (e.g. go.Int)
 func (t JType) IsEscapedBasic() bool {
 	_, basic := t.Orig.Underlying().(*types.Basic)
 	return basic && t.Ident != nil && Escapes(t.Ident)
 }
 
+// Returns whether t represents a Go struct type (value semantics).
+// This affects assignment and equality:
+// 	a = b    ->    a.set(b)
+// 	a == b   ->    a.equals(b)
 func (t JType) IsStructValue() bool {
 	_, ok := t.Orig.Underlying().(*types.Struct)
 	return ok
 }
 
+// Returns whether java variables of this type should be declared final.
+// E.g.: an escaped basic type, so we can access it from an inner class (e.g. closure).
 func (t JType) NeedsFinal() bool {
 	return t.IsEscapedBasic() || t.IsStructValue()
 }
 
+func (t JType) NeedsSetMethod() bool {
+	return t.NeedsFinal()
+}
+
+func (t JType) NeedsEqualsMethod() bool {
+	return t.NeedsFinal()
+}
+
+// Returns whether t is underlied by a Go value type (as opposed to pointer type).
+// In that case, pointer methods on t need insertion of an address-of.
 func (t JType) IsValue() bool {
 	switch t := t.Orig.Underlying().(type) {
 	default:
@@ -101,8 +122,14 @@ func javaPointerNameForElem(e types.Type) string {
 	case *types.Named, *types.Pointer:
 		return javaName(e) + "Ptr"
 	case *types.Basic:
-		return Export(javaBasicName(e) + "Ptr")
+		return "go." + Export(javaBasicName(e)+"Ptr")
 	}
+}
+
+// java type for Go pointer type. E.g.
+// 	*int -> IntPtr
+func javaPointerName(t *types.Pointer) string {
+	return javaPointerNameForElem(t.Elem())
 }
 
 // Java name for basic type.
@@ -128,12 +155,6 @@ func javaNamedName(t *types.Named) string {
 	} else {
 		return obj.Name()
 	}
-}
-
-// java type for Go pointer type. E.g.
-// 	*int -> IntPtr
-func javaPointerName(t *types.Pointer) string {
-	return javaPointerNameForElem(t.Elem())
 }
 
 // JavaTupleType returns the java type used to wrap a tuple of go types for multiple return values. E.g.:
