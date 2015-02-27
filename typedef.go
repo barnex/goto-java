@@ -252,7 +252,7 @@ func (w *Writer) PutMethodDecl(f *ast.FuncDecl, copyRecv bool) {
 
 	// (1) Put static implementation with "this" as first receiver
 	w.Putf("\t/** Implementation for method %v, with receiver as first argument. */\n", f.Name)
-	w.PutStaticFunc(f)
+	w.PutFunc(STATIC, f)
 	w.Putln()
 
 	// (2) Put method, calling static implementation

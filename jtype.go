@@ -20,14 +20,13 @@ type JType struct {
 }
 
 func JTypeOf(x ast.Expr) JType {
-
 	t := JType{Orig: TypeOf(x)}
 	if id, ok := x.(*ast.Ident); ok {
 		t.Ident = id
 	}
 
 	if t.IsEscapedBasic() {
-		panic("")
+		t.JName = "go." + Export(javaBasicName(t.Orig.Underlying().(*types.Basic)))
 	} else {
 		t.JName = javaName(t.Orig)
 	}
@@ -56,6 +55,10 @@ func (t JType) IsEscapedBasic() bool {
 func (t JType) IsStructValue() bool {
 	_, ok := t.Orig.Underlying().(*types.Struct)
 	return ok
+}
+
+func (t JType) NeedsFinal() bool {
+	return t.IsEscapedBasic() || t.IsStructValue()
 }
 
 func (t JType) IsValue() bool {

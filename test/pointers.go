@@ -23,36 +23,36 @@ func main() {
 	println(j)
 
 	var k int = 387
-	x = &k	
+	x = &k
 	(*x)++
 	println(k)
 
 	println(global)
-//	inc(&global)
-//	println(global)
-//	inc(globalptr)
-//	println(global)
-//
-//	var x *int
-//	println(x == nil)
-//
-//	y := new(int)
-//	println(y == nil)
-//
-//	*y = 7
-//	println(*y)
-//	println(x == y)
-//
-//	x = y
-//	*x = 8
-//	println(*y)
-//	println(x == y)
-//
-//	z := &x
-//	**z = 5
-//	println(**z)
-//
-//	println(*makePtr())
+	//	inc(&global)
+	//	println(global)
+	//	inc(globalptr)
+	//	println(global)
+	//
+	//	var x *int
+	//	println(x == nil)
+	//
+	//	y := new(int)
+	//	println(y == nil)
+	//
+	//	*y = 7
+	//	println(*y)
+	//	println(x == y)
+	//
+	//	x = y
+	//	*x = 8
+	//	println(*y)
+	//	println(x == y)
+	//
+	//	z := &x
+	//	**z = 5
+	//	println(**z)
+	//
+	//	println(*makePtr())
 	//testShortRedefine()
 }
 

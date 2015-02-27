@@ -14,7 +14,7 @@ func (w *Writer) PutDecl(mod JModifier, d ast.Decl) {
 	default:
 		panic("unhandled memeber type: " + reflect.TypeOf(d).String())
 	case *ast.FuncDecl:
-		w.PutFuncDecl(d)
+		w.PutFuncDecl(mod, d)
 	case *ast.GenDecl:
 		w.PutGenDecl(mod, d)
 	}
@@ -31,13 +31,13 @@ func (w *Writer) PutDecl(mod JModifier, d ast.Decl) {
 // 	    Type *FuncType     // function signature: parameters, results, and position of "func" keyword
 // 	    Body *BlockStmt    // function body; or nil (forward declaration)
 // 	}
-func (w *Writer) PutFuncDecl(n *ast.FuncDecl) {
+func (w *Writer) PutFuncDecl(mod JModifier, n *ast.FuncDecl) {
 	if n.Recv == nil {
 		// main is special: need String[] args
 		if n.Name.Name == "main" {
 			w.PutMainDecl(n)
 		} else {
-			w.PutStaticFunc(n)
+			w.PutFunc(mod, n)
 		}
 	} else {
 		// ignore method, handled by CollectDefs.
@@ -53,11 +53,11 @@ func (w *Writer) PutMainDecl(n *ast.FuncDecl) {
 
 // Emit code for a top-level function (not method) declaration, e.g.:
 // 	func f(a, b int) { ... }
-func (w *Writer) PutStaticFunc(f *ast.FuncDecl) {
+func (w *Writer) PutFunc(mod JModifier, f *ast.FuncDecl) {
 	w.PutDoc(f.Doc)
 
 	// modifier
-	w.Put(STATIC | ModifierFor(f.Name))
+	w.Put(mod | ModifierFor(f.Name))
 
 	// return type
 	retNames, retTypes := FlattenFields(f.Type.Results)
@@ -134,7 +134,7 @@ func (w *Writer) PutParams(names []*ast.Ident, types []JType) {
 // 	token.VAR     *ValueSpec
 //
 func (w *Writer) PutGenDecl(mod JModifier, d *ast.GenDecl) {
-	switch d.Tok { // IMPORT, CONST, TYPE, VAR
+	switch d.Tok {
 	default:
 		Error(d, "cannot handle "+d.Tok.String())
 	case token.TYPE:
@@ -200,7 +200,7 @@ func (w *Writer) PutValueSpec(mod JModifier, s *ast.ValueSpec) {
 			if i != 0 {
 				w.Putln(";")
 			}
-			w.PutJVarDecl(mod, JTypeOf(n), s.Names[i:i+1], []ast.Expr{value}, s.Comment)
+			w.PutJVarDecl(mod|ModifierFor(n), JTypeOf(n), s.Names[i:i+1], []ast.Expr{value}, s.Comment)
 		}
 	}
 }
@@ -267,7 +267,7 @@ func isShortRedefine(id *ast.Ident) bool {
 //  int b = 3;
 func (w *Writer) PutJVarDecl(mod JModifier, jType JType, names []*ast.Ident, values []ast.Expr, comment *ast.CommentGroup) {
 
-	if jType.IsStructValue() {
+	if jType.NeedsFinal() {
 		mod |= FINAL
 	}
 

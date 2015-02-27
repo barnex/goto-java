@@ -263,8 +263,7 @@ func NeedSemicolon(s ast.Stmt) bool {
 // 	        Decl Decl // *GenDecl with CONST, TYPE, or VAR token
 // 	}
 func (w *Writer) PutDeclStmt(d *ast.DeclStmt) {
-	modifier := NONE
-	w.PutDecl(modifier, d.Decl)
+	w.PutDecl(NONE, d.Decl)
 }
 
 // Emit a (stand-alone) expression in a statement list.

@@ -23,10 +23,11 @@ const (
 // Modifier is also final for struct types (implemented as final java references)
 func ModifierFor(ident *ast.Ident) JModifier {
 	mod := NONE
-	if ident.IsExported() {
+	global := !IsLocal(ident)
+	if global && ident.IsExported() {
 		mod |= PUBLIC
 	}
-	if JTypeOf(ident).IsStructValue() {
+	if JTypeOf(ident).NeedsFinal() {
 		mod |= FINAL
 	}
 	return mod
