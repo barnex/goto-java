@@ -25,9 +25,16 @@ func main() {
 	var i9 = f()
 	ia, yy := 5, 6
 
-	// make them escape
+	// Make them escape
+	// Assign through address
 	var p *int
 	p = &i0
+	*p = 10
+	(*p) = 10
+	*p++
+	((*p))++
+	println(i0)
+
 	p = &i1
 	p = &i2
 	p = &i3
@@ -40,7 +47,6 @@ func main() {
 	println(*p)
 
 	// use values
-	println(i0)
 	println(i1)
 	println(i2)
 	println(i3)

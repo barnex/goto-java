@@ -3,6 +3,7 @@ package gotojava
 import (
 	"go/ast"
 	"go/token"
+	"reflect"
 )
 
 // Emit an assignment or a short variable declaration. Godoc:
@@ -54,17 +55,61 @@ func (w *Writer) putAssign(n *ast.AssignStmt) {
 		// blank identifer: need to put type. E.g.:
 		// 	int _4 = f(x);
 		if IsBlank(lhs) {
-			w.Put(JTypeOf(rhs), " ")
-			w.PutJAssign(JTypeOf(rhs), lhs, JTypeOf(rhs), RValue(rhs))
+			w.PutJVarDecl(NONE, JTypeOf(rhs), lhs.(*ast.Ident), rhs, nil)
+			//	w.Put(JTypeOf(rhs), " ")
+			//	w.PutAssign(JTypeOf(rhs), lhs, JTypeOf(rhs), RValue(rhs))
 		} else {
-			w.PutJAssign(JTypeOf(lhs), LValue(lhs), JTypeOf(rhs), RValue(rhs))
+			w.PutAssign(lhs, rhs)
 		}
+	}
+}
+
+func (w *Writer) PutAssign(lhs, rhs ast.Expr) {
+	lhs = StripParens(lhs)
+	switch lhs := lhs.(type) {
+	default:
+		panic("not supported: assign to " + reflect.TypeOf(lhs).String())
+	case *ast.Ident:
+		w.putIdentAssign(lhs, rhs)
+	case *ast.SelectorExpr:
+		w.putSelectorAssign(lhs, rhs)
+	case *ast.StarExpr:
+		w.putStarAssign(lhs, rhs)
+	}
+}
+
+func (w *Writer) putIdentAssign(lhs *ast.Ident, rhs ast.Expr) {
+	if JTypeOf(lhs).NeedsSetMethod() {
+		w.Put(lhs, ".set(", RValue(rhs), ")")
+	} else {
+		w.Put(lhs, " = ", RValue(rhs))
+	}
+}
+
+func (w *Writer) putSelectorAssign(lhs *ast.SelectorExpr, rhs ast.Expr) {
+	w.Put(lhs.X, ".")
+	w.putIdentAssign(lhs.Sel, rhs)
+}
+
+func (w *Writer) putStarAssign(lhs *ast.StarExpr, rhs ast.Expr) {
+	switch elem := lhs.X.(type) {
+	default:
+		panic("not supported: assign to *(" + reflect.TypeOf(elem).String() + ")")
+	case *ast.Ident:
+		w.Put(elem, ".set(", RValue(rhs), ")")
 	}
 }
 
 // Emit code for rhs, possibly converting to make it assignable to lhs.
 func (w *Writer) PutAutoCast(rhs ast.Expr, lhs JType, inmethod bool) {
 	w.PutExpr(rhs)
+}
+
+func RValue(rhs ast.Expr) interface{} {
+	if JTypeOf(rhs).IsEscapedBasic() {
+		return Transpile(rhs, ".value")
+	}
+	return rhs
 }
 
 // Emit code for Go's "lhs = rhs", with given java types for both sides.
@@ -75,7 +120,7 @@ func (w *Writer) PutJAssign(ltyp JType, lhs interface{}, rtyp JType, rhs interfa
 	switch {
 	default:
 		w.Put(lhs, " = ", rhs)
-	case ltyp.IsStructValue():
+	case ltyp.NeedsSetMethod():
 		w.Put(lhs, ".set(", rhs, ")")
 	}
 }

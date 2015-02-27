@@ -227,9 +227,9 @@ func (w *Writer) PutJVarDecl(mod JModifier, jType JType, id *ast.Ident, value as
 	}
 	w.Put(mod, jType, " ", id, " = ")
 	if value != nil {
-		w.Put(InitValue(value, JTypeOf(id)))
+		w.Put(InitValue(value, jType))
 	} else {
-		w.Put(ZeroValue(JTypeOf(id)))
+		w.Put(ZeroValue(jType))
 	}
 }
 

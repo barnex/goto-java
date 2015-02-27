@@ -17,20 +17,6 @@ func InitValue(rhs ast.Expr, typ JType) interface{} {
 	return rhs
 }
 
-func LValue(lhs ast.Expr) interface{} {
-	if JTypeOf(lhs).IsEscapedBasic() {
-		return Transpile(lhs, ".value")
-	}
-	return lhs
-}
-
-func RValue(rhs ast.Expr) interface{} {
-	if JTypeOf(rhs).IsEscapedBasic() {
-		return Transpile(rhs, ".value")
-	}
-	return rhs
-}
-
 // ZeroValue returns the zero value for a new variable of java type jType.
 // E.g.:
 // 	var x int  ->  int x = 0;

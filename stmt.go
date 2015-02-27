@@ -124,7 +124,23 @@ func (w *Writer) PutBranchStmt(b *ast.BranchStmt) {
 // 	        Tok    token.Token // INC or DEC
 // 	}
 func (w *Writer) PutIncDecStmt(s *ast.IncDecStmt) {
-	w.Put(LValue(s.X), s.Tok.String())
+
+	x := StripParens(s.X)
+	switch x := x.(type) {
+	default:
+		panic("not supported: incdec on " + reflect.TypeOf(x).String())
+	case *ast.Ident:
+		w.Put(x, s.Tok)
+	case *ast.StarExpr:
+		switch s.Tok {
+		default:
+			panic(s.Tok)
+		case token.INC:
+			w.Put(x.X, ".inc()")
+		case token.DEC:
+			w.Put(x.X, ".dec()")
+		}
+	}
 }
 
 // Emit a for statement.
