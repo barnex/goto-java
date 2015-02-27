@@ -103,7 +103,7 @@ func GenClasses() {
 func GenStructPointerClass(d *TypeDef) {
 	spec := d.typeSpec
 
-	name := JavaPointerName(spec.Name)
+	name := javaPointerNameForElem(TypeOf(spec.Name))
 	base := JTypeOf(spec.Name)
 
 	w := NewWriterFile(name + ".java")
@@ -126,7 +126,7 @@ func GenStructPointerClass(d *TypeDef) {
 func GenStructValueClass(d *TypeDef) {
 	spec := d.typeSpec
 	name := JTypeOf(spec.Name).JName
-	ptrname := JavaPointerName(spec.Name)
+	ptrname := javaPointerNameForElem(TypeOf(spec.Name))
 	w := NewWriterFile(name + ".java")
 	defer w.Close()
 

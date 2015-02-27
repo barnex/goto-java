@@ -60,12 +60,8 @@ func (w *Writer) putNewCall(c *ast.CallExpr) {
 	switch t := TypeOf(arg).(type) {
 	default:
 		panic("cannot handle new " + reflect.TypeOf(t).String())
-	case *types.Named:
-		w.Put("new ", JavaPointerName(arg), "()")
-	case *types.Basic:
-		w.Put("new ", JavaPointerName(arg), "()")
-	case *types.Pointer:
-		w.Put("new ", JavaPointerName(arg), "()")
+	case *types.Named, *types.Basic, *types.Pointer:
+		w.Put("new ", javaPointerNameForElem(TypeOf(arg)), "()") // ?
 	}
 }
 

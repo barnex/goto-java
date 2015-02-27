@@ -29,7 +29,7 @@ func JTypeOf(x ast.Expr) JType {
 	if t.IsEscapedBasic() {
 		panic("")
 	} else {
-
+		t.JName = javaName(t.Orig)
 	}
 	return t
 }
@@ -69,28 +69,41 @@ func (t JType) IsValue() bool {
 	}
 }
 
-func javaType(orig types.Type) string {
+func javaName(orig types.Type) string {
 	switch orig := orig.(type) {
 	default:
 		panic("cannot handle type " + reflect.TypeOf(orig).String())
 	case *types.Basic:
-		return javaBasicType(orig)
+		return javaBasicName(orig)
 	case *types.Named:
-		return javaNamedType(orig)
+		return javaNamedName(orig)
 	case *types.Pointer:
-		return javaPointerType(orig)
+		return javaPointerName(orig)
 	case *types.Signature:
 		Log(nil, "TODO: Signature")
 		return "**SIGNATURE**"
 	}
 }
 
-func JavaPointerName(elemExpr ast.Expr) string {
+//func JavaPointerNameForElem(elemExpr ast.Expr) string {
+//	// TODO: what for pointer to already escaped basic?
+//	return JTypeOf(elemExpr).JName + "Ptr"
+//}
+
+func javaPointerNameForElem(e types.Type) string {
 	// TODO: what for pointer to already escaped basic?
-	return JTypeOf(elemExpr).JName + "Ptr"
+	switch e := e.(type) {
+	default:
+		panic("cannot handle pointer to " + reflect.TypeOf(e).String())
+	case *types.Named, *types.Pointer:
+		return javaName(e) + "Ptr"
+	case *types.Basic:
+		return Export(javaBasicName(e) + "Ptr")
+	}
 }
 
-func javaBasicType(t *types.Basic) string {
+// Java name for basic type.
+func javaBasicName(t *types.Basic) string {
 	// remove "untyped "
 	name := t.Name()
 	if t.Info()&types.IsUntyped != 0 {
@@ -104,7 +117,8 @@ func javaBasicType(t *types.Basic) string {
 	}
 }
 
-func javaNamedType(t *types.Named) string {
+// Java name for named type.
+func javaNamedName(t *types.Named) string {
 	obj := t.Obj()
 	if r, ok := rename[obj]; ok {
 		return r
@@ -115,19 +129,8 @@ func javaNamedType(t *types.Named) string {
 
 // java type for Go pointer type. E.g.
 // 	*int -> IntPtr
-func javaPointerType(t *types.Pointer) string {
+func javaPointerName(t *types.Pointer) string {
 	return javaPointerNameForElem(t.Elem())
-}
-
-func javaPointerNameForElem(e types.Type) string {
-	switch e := e.(type) {
-	default:
-		panic("cannot handle pointer to " + reflect.TypeOf(e).String())
-	case *types.Named, *types.Pointer:
-		return javaType(e) + "Ptr"
-	case *types.Basic:
-		return Export(javaBasicType(e) + "Ptr")
-	}
 }
 
 // JavaTupleType returns the java type used to wrap a tuple of go types for multiple return values. E.g.:
