@@ -141,6 +141,14 @@ func (w *Writer) PutForStmt(f *ast.ForStmt) {
 	w.Putln(f.Body)
 }
 
+func nnil(x interface{}) interface{} {
+	if x == nil {
+		return ""
+	} else {
+		return x
+	}
+}
+
 // Emit if statement.
 // IfStmt godoc:
 // 	type IfStmt struct {

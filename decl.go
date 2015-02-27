@@ -160,9 +160,7 @@ func (w *Writer) PutGenDecl(mod JModifier, d *ast.GenDecl) {
 // The concrete type of specs elements must be *ast.ValueSpec.
 func (w *Writer) PutValueSpecs(mod JModifier, specs []ast.Spec) {
 	for i, spec := range specs {
-		if i != 0 {
-			w.Putln(";")
-		}
+		w.PutSemi(i)
 		w.PutValueSpec(mod, spec.(*ast.ValueSpec)) // doc says it's a valueSpec for Tok == VAR, CONST
 	}
 }
@@ -184,24 +182,15 @@ func (w *Writer) PutValueSpecs(mod JModifier, specs []ast.Spec) {
 // A ValueSpec node represents a constant or variable declaration
 // (ConstSpec or VarSpec production).
 func (w *Writer) PutValueSpec(mod JModifier, s *ast.ValueSpec) {
-	if s.Type != nil {
-		// var with explicit type: everything on one line, e.g.:
-		// 	int a = 1, b = 2
-		w.PutJVarDecl(mod, JTypeOf(s.Type), s.Names, s.Values, s.Comment)
-	} else {
-		// var with infered type: specs on separate line, e.g.:
-		// 	int a = 1;
-		// 	String b = "";
-		for i, n := range s.Names {
-			var value ast.Expr = nil
-			if i < len(s.Values) {
-				value = s.Values[i]
-			}
-			if i != 0 {
-				w.Putln(";")
-			}
-			w.PutJVarDecl(mod, JTypeOf(n), s.Names[i:i+1], []ast.Expr{value}, s.Comment)
+	// One per line
+	// TODO: what if spec.Type != JTypeOf(id) e.g. escaped basic
+	for i, id := range s.Names {
+		w.PutSemi(i)
+		var value ast.Expr = nil
+		if i < len(s.Values) {
+			value = s.Values[i]
 		}
+		w.PutJVarDecl(mod, JTypeOf(id), id, value, s.Comment)
 	}
 }
 
@@ -212,23 +201,35 @@ func (w *Writer) putShortDefine(mod JModifier, a *ast.AssignStmt) {
 		Error(a, "assignment count mismatch:", len(a.Lhs), "!=", len(a.Rhs))
 		// TODO: function with multiple returns
 	}
-	for i := range a.Lhs {
-		if i != 0 {
-			w.Putln(";")
-		}
-
-		id := a.Lhs[i].(*ast.Ident)
+	for i, lhs := range a.Lhs {
+		w.PutSemi(i)
 
 		var rhs ast.Expr = nil
 		if i < len(a.Rhs) {
 			rhs = a.Rhs[i]
 		}
 
+		id := lhs.(*ast.Ident)
 		if isShortRedefine(id) {
 			w.PutJAssign(JTypeOf(id), id, JTypeOf(rhs), RValue(rhs))
 		} else {
-			w.PutJVarDecl(mod, JTypeOf(id), []*ast.Ident{id}, []ast.Expr{rhs}, nil)
+			w.PutJVarDecl(mod, JTypeOf(id), id, rhs, nil)
 		}
+	}
+}
+
+// Put a value java variable declaration:
+// 	modifier type ident = value;
+// value may be nil.
+func (w *Writer) PutJVarDecl(mod JModifier, jType JType, id *ast.Ident, value ast.Expr, comment *ast.CommentGroup) {
+	if jType.NeedsFinal() {
+		mod |= FINAL
+	}
+	w.Put(mod, jType, " ", id, " = ")
+	if value != nil {
+		w.Put(InitValue(value, JTypeOf(id)))
+	} else {
+		w.Put(ZeroValue(JTypeOf(id)))
 	}
 }
 
@@ -252,35 +253,4 @@ func isShortRedefine(id *ast.Ident) bool {
 		}
 	}
 	return false
-}
-
-// Put a value spec where all variables have the same, explicit, type, e.g.:
-// 	var x, y int = 1, 2
-// Translates to java:
-// 	int x = 1, y = 2
-// Type may be nil to allow short declarations with an existing variable. e.g.:
-// 	a := 1
-// 	a, b := 2, 3
-// becomes:
-// 	int a = 1;
-// 	a = 2;       // typ = nil
-//  int b = 3;
-func (w *Writer) PutJVarDecl(mod JModifier, jType JType, names []*ast.Ident, values []ast.Expr, comment *ast.CommentGroup) {
-
-	if jType.NeedsFinal() {
-		mod |= FINAL
-	}
-
-	w.Put(mod, jType)
-
-	for i, id := range names {
-		w.Put(comma(i))
-
-		w.Put(" ", id, " = ")
-		if i < len(values) {
-			w.Put(InitValue(values[i], JTypeOf(id)))
-		} else {
-			w.Put(ZeroValue(JTypeOf(id)))
-		}
-	}
 }

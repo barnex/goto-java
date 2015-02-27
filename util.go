@@ -60,11 +60,9 @@ func comma(i int) string {
 	}
 }
 
-func nnil(x interface{}) interface{} {
-	if x == nil {
-		return ""
-	} else {
-		return x
+func (w *Writer) PutSemi(i int) {
+	if i != 0 {
+		w.Putln(";")
 	}
 }
 

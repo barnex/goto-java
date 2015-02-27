@@ -4,6 +4,9 @@ public class Int extends IntPtr{
 
 	public int value;
 
+	public Int(){
+	}
+
 	public Int(int value){
 		this.value = value;
 	}
