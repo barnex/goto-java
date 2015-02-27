@@ -46,21 +46,19 @@ func (w *Writer) putAssign(n *ast.AssignStmt) {
 
 	// multiple assign: put one per line
 	for i, lhs := range n.Lhs {
+		lhs = StripParens(lhs) // border case, go allows "(x) = y" //?
 		rhs := n.Rhs[i]
 		if i != 0 {
 			w.Putln(";")
 		}
 		// blank identifer: need to put type. E.g.:
 		// 	int _4 = f(x);
-		var typeOfLHS JType
 		if IsBlank(lhs) {
 			w.Put(JTypeOf(rhs), " ")
-			lhs = StripParens(lhs) // border case, go allows "(_) = x"
-			typeOfLHS = JTypeOf(rhs)
+			w.PutJAssign(JTypeOf(rhs), lhs, JTypeOf(rhs), RValue(rhs))
 		} else {
-			typeOfLHS = JTypeOf(lhs)
+			w.PutJAssign(JTypeOf(lhs), LValue(lhs), JTypeOf(rhs), RValue(rhs))
 		}
-		w.PutJAssign(typeOfLHS, LValue(lhs), JTypeOf(rhs), RValue(rhs))
 	}
 }
 
