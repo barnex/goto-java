@@ -15,8 +15,8 @@ type Int struct {
 
 // A test struct.
 type Struct struct {
-	x, y Int
-	v    int
+	x, y     Int
+	v        int
 	Exported int
 }
 

@@ -225,7 +225,7 @@ func (w *Writer) putShortDefine(mod JModifier, a *ast.AssignStmt) {
 		}
 
 		if isShortRedefine(id) {
-			w.PutJAssign(JTypeOf(id), id, JTypeOf(rhs), rhs)
+			w.PutJAssign(JTypeOf(id), id, JTypeOf(rhs), RValue(rhs))
 		} else {
 			w.PutJVarDecl(mod, JTypeOf(id), []*ast.Ident{id}, []ast.Expr{rhs}, nil)
 		}
@@ -273,14 +273,14 @@ func (w *Writer) PutJVarDecl(mod JModifier, jType JType, names []*ast.Ident, val
 
 	w.Put(mod, jType)
 
-	for i, lhs := range names {
+	for i, id := range names {
 		w.Put(comma(i))
 
-		w.Put(" ", lhs, " = ")
+		w.Put(" ", id, " = ")
 		if i < len(values) {
-			w.PutRHS(values[i], JTypeOf(lhs), false)
+			w.Put(InitValue(values[i], JTypeOf(id)))
 		} else {
-			w.Put(ZeroValue(JTypeOf(lhs)))
+			w.Put(ZeroValue(JTypeOf(id)))
 		}
 	}
 }

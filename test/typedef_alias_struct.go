@@ -8,7 +8,6 @@ func (a *A) AP() { a.v++ }
 func (b B) BV()  { println(b.v) }
 func (b *B) BP() { b.v++ }
 
-
 func main() {
 	var a A
 	a = A{}

@@ -5,8 +5,31 @@ package gotojava
 import (
 	"reflect"
 
+	"go/ast"
+
 	"golang.org/x/tools/go/types"
 )
+
+func InitValue(rhs ast.Expr, typ JType) interface{} {
+	if typ.IsEscapedBasic() {
+		return "new " + typ.JName + "(" + Transpile(RValue(rhs)) + ")"
+	}
+	return rhs
+}
+
+func LValue(lhs ast.Expr) interface{} {
+	if JTypeOf(lhs).IsEscapedBasic() {
+		return Transpile(lhs, ".value")
+	}
+	return lhs
+}
+
+func RValue(rhs ast.Expr) interface{} {
+	if JTypeOf(rhs).IsEscapedBasic() {
+		return Transpile(rhs, ".value")
+	}
+	return rhs
+}
 
 // ZeroValue returns the zero value for a new variable of java type jType.
 // E.g.:

@@ -6,7 +6,6 @@ type B A
 
 // Hooray, no methods allowed on pointer type
 
-
 func main() {
 	var a A
 	a = &S{}
@@ -17,7 +16,6 @@ func main() {
 	var b B
 	b = B(a)
 	b.v++
-	
+
 	println(a.v)
 }
-

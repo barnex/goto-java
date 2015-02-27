@@ -10,11 +10,16 @@ var (
 //}
 
 func main() {
-	i := 0
+	i := 0 // escapes!
+	i = 1
+	i++
+	println(i)
+
 	x := &i
 	(*x)++
+	println(*x)
 	println(i)
-	i = 666
+	*x = 666
 	println(i)
 
 	var j int

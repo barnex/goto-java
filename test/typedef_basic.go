@@ -3,7 +3,7 @@ package main
 // test named basic types
 
 type MyInt int
-type A MyInt 
+type A MyInt
 
 func (i MyInt) square() int {
 	i = i * i // try to mutate

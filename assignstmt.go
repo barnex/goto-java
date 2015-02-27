@@ -30,11 +30,11 @@ func (w *Writer) PutAssignStmt(n *ast.AssignStmt) {
 func (w *Writer) putAssignOp(lhs ast.Expr, tok token.Token, rhs ast.Expr) {
 	if tok == token.AND_NOT_ASSIGN {
 		w.Put(lhs, " &= ", " ~", "(")
-		w.PutRHS(rhs, JTypeOf(lhs), false)
+		w.PutAutoCast(rhs, JTypeOf(lhs), false)
 		w.Put(")")
 	} else {
 		w.Put(lhs, tok)
-		w.PutRHS(rhs, JTypeOf(lhs), false)
+		w.PutAutoCast(rhs, JTypeOf(lhs), false)
 	}
 }
 
@@ -60,17 +60,13 @@ func (w *Writer) putAssign(n *ast.AssignStmt) {
 		} else {
 			typeOfLHS = JTypeOf(lhs)
 		}
-		w.PutJAssign(typeOfLHS, lhs, JTypeOf(rhs), rhs)
+		w.PutJAssign(typeOfLHS, LValue(lhs), JTypeOf(rhs), RValue(rhs))
 	}
 }
 
 // Emit code for rhs, possibly converting to make it assignable to lhs.
-func (w *Writer) PutRHS(rhs ast.Expr, lhs JType, inmethod bool) {
-	if lhs.IsEscapedBasic() {
-		w.Put("new ", lhs.JName, "(", rhs, ")")
-	} else {
-		w.PutExpr(rhs)
-	}
+func (w *Writer) PutAutoCast(rhs ast.Expr, lhs JType, inmethod bool) {
+	w.PutExpr(rhs)
 }
 
 // Emit code for Go's "lhs = rhs", with given java types for both sides.
@@ -80,8 +76,8 @@ func (w *Writer) PutRHS(rhs ast.Expr, lhs JType, inmethod bool) {
 func (w *Writer) PutJAssign(ltyp JType, lhs interface{}, rtyp JType, rhs interface{}) {
 	switch {
 	default:
-		w.Put(lhs, " = ", rhs) // TODO: panic
-	case ltyp.IsStructValue() && rtyp.IsStructValue():
+		w.Put(lhs, " = ", rhs)
+	case ltyp.IsStructValue():
 		w.Put(lhs, ".set(", rhs, ")")
 	}
 }

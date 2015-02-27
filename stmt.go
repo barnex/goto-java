@@ -124,7 +124,7 @@ func (w *Writer) PutBranchStmt(b *ast.BranchStmt) {
 // 	        Tok    token.Token // INC or DEC
 // 	}
 func (w *Writer) PutIncDecStmt(s *ast.IncDecStmt) {
-	w.Put(s.X, s.Tok.String())
+	w.Put(LValue(s.X), s.Tok.String())
 }
 
 // Emit a for statement.
@@ -198,11 +198,8 @@ func (w *Writer) PutReturnStmt(r *ast.ReturnStmt) {
 	case 1:
 		w.Put("return ", results[0])
 	default:
-		w.Put("return new ", JavaTupleType(types), "(")
-		for i, r := range results {
-			w.Put(comma(i), r)
-		}
-		w.Put(")")
+		w.Put("return new ", JavaTupleType(types))
+		w.PutArgs(results, 0)
 	}
 }
 

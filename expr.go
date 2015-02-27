@@ -211,39 +211,19 @@ func (w *Writer) PutBinaryExpr(b *ast.BinaryExpr) {
 // 	        Ellipsis token.Pos // position of "...", if any
 // 	        Rparen   token.Pos // position of ")"
 // 	}
-// TODO: handle ellipsis.
 func (w *Writer) PutCallExpr(n *ast.CallExpr) {
-	if n.Ellipsis != 0 {
-		Error(n, "cannot handle ellipsis...")
-	}
 	if IsBuiltin(n.Fun) {
 		w.PutBuiltinCall(n)
-		return
+	} else {
+		w.PutExpr(n.Fun) // TODO: parenthesized = problematic
+		w.PutArgs(n.Args, n.Ellipsis)
 	}
-
-	w.PutExpr(n.Fun) // TODO: parenthesized = problematic
-
-	//signature := TypeOf(n.Fun).(*types.Signature) // go/types doc says it's always a signature
-	//params := signature.Params()
-
-	w.Put("(")
-	for i, a := range n.Args {
-		if i != 0 {
-			w.Put(",")
-		}
-		w.Put(a)
-		//w.PutImplicitCast(a, params.At(i).Type().Underlying().String())
-	}
-	w.Put(")")
 }
 
 func (w *Writer) PutArgs(args []ast.Expr, ellipsis token.Pos) {
 	w.Put("(")
 	for i, a := range args {
-		if i != 0 {
-			w.Put(",")
-		}
-		w.PutExpr(a)
+		w.Put(comma(i), RValue(a)) // TODO: cast
 	}
 	if ellipsis != 0 {
 		w.Put("...")
