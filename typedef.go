@@ -125,7 +125,7 @@ func GenStructPointerClass(d *TypeDef) {
 // Generate java class for Go named struct type (value semantics).
 func GenStructValueClass(d *TypeDef) {
 	spec := d.typeSpec
-	name := JTypeOf(spec.Name).JavaName
+	name := JTypeOf(spec.Name).JName
 	ptrname := JavaPointerName(spec.Name)
 	w := NewWriterFile(name + ".java")
 	defer w.Close()

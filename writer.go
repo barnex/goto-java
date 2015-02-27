@@ -85,7 +85,7 @@ func (w *Writer) put(t interface{}) {
 	}
 
 	if t, ok := t.(JType); ok {
-		w.Put(t.JavaName)
+		w.Put(t.JName)
 		return
 	}
 	panic("writer: cannot put type " + reflect.TypeOf(t).String())

@@ -11,11 +11,10 @@ import (
 // ZeroValue returns the zero value for a new variable of java type jType.
 // E.g.:
 // 	var x int  ->  int x = 0;
-// TODO: JType
 func ZeroValue(t JType) string {
-	switch typ := t.GoType.(type) {
+	switch typ := t.Orig.(type) {
 	default:
-		panic("cannot make zero value for " + reflect.TypeOf(typ).String() + ":" + t.JavaName)
+		panic("cannot make zero value for " + reflect.TypeOf(typ).String() + ":" + t.JName)
 	case *types.Basic:
 		return basicZeroValue(typ)
 	case *types.Named:
