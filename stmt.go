@@ -221,14 +221,6 @@ func (w *Writer) PutBlockStmt(b *ast.BlockStmt) {
 func (w *Writer) PutStmtList(list []ast.Stmt) {
 	prevLine := -1
 	for _, n := range list {
-		w.PutStmt(n)
-
-		if NeedSemicolon(n) {
-			w.Putln(";")
-		} else {
-			w.Putln()
-		}
-
 		// put empty lines if present in original source
 		// TODO: writer: global lastLine, handle everywhere
 		line := PosOf(n).Line
@@ -239,6 +231,14 @@ func (w *Writer) PutStmtList(list []ast.Stmt) {
 			}
 		}
 		prevLine = line
+
+		w.PutStmt(n)
+
+		if NeedSemicolon(n) {
+			w.Putln(";")
+		} else {
+			w.Putln()
+		}
 	}
 }
 
