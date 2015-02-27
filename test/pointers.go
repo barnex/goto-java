@@ -13,7 +13,8 @@ func f()int{return 42}
 
 func main() {
 
-	// Test declarations of escaping basic
+	// Test declarations of escaping basics
+	// Sneak-in a few that don't escape as well (xx, yy)
 	i0 := 4
 	var i1 int 
 	var i2 int = 1
@@ -24,8 +25,8 @@ func main() {
 	var i9 = f()
 	ia, yy := 5, 6
 
+	// make them escape
 	var p *int
-
 	p = &i0
 	p = &i1
 	p = &i2
@@ -36,9 +37,9 @@ func main() {
 	p = &i8
 	p = &i9
 	p = &ia
-
 	println(*p)
 
+	// use values
 	println(i0)
 	println(i1)
 	println(i2)
@@ -51,7 +52,6 @@ func main() {
 	println(i9)
 	println(ia)
 	println(yy)
-
 
 //	i := 0 // escapes!
 //	i = 1

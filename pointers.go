@@ -46,7 +46,7 @@ func (w *Writer) putAddressOfLocal(id *ast.Ident) {
 func (w *Writer) putAddressOfGlobal(id *ast.Ident) {
 	// TODO: indent
 	w.Putf(`new go.IntPtr(){
-			public int get(){return %s;}
+			public int value(){return %s;}
 			public void set(int v){%s = v;} // TODO: name collision
 		}`, id, id)
 }

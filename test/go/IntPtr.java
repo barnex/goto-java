@@ -3,6 +3,6 @@ package go;
 public abstract class IntPtr{
 	
 	public abstract void set(int v);
-	public abstract int get();
+	public abstract int value();
 
 }

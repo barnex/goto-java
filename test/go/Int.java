@@ -11,7 +11,7 @@ public class Int extends IntPtr{
 		this.value = value;
 	}
 
-	public int get(){
+	public int value(){
 		return value;
 	}
 
@@ -24,6 +24,7 @@ public class Int extends IntPtr{
 	}
 
 	public boolean equals(Object other){
-		return other instanceof Int && ((Int)other).value == this.value;	
+		return other instanceof Int 
+			&& ((Int)other).value == this.value;	
 	}
 }
