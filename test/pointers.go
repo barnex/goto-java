@@ -15,7 +15,7 @@ func main() {
 
 	// Test declarations of escaping basics
 	// Sneak-in a few that don't escape as well (xx, yy)
-	i0 := 4
+	i := 4
 	var i1 int 
 	var i2 int = 1
 	var i3, i4 int
@@ -28,13 +28,7 @@ func main() {
 	// Make them escape
 	// Assign through address
 	var p *int
-	p = &i0
-	*p = 10
-	(*p) = 10
-	*p++
-	((*p))++
-	println(i0)
-
+	p = &i
 	p = &i1
 	p = &i2
 	p = &i3
@@ -44,9 +38,9 @@ func main() {
 	p = &i8
 	p = &i9
 	p = &ia
-	println(*p)
 
 	// use values
+	println(*p)
 	println(i1)
 	println(i2)
 	println(i3)
@@ -58,6 +52,16 @@ func main() {
 	println(i9)
 	println(ia)
 	println(yy)
+
+	// Test that we can still use escaped basics as usual
+	//i = 1
+	//i++
+
+	// Pointer lvalues
+	*p = 10
+	(*p) = 10
+	*p++
+	((*p))++
 
 //	i := 0 // escapes!
 //	i = 1
