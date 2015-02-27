@@ -17,14 +17,13 @@ const (
 	FINAL
 )
 
-// Returns a suited java modifier (public, ...) for the definition of ident. E.g.:
+// Returns a suited java modifier (public, ...) for the (globally visible) definition of ident. E.g.:
 // 	x -> NONE   (package private)
 // 	X -> PUBLIC (exported)
 // Modifier is also final for struct types (implemented as final java references)
-func ModifierFor(ident *ast.Ident) JModifier {
+func GlobalModifierFor(ident *ast.Ident) JModifier {
 	mod := NONE
-	global := !IsLocal(ident)
-	if global && ident.IsExported() {
+	if ident.IsExported() {
 		mod |= PUBLIC
 	}
 	if JTypeOf(ident).NeedsFinal() {

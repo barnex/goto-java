@@ -239,8 +239,8 @@ func (w *Writer) PutStructFields(fields *ast.FieldList) {
 	names, types := FlattenFields(fields)
 	for i, n := range names {
 		t := types[i]
-		w.Put(ModifierFor(n), t, " ", n)
-		if ModifierFor(n)&FINAL != 0 {
+		w.Put(GlobalModifierFor(n), t, " ", n)
+		if t.NeedsFinal() {
 			w.Put(" = ", ZeroValue(t))
 		}
 		w.Putln(";")
@@ -257,7 +257,7 @@ func (w *Writer) PutMethodDecl(f *ast.FuncDecl, copyRecv bool) {
 
 	// (2) Put method, calling static implementation
 	w.PutDoc(f.Doc)
-	w.Put(ModifierFor(f.Name))
+	w.Put(GlobalModifierFor(f.Name))
 
 	// return type
 	_, retTypes := FlattenFields(f.Type.Results)

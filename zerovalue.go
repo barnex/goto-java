@@ -12,6 +12,9 @@ import (
 // E.g.:
 // 	var x int  ->  int x = 0;
 func ZeroValue(t JType) string {
+	if t.IsEscapedBasic() {
+		return "new " + t.JName + "()"
+	}
 	switch typ := t.Orig.(type) {
 	default:
 		panic("cannot make zero value for " + reflect.TypeOf(typ).String() + ":" + t.JName)

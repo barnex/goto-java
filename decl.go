@@ -57,7 +57,7 @@ func (w *Writer) PutFunc(mod JModifier, f *ast.FuncDecl) {
 	w.PutDoc(f.Doc)
 
 	// modifier
-	w.Put(mod | ModifierFor(f.Name))
+	w.Put(mod | GlobalModifierFor(f.Name))
 
 	// return type
 	retNames, retTypes := FlattenFields(f.Type.Results)
@@ -200,7 +200,7 @@ func (w *Writer) PutValueSpec(mod JModifier, s *ast.ValueSpec) {
 			if i != 0 {
 				w.Putln(";")
 			}
-			w.PutJVarDecl(mod|ModifierFor(n), JTypeOf(n), s.Names[i:i+1], []ast.Expr{value}, s.Comment)
+			w.PutJVarDecl(mod, JTypeOf(n), s.Names[i:i+1], []ast.Expr{value}, s.Comment)
 		}
 	}
 }
@@ -273,18 +273,14 @@ func (w *Writer) PutJVarDecl(mod JModifier, jType JType, names []*ast.Ident, val
 
 	w.Put(mod, jType)
 
-	for i, n := range names {
+	for i, lhs := range names {
+		w.Put(comma(i))
 
-		w.Put(" ", n, " = ")
-
+		w.Put(" ", lhs, " = ")
 		if i < len(values) {
-			w.PutExpr(values[i])
+			w.PutRHS(values[i], JTypeOf(lhs), false)
 		} else {
-			w.Put(ZeroValue(JTypeOf(n)))
-		}
-
-		if i != len(names)-1 {
-			w.Put(", ")
+			w.Put(ZeroValue(JTypeOf(lhs)))
 		}
 	}
 }

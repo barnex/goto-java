@@ -3,8 +3,6 @@ package gotojava
 import (
 	"go/ast"
 	"go/token"
-
-	"golang.org/x/tools/go/types"
 )
 
 // Emit an assignment or a short variable declaration. Godoc:
@@ -32,11 +30,11 @@ func (w *Writer) PutAssignStmt(n *ast.AssignStmt) {
 func (w *Writer) putAssignOp(lhs ast.Expr, tok token.Token, rhs ast.Expr) {
 	if tok == token.AND_NOT_ASSIGN {
 		w.Put(lhs, " &= ", " ~", "(")
-		w.PutRHS(rhs, TypeOf(lhs), false)
+		w.PutRHS(rhs, JTypeOf(lhs), false)
 		w.Put(")")
 	} else {
 		w.Put(lhs, tok)
-		w.PutRHS(rhs, TypeOf(lhs), false)
+		w.PutRHS(rhs, JTypeOf(lhs), false)
 	}
 }
 
@@ -67,9 +65,12 @@ func (w *Writer) putAssign(n *ast.AssignStmt) {
 }
 
 // Emit code for rhs, possibly converting to make it assignable to lhs.
-func (w *Writer) PutRHS(rhs ast.Expr, lhs types.Type, inmethod bool) {
-	// TODO
-	w.PutExpr(rhs)
+func (w *Writer) PutRHS(rhs ast.Expr, lhs JType, inmethod bool) {
+	if lhs.IsEscapedBasic() {
+		w.Put("new ", lhs.JName, "(", rhs, ")")
+	} else {
+		w.PutExpr(rhs)
+	}
 }
 
 // Emit code for Go's "lhs = rhs", with given java types for both sides.
