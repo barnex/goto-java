@@ -11,7 +11,7 @@ import (
 )
 
 func InitValue(rhs ast.Expr, typ JType) interface{} {
-	if typ.IsEscapedBasic() {
+	if typ.IsEscapedPrimitive() {
 		return "new " + typ.JName + "(" + Transpile(RValue(rhs)) + ")"
 	}
 	return rhs
@@ -21,7 +21,7 @@ func InitValue(rhs ast.Expr, typ JType) interface{} {
 // E.g.:
 // 	var x int  ->  int x = 0;
 func ZeroValue(t JType) string {
-	if t.IsEscapedBasic() {
+	if t.IsEscapedPrimitive() {
 		return "new " + t.JName + "()"
 	}
 	switch typ := t.Orig.(type) {

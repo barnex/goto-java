@@ -9,14 +9,14 @@ var (
 //	(*i)++
 //}
 
-func f()int{return 42}
+func f() int { return 42 }
 
 func main() {
 
 	// Test declarations of escaping basics
 	// Sneak-in a few that don't escape as well (xx, yy)
 	i := 4
-	var i1 int 
+	var i1 int
 	var i2 int = 1
 	var i3, i4 int
 	var i5, xx int = 2, 3
@@ -54,37 +54,37 @@ func main() {
 	println(yy)
 
 	// Test that we can still use escaped basics as usual
-	//i = 1
-	//i++
+	i = 1
+	i++
 
 	// Pointer lvalues
 	*p = 10
 	(*p) = 10
 	*p++
-	((*p))++
+	(*p)++
 
-//	i := 0 // escapes!
-//	i = 1
-//	i++
-//	println(i)
-//	println(i == 1)
+	//	i := 0 // escapes!
+	//	i = 1
+	//	i++
+	//	println(i)
+	//	println(i == 1)
 
-//	x := &i
-//	(*x)++
-//	println(*x)
-//	println(i)
-//	*x = 666
-//	println(i)
-//
-//	var j int
-//	x = &j
-//	(*x)++
-//	println(j)
-//
-//	var k int = 387
-//	x = &k
-//	(*x)++
-//	println(k)
+	//	x := &i
+	//	(*x)++
+	//	println(*x)
+	//	println(i)
+	//	*x = 666
+	//	println(i)
+	//
+	//	var j int
+	//	x = &j
+	//	(*x)++
+	//	println(j)
+	//
+	//	var k int = 387
+	//	x = &k
+	//	(*x)++
+	//	println(k)
 
 	println(global)
 	//	inc(&global)

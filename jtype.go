@@ -25,7 +25,7 @@ func JTypeOf(x ast.Expr) JType {
 		t.Ident = id
 	}
 
-	if t.IsEscapedBasic() {
+	if t.IsEscapedPrimitive() {
 		t.JName = "go." + Export(javaBasicName(t.Orig.Underlying().(*types.Basic)))
 	} else {
 		t.JName = javaName(t.Orig)
@@ -52,7 +52,7 @@ func JavaReturnTypeOf(resultTypes []JType) JType {
 // 	x := &i
 // 	IsEscapedBasic(JTypeOf(i)) // true
 // In such case the java primitive (e.g. int) is replaced by a wrapper (e.g. go.Int)
-func (t JType) IsEscapedBasic() bool {
+func (t JType) IsEscapedPrimitive() bool {
 	_, basic := t.Orig.Underlying().(*types.Basic)
 	return basic && t.Ident != nil && Escapes(t.Ident)
 }
@@ -69,7 +69,7 @@ func (t JType) IsStructValue() bool {
 // Returns whether java variables of this type should be declared final.
 // E.g.: an escaped basic type, so we can access it from an inner class (e.g. closure).
 func (t JType) NeedsFinal() bool {
-	return t.IsEscapedBasic() || t.IsStructValue()
+	return t.IsEscapedPrimitive() || t.IsStructValue()
 }
 
 func (t JType) NeedsSetMethod() bool {

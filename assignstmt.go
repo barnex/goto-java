@@ -16,31 +16,18 @@ import (
 func (w *Writer) PutAssignStmt(n *ast.AssignStmt) {
 	lhs, rhs := n.Lhs, n.Rhs
 	switch n.Tok {
-	case token.ASSIGN:
-		w.putAssign(n)
 	case token.DEFINE:
 		w.putShortDefine(NONE, n)
+	case token.ASSIGN:
+		w.putMultiAssign(n)
 	default:
 		assert(len(lhs) == 1 && len(rhs) == 1)
-		w.putAssignOp(lhs[0], n.Tok, rhs[0])
-	}
-}
-
-// Emit assign statement with operation, e.g.:
-// 	+= -= *= /= ...
-func (w *Writer) putAssignOp(lhs ast.Expr, tok token.Token, rhs ast.Expr) {
-	if tok == token.AND_NOT_ASSIGN {
-		w.Put(lhs, " &= ", " ~", "(")
-		w.PutAutoCast(rhs, JTypeOf(lhs), false)
-		w.Put(")")
-	} else {
-		w.Put(lhs, tok)
-		w.PutAutoCast(rhs, JTypeOf(lhs), false)
+		w.PutAssign(lhs[0], n.Tok, rhs[0])
 	}
 }
 
 // Emit pure assign statement ('=' token)
-func (w *Writer) putAssign(n *ast.AssignStmt) {
+func (w *Writer) putMultiAssign(n *ast.AssignStmt) {
 	if len(n.Lhs) != len(n.Rhs) {
 		Error(n, "assignment count mismatch:", len(n.Lhs), "!=", len(n.Rhs))
 	}
@@ -59,36 +46,69 @@ func (w *Writer) putAssign(n *ast.AssignStmt) {
 			//	w.Put(JTypeOf(rhs), " ")
 			//	w.PutAssign(JTypeOf(rhs), lhs, JTypeOf(rhs), RValue(rhs))
 		} else {
-			w.PutAssign(lhs, rhs)
+			w.PutAssign(lhs, n.Tok, rhs)
 		}
 	}
 }
 
-func (w *Writer) PutAssign(lhs, rhs ast.Expr) {
+func (w *Writer) PutAssign(lhs ast.Expr, op token.Token, rhs ast.Expr) {
 	lhs = StripParens(lhs)
+
 	switch lhs := lhs.(type) {
 	default:
-		panic("not supported: assign to " + reflect.TypeOf(lhs).String())
+		panic("unsupported lvalue: " + reflect.TypeOf(lhs).String())
 	case *ast.Ident:
-		w.putIdentAssign(lhs, rhs)
-	case *ast.SelectorExpr:
-		w.putSelectorAssign(lhs, rhs)
+		w.putIdentAssign(lhs, op, rhs)
 	case *ast.StarExpr:
-		w.putStarAssign(lhs, rhs)
+		//case *ast.SelectorExpr:
 	}
 }
 
-func (w *Writer) putIdentAssign(lhs *ast.Ident, rhs ast.Expr) {
+func (w *Writer) putIdentAssign(lhs *ast.Ident, op token.Token, rhs ast.Expr) {
+
 	if JTypeOf(lhs).NeedsSetMethod() {
-		w.Put(lhs, ".set(", RValue(rhs), ")")
+		meth := opToMeth[op]
+		if meth == "" {
+			panic("cannot handle " + op.String())
+		}
+		w.Put(lhs, ".", meth, " (", RValue(rhs), ")")
 	} else {
-		w.Put(lhs, " = ", RValue(rhs))
+		w.putAssignOp(lhs, op, rhs) // e.g. "lhs = rhs"
 	}
 }
 
-func (w *Writer) putSelectorAssign(lhs *ast.SelectorExpr, rhs ast.Expr) {
+var opToMeth = map[token.Token]string{
+	token.ASSIGN:         "set", // =
+	token.INC:            "inc", // ++
+	token.DEC:            "dec", // --
+	token.ADD_ASSIGN:     "add", // +=
+	token.SUB_ASSIGN:     "sub", // -=
+	token.MUL_ASSIGN:     "mul", // *=
+	token.QUO_ASSIGN:     "div", // /=
+	token.REM_ASSIGN:     "XXX", // %=
+	token.AND_ASSIGN:     "XXX", // &=
+	token.OR_ASSIGN:      "XXX", // |=
+	token.XOR_ASSIGN:     "XXX", // ^=
+	token.SHL_ASSIGN:     "XXX", // <<=
+	token.SHR_ASSIGN:     "XXX", // >>=
+	token.AND_NOT_ASSIGN: "XXX", // &^=
+
+}
+
+// Emit assign statement with operation, e.g.:
+// 	+= -= *= /= ++ ...
+// For inc/dec stmt, rhs should be nil.
+func (w *Writer) putAssignOp(lhs ast.Expr, tok token.Token, rhs ast.Expr) {
+	if tok == token.AND_NOT_ASSIGN {
+		w.Put(lhs, " &= ", " ~", "(", RValue(rhs), ")")
+	} else {
+		w.Put(lhs, tok, RValue(rhs))
+	}
+}
+
+func (w *Writer) putSelectorAssign(lhs *ast.SelectorExpr, op token.Token, rhs ast.Expr) {
 	w.Put(lhs.X, ".")
-	w.putIdentAssign(lhs.Sel, rhs)
+	w.putIdentAssign(lhs.Sel, op, rhs)
 }
 
 func (w *Writer) putStarAssign(lhs *ast.StarExpr, rhs ast.Expr) {
@@ -101,15 +121,19 @@ func (w *Writer) putStarAssign(lhs *ast.StarExpr, rhs ast.Expr) {
 }
 
 // Emit code for rhs, possibly converting to make it assignable to lhs.
-func (w *Writer) PutAutoCast(rhs ast.Expr, lhs JType, inmethod bool) {
-	w.PutExpr(rhs)
-}
+//func (w *Writer) PutAutoCast(rhs ast.Expr, lhs JType, inmethod bool) {
+//	w.PutExpr(rhs)
+//}
 
 func RValue(rhs ast.Expr) interface{} {
-	if JTypeOf(rhs).IsEscapedBasic() {
+	if rhs == nil {
+		return ""
+	}
+	if JTypeOf(rhs).IsEscapedPrimitive() {
 		return Transpile(rhs, ".value")
 	}
 	return rhs
+	// TODO: cast
 }
 
 // Emit code for Go's "lhs = rhs", with given java types for both sides.
