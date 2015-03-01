@@ -92,7 +92,6 @@ var opToMeth = map[token.Token]string{
 	token.SHL_ASSIGN:     "XXX", // <<=
 	token.SHR_ASSIGN:     "XXX", // >>=
 	token.AND_NOT_ASSIGN: "XXX", // &^=
-
 }
 
 // Emit assign statement with operation, e.g.:
