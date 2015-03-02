@@ -64,34 +64,28 @@ func (w *Writer) PutAssign(lhs ast.Expr, op token.Token, rhs ast.Expr) {
 	}
 }
 
+// TODO: not only for idents
 func (w *Writer) putIdentAssign(lhs *ast.Ident, op token.Token, rhs ast.Expr) {
-
 	if JTypeOf(lhs).NeedsSetMethod() {
-		meth := opToMeth[op]
-		if meth == "" {
-			panic("cannot handle " + op.String())
+		rhs := RValue(rhs)
+		if meth := opToMeth[op]; meth != "" {
+			w.Put(lhs, ".", meth, " (", rhs, ")")
+		} else {
+			op2 := op.String()[:len(op.String())-1]
+			if op == token.AND_NOT_ASSIGN {
+				op2 = "&~"
+			}
+			w.Put(lhs, ".set(", RValue(lhs), " ", op2, " (", rhs, "))")
 		}
-		w.Put(lhs, ".", meth, " (", RValue(rhs), ")")
 	} else {
 		w.putAssignOp(lhs, op, rhs) // e.g. "lhs = rhs"
 	}
 }
 
 var opToMeth = map[token.Token]string{
-	token.ASSIGN:         "set", // =
-	token.INC:            "inc", // ++
-	token.DEC:            "dec", // --
-	token.ADD_ASSIGN:     "add", // +=
-	token.SUB_ASSIGN:     "sub", // -=
-	token.MUL_ASSIGN:     "mul", // *=
-	token.QUO_ASSIGN:     "div", // /=
-	token.REM_ASSIGN:     "XXX", // %=
-	token.AND_ASSIGN:     "XXX", // &=
-	token.OR_ASSIGN:      "XXX", // |=
-	token.XOR_ASSIGN:     "XXX", // ^=
-	token.SHL_ASSIGN:     "XXX", // <<=
-	token.SHR_ASSIGN:     "XXX", // >>=
-	token.AND_NOT_ASSIGN: "XXX", // &^=
+	token.ASSIGN: "set", // =
+	token.INC:    "inc", // ++
+	token.DEC:    "dec", // --
 }
 
 // Emit assign statement with operation, e.g.:

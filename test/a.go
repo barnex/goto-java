@@ -82,41 +82,41 @@ func unnamed_basic() {
 	l_a1--
 	e_a1--
 
-	l_a1 += l_a2
-	e_a1 += l_a2
-
-	l_a1 -= l_a2
-	e_a1 -= l_a2
-
-	l_a1 *= l_a2
-	e_a1 *= l_a2
-
-	l_a1 /= l_a2
-	e_a1 /= l_a2
-
-	l_a1 += e_a2
-	e_a1 += e_a2
-
-	l_a1 -= e_a2
-	e_a1 -= e_a2
-
-	l_a1 *= e_a2
-	e_a1 *= e_a2
-
-	l_a1 /= e_a2
-	e_a1 /= e_a2
-
-	l_a1 %= l_a2
-	e_a1 %= l_a2
-
-	l_a1 &= l_a2
-	e_a1 &= l_a2
-
-	l_a1 |= l_a2
-	e_a1 |= l_a2
-
-	l_a1 ^= l_a2
-	e_a1 ^= l_a2
+	l_a1 += l_a2 + 2
+	e_a1 += l_a2 + 2
+               
+	l_a1 -= l_a2 + 2
+	e_a1 -= l_a2 + 2
+              
+	l_a1 *= l_a2 + 2
+	e_a1 *= l_a2 + 2
+             
+	l_a1 /= l_a2 + 2
+	e_a1 /= l_a2 + 2
+            
+	l_a1 += e_a2 + 2
+	e_a1 += e_a2 + 2
+           
+	l_a1 -= e_a2 + 2
+	e_a1 -= e_a2 + 2
+          
+	l_a1 *= e_a2 + 2
+	e_a1 *= e_a2 + 2
+         
+	l_a1 /= e_a2 + 2
+	e_a1 /= e_a2 + 2
+        
+	l_a1 %= l_a2 + 2
+	e_a1 %= l_a2 + 2
+       
+	l_a1 &= l_a2 + 2
+	e_a1 &= l_a2 + 2
+      
+	l_a1 |= l_a2 + 2
+	e_a1 |= l_a2 + 2
+     
+	l_a1 ^= l_a2 + 2
+	e_a1 ^= l_a2 + 2
 
 	//l_a1 <<= e_a2 // TODO: uint
 	//e_a1 <<= e_a2
@@ -129,6 +129,45 @@ func unnamed_basic() {
 
 	println(l_a1 == e_a2)
 	println(e_a1 == e_a2)
+	println(l_a1 < e_a2)
+	println(e_a1 < e_a2)
+	println(l_a1 > e_a2)
+	println(e_a1 > e_a2)
+	println(l_a1 != e_a2)
+	println(e_a1 != e_a2)
+	println(l_a1 >= e_a2)
+	println(e_a1 >= e_a2)
+	println(l_a1 <= e_a2)
+	println(e_a1 <= e_a2)
+
+	println(l_a1 == l_a2)
+	println(e_a1 == l_a2)
+	println(l_a1 < l_a2)
+	println(e_a1 < l_a2)
+	println(l_a1 > l_a2)
+	println(e_a1 > l_a2)
+	println(l_a1 != l_a2)
+	println(e_a1 != l_a2)
+	println(l_a1 >= l_a2)
+	println(e_a1 >= l_a2)
+	println(l_a1 <= l_a2)
+	println(e_a1 <= l_a2)
+
+	println(l_a1 == 1+1)
+	println(e_a1 == 1+1)
+	println(l_a1 < 1+1)
+	println(e_a1 < 1+1)
+	println(l_a1 > 1+1)
+	println(e_a1 > 1+1)
+	println(l_a1 != 1+1)
+	println(e_a1 != 1+1)
+	println(l_a1 >= 1+1)
+	println(e_a1 >= 1+1)
+	println(l_a1 <= 1+1)
+	println(e_a1 <= 1+1)
+
+
+
 
 	println(l_a1)
 	println(l_a2)

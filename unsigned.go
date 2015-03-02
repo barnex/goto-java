@@ -43,12 +43,6 @@ func (w *Writer) PutUnsignedOp(x ast.Expr, op token.Token, y ast.Expr) {
 	default:
 		Error(x, "unsigned", op.String(), "not supported")
 	case token.QUO, token.REM, token.LSS, token.GTR, token.LEQ, token.GEQ:
-		w.Put(function, "(")
-		w.Put(x)
-		//w.PutImplicitCast(x, goType)
-		w.Put(", ")
-		//w.PutImplicitCast(y, goType)
-		w.Put(y)
-		w.Put(")")
+		w.Put(function, "(", RValue(x), ", ", RValue(y), ")")
 	}
 }
