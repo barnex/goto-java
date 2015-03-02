@@ -66,6 +66,8 @@ func NeedsSetMethod(lvalue ast.Expr) bool {
 		return JTypeOf(lvalue).NeedsSetMethod()
 	case *ast.StarExpr:
 		return true
+	case *ast.SelectorExpr:
+		return NeedsSetMethod(lvalue.Sel)
 	}
 }
 
@@ -137,7 +139,7 @@ func RValue(rhs ast.Expr) interface{} {
 	// TODO: cast
 }
 
-func LValue(lhs ast.Expr) ast.Expr {
+func LValue(lhs ast.Expr) interface{} {
 	lhs = StripParens(lhs)
 	switch lhs := lhs.(type) {
 	default:
@@ -146,6 +148,8 @@ func LValue(lhs ast.Expr) ast.Expr {
 		return lhs
 	case *ast.StarExpr:
 		return lhs.X
+	case *ast.SelectorExpr:
+		return Transpile(lhs.X, ".", lhs.Sel)
 	}
 }
 
