@@ -43,6 +43,8 @@ func (w *Writer) PutExpr(n ast.Expr) {
 		w.PutStarExpr(e)
 	case *ast.UnaryExpr:
 		w.PutUnaryExpr(e)
+	case *ast.CompositeLit:
+		w.PutCompositeLit(e)
 	}
 }
 
@@ -70,6 +72,17 @@ func (w *Writer) PutBasicLit(n *ast.BasicLit) {
 		checkUserErr(err)
 		w.Put(fmt.Sprintf("%q", str)) // TODO: flag for "%q"?
 	}
+}
+
+// Emit code for a composite literal. Godoc:
+// 	type CompositeLit struct {
+// 	        Type   Expr      // literal type; or nil
+// 	        Lbrace token.Pos // position of "{"
+// 	        Elts   []Expr    // list of composite elements; or nil
+// 	        Rbrace token.Pos // position of "}"
+// 	}
+func (w *Writer) PutCompositeLit(lit *ast.CompositeLit) {
+	// *ast.KeyValueExpr  or just exprs
 }
 
 // Emit a unary expression, execpt unary "*".

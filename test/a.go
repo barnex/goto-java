@@ -1,20 +1,20 @@
 package main
 
 //type B int
-//
-//type S struct {
-//	a int
-//	b *int
-//	c B
-//	d *B
-//	e struct{ v int }
-//	g *struct{ v int }
-//	h struct{ int }
-//	i *struct{ int }
-//	j S2
-//	k *S
-//}
-//
+
+type S struct {
+	a int
+	b *int
+	//c B
+	//d *B
+	//e struct{ v int }
+	//g *struct{ v int }
+	//h struct{ int }
+	//i *struct{ int }
+	j S2
+	k *S
+}
+
 //var (
 //	g_a int
 //	g_b *int
@@ -27,10 +27,10 @@ package main
 //	g_j S2
 //	g_k *S
 //)
-//
-//type S2 struct {
-//	v int
-//}
+
+type S2 struct {
+	v int
+}
 
 func main() {
 
@@ -49,6 +49,24 @@ func main() {
 	//		l_i *struct{ int }
 	//		l_j S2
 
+}
+
+func named_struct() {
+	var (
+		s1 S
+		s2 S = S{}
+		s3 S = S{3, nil, S2{}, nil}
+		s4 S = S{k: nil, b: new(int), a: 7}
+		//s3 int = l_a2
+		//s1 int = l_a2
+		//s2 int = e_a1
+		//s4 int = e_a1
+	)
+
+	println(s1.a)
+	println(s2.a)
+	println(s3.a)
+	println(s4.a)
 }
 
 func unnamed_pointer() {
@@ -103,18 +121,6 @@ func unnamed_pointer() {
 	// use variables
 	_ = p4
 	_ = p5
-
-}
-
-func named_struct() {
-	//	var (
-	//		l_a1 int
-	//		l_a2 int = 1
-	//		l_a3 int = l_a2
-	//		e_a1 int = l_a2
-	//		e_a2 int = e_a1
-	//		l_a4 int = e_a1
-	//	)
 
 }
 
