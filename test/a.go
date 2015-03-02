@@ -15,6 +15,19 @@ type S struct {
 	k *S
 }
 
+func (s S) sum() int {
+	sum := s.a
+	sum += *s.b
+	sum += s.j.v
+	//sum += s.k.a
+	// try to mutate receiver value
+	s.a = 88
+	s.b = new(int)
+	s.j = S2{77}
+	s.k = new(S)
+	return sum
+}
+
 //var (
 //	g_a int
 //	g_b *int
@@ -60,8 +73,8 @@ func unnamed_struct() {
 	//)
 }
 
-func makeSPtr()*S{
-	return &S{a:12}
+func makeSPtr() *S {
+	return &S{a: 12}
 }
 
 func named_struct_pointer() {
@@ -70,7 +83,7 @@ func named_struct_pointer() {
 		s1 *S
 		s2 *S = &S{}
 		s3 *S = &S{3, nil, S2{}, nil}
-		s4 *S = &S{k: nil, b: new(int), a: 7}
+		s4 *S = &S{k: &S{a: 19}, b: new(int), a: 7}
 		s5 *S = makeSPtr()
 		s6 *S = &s
 	)
@@ -101,8 +114,8 @@ func named_struct_pointer() {
 	println(s1 == s6)
 }
 
-func makeS()S{
-	return S{a:12}
+func makeS() S {
+	return S{a: 12}
 }
 
 func named_struct() {
@@ -110,7 +123,7 @@ func named_struct() {
 		s1 S
 		s2 S = S{}
 		s3 S = S{3, nil, S2{}, nil}
-		s4 S = S{k: nil, b: new(int), a: 7}
+		s4 S = S{k: &S{a: 12}, b: new(int), a: 7}
 		s5 S = makeS()
 	)
 	s6 := S{}
@@ -128,6 +141,19 @@ func named_struct() {
 	println(s8.a)
 	println(s9.a)
 
+	// value method should not mutate
+	println(s4.a)
+	println(*(s4.b))
+	println(s4.k.a)
+	println(s4.j.v)
+
+	println(s4.sum())
+
+	println(s4.a)
+	println(*(s4.b))
+	println(s4.k.a)
+	println(s4.j.v)
+
 	s1 = s6
 	s1.b = s6.b
 
@@ -144,7 +170,7 @@ func named_struct() {
 	println((&s4).a)
 }
 
-func eat_intptr(*int){}
+func eat_intptr(*int) {}
 
 func unnamed_pointer() {
 	var (
@@ -201,7 +227,7 @@ func unnamed_pointer() {
 
 }
 
-func eat_int(int){}
+func eat_int(int) {}
 
 func unnamed_basic() {
 	var (
