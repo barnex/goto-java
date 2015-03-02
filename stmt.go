@@ -229,6 +229,7 @@ func (w *Writer) PutBlockStmt(b *ast.BlockStmt) {
 func (w *Writer) PutStmtList(list []ast.Stmt) {
 	prevLine := -1
 	for _, n := range list {
+
 		// put empty lines if present in original source
 		// TODO: writer: global lastLine, handle everywhere
 		line := PosOf(n).Line
@@ -238,7 +239,7 @@ func (w *Writer) PutStmtList(list []ast.Stmt) {
 				w.Putln()
 			}
 		}
-		prevLine = line
+		prevLine = fset.Position(n.End()).Line
 
 		w.PutStmt(n)
 
