@@ -82,7 +82,7 @@ func (w *Writer) putAssignOp(lhs ast.Expr, tok token.Token, rhs ast.Expr) {
 
 func (w *Writer) putAssignMethod(lhs ast.Expr, tok token.Token, rhs ast.Expr) {
 	if meth := opToMeth[tok]; meth != "" {
-		w.Put(lhs, ".", meth, " (", RValue(rhs), ")")
+		w.Put(LValue(lhs), ".", meth, " (", RValue(rhs), ")")
 	} else {
 		panic(tok)
 	}
@@ -135,6 +135,18 @@ func RValue(rhs ast.Expr) interface{} {
 
 	return rhs
 	// TODO: cast
+}
+
+func LValue(lhs ast.Expr) ast.Expr {
+	lhs = StripParens(lhs)
+	switch lhs := lhs.(type) {
+	default:
+		panic("cannot make LValue: " + reflect.TypeOf(lhs).String())
+	case *ast.Ident:
+		return lhs
+	case *ast.StarExpr:
+		return lhs.X
+	}
 }
 
 // Emit code for Go's "lhs = rhs", with given java types for both sides.

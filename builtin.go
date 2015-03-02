@@ -57,10 +57,13 @@ func (w *Writer) PutBuiltinCall(c *ast.CallExpr) {
 func (w *Writer) putNewCall(c *ast.CallExpr) {
 	assert(len(c.Args) == 1)
 	arg := c.Args[0]
+
 	switch t := TypeOf(arg).(type) {
 	default:
 		panic("cannot handle new " + reflect.TypeOf(t).String())
-	case *types.Named, *types.Basic, *types.Pointer:
+	case *types.Basic:
+		w.Put("new ", EscapedBasicName(JTypeOf(arg)), "()")
+	case *types.Named, *types.Pointer:
 		w.Put("new ", javaPointerNameForElem(TypeOf(arg)), "()") // ?
 	}
 }

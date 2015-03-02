@@ -26,11 +26,16 @@ func JTypeOf(x ast.Expr) JType {
 	}
 
 	if t.IsEscapedPrimitive() {
-		t.JName = "go." + Export(javaBasicName(t.Orig.Underlying().(*types.Basic)))
+		t.JName = EscapedBasicName(t)
 	} else {
 		t.JName = javaName(t.Orig)
 	}
 	return t
+}
+
+func EscapedBasicName(t JType) string {
+	return "go." + Export(javaBasicName(t.Orig.Underlying().(*types.Basic)))
+
 }
 
 // Java return type for a function that returns given types.
