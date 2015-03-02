@@ -34,17 +34,14 @@ func (w *Writer) putMultiAssign(n *ast.AssignStmt) {
 
 	// multiple assign: put one per line
 	for i, lhs := range n.Lhs {
+		w.PutSemi(i)
+
 		lhs = StripParens(lhs) // border case, go allows "(x) = y" //?
 		rhs := n.Rhs[i]
-		if i != 0 {
-			w.Putln(";")
-		}
-		// blank identifer: need to put type. E.g.:
-		// 	int _4 = f(x);
+
+		// blank identifer: it's actually a define. E.g.: int _4 = f(x);
 		if IsBlank(lhs) {
 			w.PutJVarDecl(NONE, JTypeOf(rhs), lhs.(*ast.Ident), rhs, nil)
-			//	w.Put(JTypeOf(rhs), " ")
-			//	w.PutAssign(JTypeOf(rhs), lhs, JTypeOf(rhs), RValue(rhs))
 		} else {
 			w.PutAssign(lhs, n.Tok, rhs)
 		}
@@ -54,38 +51,22 @@ func (w *Writer) putMultiAssign(n *ast.AssignStmt) {
 func (w *Writer) PutAssign(lhs ast.Expr, op token.Token, rhs ast.Expr) {
 	lhs = StripParens(lhs)
 
-	switch lhs := lhs.(type) {
-	default:
-		panic("unsupported lvalue: " + reflect.TypeOf(lhs).String())
-	case *ast.Ident:
-		w.putIdentAssign(lhs, op, rhs)
-	case *ast.StarExpr:
-		//case *ast.SelectorExpr:
-	}
-}
-
-// TODO: not only for idents
-func (w *Writer) putIdentAssign(lhs *ast.Ident, op token.Token, rhs ast.Expr) {
-	if JTypeOf(lhs).NeedsSetMethod() {
-		rhs := RValue(rhs)
-		if meth := opToMeth[op]; meth != "" {
-			w.Put(lhs, ".", meth, " (", rhs, ")")
-		} else {
-			op2 := op.String()[:len(op.String())-1]
-			if op == token.AND_NOT_ASSIGN {
-				op2 = "&~"
-			}
-			w.Put(lhs, ".set(", RValue(lhs), " ", op2, " (", rhs, "))")
-		}
+	if NeedsSetMethod(lhs) {
+		w.putAssignMethod(lhs, op, rhs)
 	} else {
-		w.putAssignOp(lhs, op, rhs) // e.g. "lhs = rhs"
+		w.putAssignOp(lhs, op, rhs)
 	}
 }
 
-var opToMeth = map[token.Token]string{
-	token.ASSIGN: "set", // =
-	token.INC:    "inc", // ++
-	token.DEC:    "dec", // --
+func NeedsSetMethod(lvalue ast.Expr) bool {
+	switch lvalue := lvalue.(type) {
+	default:
+		panic("unsupported lvalue: " + reflect.TypeOf(lvalue).String())
+	case *ast.Ident:
+		return JTypeOf(lvalue).NeedsSetMethod()
+	case *ast.StarExpr:
+		return true
+	}
 }
 
 // Emit assign statement with operation, e.g.:
@@ -99,19 +80,44 @@ func (w *Writer) putAssignOp(lhs ast.Expr, tok token.Token, rhs ast.Expr) {
 	}
 }
 
-func (w *Writer) putSelectorAssign(lhs *ast.SelectorExpr, op token.Token, rhs ast.Expr) {
-	w.Put(lhs.X, ".")
-	w.putIdentAssign(lhs.Sel, op, rhs)
-}
-
-func (w *Writer) putStarAssign(lhs *ast.StarExpr, rhs ast.Expr) {
-	switch elem := lhs.X.(type) {
-	default:
-		panic("not supported: assign to *(" + reflect.TypeOf(elem).String() + ")")
-	case *ast.Ident:
-		w.Put(elem, ".set(", RValue(rhs), ")")
+func (w *Writer) putAssignMethod(lhs ast.Expr, tok token.Token, rhs ast.Expr) {
+	if meth := opToMeth[tok]; meth != "" {
+		w.Put(lhs, ".", meth, " (", RValue(rhs), ")")
+	} else {
+		panic(tok)
 	}
 }
+
+var opToMeth = map[token.Token]string{
+	token.ASSIGN:         "set",    // =
+	token.INC:            "inc",    // ++
+	token.DEC:            "dec",    // --
+	token.ADD_ASSIGN:     "add",    // +=
+	token.SUB_ASSIGN:     "sub",    // -=
+	token.MUL_ASSIGN:     "mul",    // *=
+	token.QUO_ASSIGN:     "quo",    // /=
+	token.REM_ASSIGN:     "rem",    // %=
+	token.AND_ASSIGN:     "and",    // &=
+	token.OR_ASSIGN:      "or",     // |=
+	token.XOR_ASSIGN:     "xor",    // ^=
+	token.SHL_ASSIGN:     "shl",    // <<=
+	token.SHR_ASSIGN:     "shr",    // >>=
+	token.AND_NOT_ASSIGN: "andnot", // &^=
+}
+
+//func (w *Writer) putSelectorAssign(lhs *ast.SelectorExpr, op token.Token, rhs ast.Expr) {
+//	w.Put(lhs.X, ".")
+//	w.putIdentAssign(lhs.Sel, op, rhs)
+//}
+
+//func (w *Writer) putStarAssign(lhs *ast.StarExpr, rhs ast.Expr) {
+//	switch elem := lhs.X.(type) {
+//	default:
+//		panic("not supported: assign to *(" + reflect.TypeOf(elem).String() + ")")
+//	case *ast.Ident:
+//		w.Put(elem, ".set(", RValue(rhs), ")")
+//	}
+//}
 
 // Emit code for rhs, possibly converting to make it assignable to lhs.
 //func (w *Writer) PutAutoCast(rhs ast.Expr, lhs JType, inmethod bool) {
