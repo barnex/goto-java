@@ -52,11 +52,11 @@ func (w *Writer) putAddressOfGlobal(id *ast.Ident) {
 }
 
 func (w *Writer) putAddressOfStruct(x ast.Expr) {
-	if _, ok := x.(*ast.CompositeLit); ok{
+	if _, ok := x.(*ast.CompositeLit); ok {
 		// simplification: composite literal is allready new XxxPtr(...)
 		w.Put(x)
-	}else{
-	w.Put(x, ".addr()") 
+	} else {
+		w.Put(x, ".addr()")
 	}
 }
 
