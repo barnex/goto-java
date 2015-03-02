@@ -57,6 +57,7 @@ func unnamed_basic() {
 		l_a4 int = e_a1
 	)
 
+
 	s1 := 1
 	s2 := l_a2
 	s3 := l_a2

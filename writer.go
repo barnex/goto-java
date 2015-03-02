@@ -55,11 +55,6 @@ func (w *Writer) Close() {
 	}
 }
 
-//func SPut(tokens ...interface{})string{
-//	buf := bytes.NewBuffer()
-//
-//}
-
 func (w *Writer) Putln(tokens ...interface{}) {
 	w.Put(append(tokens, "\n")...)
 	w.needIndent = true

@@ -13,8 +13,9 @@ import (
 func InitValue(rhs ast.Expr, typ JType) interface{} {
 	if typ.IsEscapedPrimitive() {
 		return "new " + typ.JName + "(" + Transpile(RValue(rhs)) + ")"
+	} else {
+		return RValue(rhs)
 	}
-	return rhs
 }
 
 // ZeroValue returns the zero value for a new variable of java type jType.

@@ -128,9 +128,11 @@ func RValue(rhs ast.Expr) interface{} {
 	if rhs == nil {
 		return ""
 	}
+
 	if JTypeOf(rhs).IsEscapedPrimitive() {
 		return Transpile(rhs, ".value")
 	}
+
 	return rhs
 	// TODO: cast
 }
