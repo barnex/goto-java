@@ -9,25 +9,32 @@ import (
 
 // generate code for all defs in global typedefs variable
 func GenClasses() {
-	for _, c := range typedefs {
-		Log(nil, c.typeSpec.Name)
+	for _, td := range typedefs {
+		Log(nil, td.typeSpec.Name)
 
-		switch tdef := c.typeSpec.Type.(type) {
+		switch typ := td.typeSpec.Type.(type) {
 		default:
-			panic("cannot handle: " + reflect.TypeOf(tdef).String())
+			panic("cannot handle: " + reflect.TypeOf(typ).String())
 		case *ast.StructType:
-			GenStructPointerClass(c)
-			GenStructValueClass(c)
+			genStructPointerClass(td)
+			genStructValueClass(td)
+		case *ast.Ident:
+			genBasicClass(td)
 		}
 	}
 }
 
-// Generate java class for Go pointer-to-named-struct type.
-func GenStructPointerClass(d *TypeDef) {
-	spec := d.typeSpec
+func genBasicClass(d *TypeDef) {
 
+}
+
+// Generate java class for Go pointer-to-named-struct type.
+func genStructPointerClass(d *TypeDef) {
+
+	spec := d.typeSpec
 	name := javaPointerNameForElem(TypeOf(spec.Name))
 	base := JTypeOf(spec.Name)
+	fields := spec.Type.(*ast.StructType).Fields
 
 	w := NewWriterFile(name + ".java")
 	defer w.Close()
@@ -36,7 +43,6 @@ func GenStructPointerClass(d *TypeDef) {
 	w.Putf("public final class %v extends %v {\n", name, base)
 	w.indent++
 
-	fields := spec.Type.(*ast.StructType).Fields
 	w.PutConstructors(name, fields) // TODO: superconstructor
 
 	// Methods on pointer
@@ -49,10 +55,12 @@ func GenStructPointerClass(d *TypeDef) {
 }
 
 // Generate java class for Go named struct type (value semantics).
-func GenStructValueClass(d *TypeDef) {
+func genStructValueClass(d *TypeDef) {
+
 	spec := d.typeSpec
 	name := JTypeOf(spec.Name).JName
 	ptrname := javaPointerNameForElem(TypeOf(spec.Name))
+
 	w := NewWriterFile(name + ".java")
 	defer w.Close()
 

@@ -25,17 +25,19 @@ func JTypeOf(x ast.Expr) JType {
 		t.Ident = id
 	}
 
-	if t.IsEscapedPrimitive() {
-		t.JName = EscapedBasicName(t)
-	} else {
+	switch {
+	default:
 		t.JName = javaName(t.Orig)
+	case t.IsEscapedPrimitive():
+		t.JName = EscapedBasicName(t)
+	case t.IsNamedPrimitive():
+		t.JName = javaName(t.Orig.Underlying())
 	}
 	return t
 }
 
 func EscapedBasicName(t JType) string {
 	return "go." + Export(javaBasicName(t.Orig.Underlying().(*types.Basic)))
-
 }
 
 // Java return type for a function that returns given types.
@@ -58,8 +60,21 @@ func JavaReturnTypeOf(resultTypes []JType) JType {
 // 	IsEscapedBasic(JTypeOf(i)) // true
 // In such case the java primitive (e.g. int) is replaced by a wrapper (e.g. go.Int)
 func (t JType) IsEscapedPrimitive() bool {
+	return t.IsPrimitive() && t.Ident != nil && Escapes(t.Ident)
+}
+
+func (t JType) IsNamedPrimitive() bool {
+	return t.IsPrimitive() && t.IsNamed()
+}
+
+func (t JType) IsPrimitive() bool {
 	_, basic := t.Orig.Underlying().(*types.Basic)
-	return basic && t.Ident != nil && Escapes(t.Ident)
+	return basic
+}
+
+func (t JType) IsNamed() bool {
+	_, named := t.Orig.(*types.Named)
+	return named
 }
 
 // Returns whether t represents a Go struct type (value semantics).

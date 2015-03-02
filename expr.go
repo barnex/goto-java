@@ -56,7 +56,7 @@ func (w *Writer) PutExpr(n ast.Expr) {
 // 	        Value    string      // literal string; e.g. 42, 0x7f, 3.14, 1e-9, 2.4i, 'a', '\x7f', "foo" or `\m\n\o`
 // 	}
 func (w *Writer) PutBasicLit(n *ast.BasicLit) {
-	typ := TypeOf(n).(*types.Basic)
+	typ := TypeOf(n).Underlying().(*types.Basic)
 	info := typ.Info()
 	switch {
 	default:

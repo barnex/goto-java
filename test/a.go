@@ -1,6 +1,6 @@
 package main
 
-//type B int
+type B int
 
 type S struct {
 	a int
@@ -48,6 +48,7 @@ type S2 struct {
 func main() {
 
 	unnamed_basic()
+	named_basic()
 
 	named_struct()
 
@@ -410,4 +411,187 @@ func unnamed_basic() {
 	println(s5)
 
 	eat_int(s5)
+}
+
+func named_basic() {
+	var (
+		l_a1 B
+		l_a2 B = 1
+		l_a3 B = l_a2
+		e_a1 B = l_a2
+		e_a2 B = e_a1
+		l_a4 B = e_a1
+	)
+	println(l_a1)
+	println(l_a2)
+	println(l_a3)
+	println(e_a1)
+	println(e_a2)
+	println(l_a4)
+
+	//s1 := 1
+	s2 := l_a2
+	s3 := l_a2
+	s4 := e_a1
+	s5 := e_a1
+
+	//println(s1)
+	println(s2)
+	println(s3)
+	println(s4)
+	println(s5)
+
+	// make them escape
+	_ = &e_a1
+	_ = &e_a2
+
+	l_a1 = 2
+	e_a1 = 3
+	println(l_a1)
+	println(e_a1)
+
+	l_a1 = e_a1
+	e_a1 = e_a2
+	println(l_a1)
+	println(e_a1)
+
+	l_a1 = l_a1
+	e_a1 = l_a2
+	println(l_a1)
+	println(e_a1)
+
+	l_a1++
+	e_a1++
+	println(l_a1)
+	println(e_a1)
+
+	l_a1--
+	e_a1--
+	println(l_a1)
+	println(e_a1)
+
+	l_a1 += l_a2 + 2
+	e_a1 += l_a2 + 2
+	println(l_a1)
+	println(e_a1)
+
+	l_a1 -= l_a2 + 2
+	e_a1 -= l_a2 + 2
+	println(l_a1)
+	println(e_a1)
+
+	l_a1 *= l_a2 + 2
+	e_a1 *= l_a2 + 2
+	println(l_a1)
+	println(e_a1)
+
+	l_a1 /= l_a2 + 2
+	e_a1 /= l_a2 + 2
+	println(l_a1)
+	println(e_a1)
+
+	l_a1 += e_a2 + 2
+	e_a1 += e_a2 + 2
+	println(l_a1)
+	println(e_a1)
+
+	l_a1 -= e_a2 + 2
+	e_a1 -= e_a2 + 2
+	println(l_a1)
+	println(e_a1)
+
+	l_a1 *= e_a2 + 2
+	e_a1 *= e_a2 + 2
+	println(l_a1)
+	println(e_a1)
+
+	l_a1 /= e_a2 + 2
+	e_a1 /= e_a2 + 2
+	println(l_a1)
+	println(e_a1)
+
+	l_a1 %= l_a2 + 2
+	e_a1 %= l_a2 + 2
+	println(l_a1)
+	println(e_a1)
+
+	l_a1 &= l_a2 + 2
+	e_a1 &= l_a2 + 2
+	println(l_a1)
+	println(e_a1)
+
+	l_a1 |= l_a2 + 2
+	e_a1 |= l_a2 + 2
+	println(l_a1)
+	println(e_a1)
+
+	l_a1 ^= l_a2 + 2
+	e_a1 ^= l_a2 + 2
+	println(l_a1)
+	println(e_a1)
+
+	//l_a1 <<= e_a2 // TODO: uint
+	//e_a1 <<= e_a2
+
+	//l_a1 >>= e_a2
+	//e_a1 >>= e_a2
+
+	l_a1 &^= e_a2
+	e_a1 &^= e_a2
+	println(l_a1)
+	println(e_a1)
+
+	println(l_a1 == e_a2)
+	println(e_a1 == e_a2)
+	println(l_a1 < e_a2)
+	println(e_a1 < e_a2)
+	println(l_a1 > e_a2)
+	println(e_a1 > e_a2)
+	println(l_a1 != e_a2)
+	println(e_a1 != e_a2)
+	println(l_a1 >= e_a2)
+	println(e_a1 >= e_a2)
+	println(l_a1 <= e_a2)
+	println(e_a1 <= e_a2)
+
+	println(l_a1 == l_a2)
+	println(e_a1 == l_a2)
+	println(l_a1 < l_a2)
+	println(e_a1 < l_a2)
+	println(l_a1 > l_a2)
+	println(e_a1 > l_a2)
+	println(l_a1 != l_a2)
+	println(e_a1 != l_a2)
+	println(l_a1 >= l_a2)
+	println(e_a1 >= l_a2)
+	println(l_a1 <= l_a2)
+	println(e_a1 <= l_a2)
+
+	println(l_a1 == 1+1)
+	println(e_a1 == 1+1)
+	println(l_a1 < 1+1)
+	println(e_a1 < 1+1)
+	println(l_a1 > 1+1)
+	println(e_a1 > 1+1)
+	println(l_a1 != 1+1)
+	println(e_a1 != 1+1)
+	println(l_a1 >= 1+1)
+	println(e_a1 >= 1+1)
+	println(l_a1 <= 1+1)
+	println(e_a1 <= 1+1)
+
+	println(l_a1)
+	println(l_a2)
+	println(l_a3)
+	println(e_a1)
+	println(e_a2)
+	println(l_a4)
+
+	//println(s1)
+	println(s2)
+	println(s3)
+	println(s4)
+	println(s5)
+
+	//eat_int(s5)
 }
