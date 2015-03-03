@@ -60,18 +60,42 @@ func unnamed_struct() {
 	//)
 }
 
+func makeS()S{
+	return S{a:12}
+}
+
 func named_struct() {
 	var (
 		s1 S
 		s2 S = S{}
 		s3 S = S{3, nil, S2{}, nil}
 		s4 S = S{k: nil, b: new(int), a: 7}
+		s5 S = makeS()
 	)
+	s6 := S{}
+	s7 := S{3, nil, S2{}, nil}
+	s8 := S{k: nil, b: new(int), a: 7}
+	s9 := makeS()
 
 	println(s1.a)
 	println(s2.a)
 	println(s3.a)
 	println(s4.a)
+	println(s5.a)
+	println(s6.a)
+	println(s7.a)
+	println(s8.a)
+	println(s9.a)
+
+	s1 = s6
+	s1.b = s6.b
+
+	println(s1 == s1)
+	println(s1 == s2)
+	println(s1 == s3)
+	println(s1 == s4)
+	println(s1 == s5)
+	println(s1 == s6)
 
 	println((&s1).a)
 	println((&s2).a)
