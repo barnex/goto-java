@@ -82,7 +82,32 @@ func (w *Writer) PutBasicLit(n *ast.BasicLit) {
 // 	        Rbrace token.Pos // position of "}"
 // 	}
 func (w *Writer) PutCompositeLit(lit *ast.CompositeLit) {
-	// *ast.KeyValueExpr  or just exprs
+
+	if len(lit.Elts) == 0 {
+		w.Put(ZeroValue(JTypeOf(lit.Type)))
+		return
+	}
+
+	w.Put("new ", javaPointerNameForElem(TypeOf(lit.Type)))
+	if _, ok := lit.Elts[0].(*ast.KeyValueExpr); ok {
+		w.Put("(")
+		tdef := classOf(lit.Type.(*ast.Ident)) // TODO: map java names to tdef?
+		names, types := FlattenFields(tdef.typeSpec.Type.(*ast.StructType).Fields)
+		values := make(map[string]interface{})
+		for i, n := range names {
+			values[n.Name] = ZeroValue(types[i])
+		}
+		for _, e := range lit.Elts {
+			e := e.(*ast.KeyValueExpr)
+			values[e.Key.(*ast.Ident).Name] = e.Value
+		}
+		for i, n := range names {
+			w.Put(comma(i), values[n.Name])
+		}
+		w.Put(")")
+	} else {
+		w.PutArgs(lit.Elts, 0)
+	}
 }
 
 // Emit a unary expression, execpt unary "*".

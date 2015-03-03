@@ -51,22 +51,32 @@ func main() {
 
 }
 
+func unnamed_struct() {
+	//var (
+	//	s1 struct{v int}
+	//	s2 struct{v int} = struct{v int}{}
+	//	s3 struct{v int} = struct{v int}{3, nil, S2{}, nil}
+	//	s4 struct{v int} = struct{v int}{k: nil, b: new(int), a: 7}
+	//)
+}
+
 func named_struct() {
 	var (
 		s1 S
 		s2 S = S{}
 		s3 S = S{3, nil, S2{}, nil}
 		s4 S = S{k: nil, b: new(int), a: 7}
-		//s3 int = l_a2
-		//s1 int = l_a2
-		//s2 int = e_a1
-		//s4 int = e_a1
 	)
 
 	println(s1.a)
 	println(s2.a)
 	println(s3.a)
 	println(s4.a)
+
+	println((&s1).a)
+	println((&s2).a)
+	println((&s3).a)
+	println((&s4).a)
 }
 
 func unnamed_pointer() {

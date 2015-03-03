@@ -110,8 +110,11 @@ func GenStructPointerClass(d *TypeDef) {
 	defer w.Close()
 
 	w.Putf("/** %v extends %v with pointer methods. */\n", name, base)
-	w.Putf(`public final class %v extends %v {`, name, base)
+	w.Putf("public final class %v extends %v {\n", name, base)
 	w.indent++
+
+	fields := spec.Type.(*ast.StructType).Fields
+	w.PutConstructors(name, fields) // TODO: superconstructor
 
 	// Methods on pointer
 	for _, m := range d.ptrMethods {
@@ -141,24 +144,7 @@ func GenStructValueClass(d *TypeDef) {
 	w.Putln()
 
 	// Constructors:
-	// (1) no arguments
-	w.Putln("public ", name, "(){}\n")
-
-	// (2) fields as individual values
-	fieldNames, fieldTypes := FlattenFields(fields)
-	if len(fieldNames) > 0 {
-		w.Put("public ", name, "(")
-		w.PutParams(fieldNames, fieldTypes)
-		w.Putln("){")
-		w.indent++
-		for i, n := range fieldNames {
-			t := fieldTypes[i]
-			w.PutJAssign(t, Transpile("this.", n), t, n)
-			w.Putln(";")
-		}
-		w.indent--
-		w.Putln("}")
-	}
+	w.PutConstructors(name, fields)
 
 	// (3) copy constructor
 	w.Putf(`
@@ -193,6 +179,7 @@ func GenStructValueClass(d *TypeDef) {
 	public void set(%v other){
 `, name)
 	w.indent++
+	fieldNames, _ := FlattenFields(fields)
 	for _, n := range fieldNames {
 		w.PutJAssign(JTypeOf(n), Transpile("this.", n), JTypeOf(n), Transpile("other.", n))
 		w.Putln(";")
@@ -233,6 +220,27 @@ func GenStructValueClass(d *TypeDef) {
 
 	w.indent--
 	w.Putln("}")
+}
+
+func (w *Writer) PutConstructors(name string, fields *ast.FieldList) {
+	// (1) no arguments
+	w.Putln("\tpublic ", name, "(){}\n")
+
+	// (2) fields as individual values
+	fieldNames, fieldTypes := FlattenFields(fields)
+	if len(fieldNames) > 0 {
+		w.Put("public ", name, "(")
+		w.PutParams(fieldNames, fieldTypes)
+		w.Putln("){")
+		w.indent++
+		for i, n := range fieldNames {
+			t := fieldTypes[i]
+			w.PutJAssign(t, Transpile("this.", n), t, n)
+			w.Putln(";")
+		}
+		w.indent--
+		w.Putln("}")
+	}
 }
 
 func (w *Writer) PutStructFields(fields *ast.FieldList) {

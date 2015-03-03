@@ -54,7 +54,7 @@ func Unexport(name string) string {
 // Used for comma-separating values from a loop.
 func comma(i int) string {
 	if i != 0 {
-		return ","
+		return ", "
 	} else {
 		return ""
 	}
