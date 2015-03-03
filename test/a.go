@@ -60,6 +60,47 @@ func unnamed_struct() {
 	//)
 }
 
+func makeSPtr()*S{
+	return &S{a:12}
+}
+
+func named_struct_pointer() {
+	var s S
+	var (
+		s1 *S
+		s2 *S = &S{}
+		s3 *S = &S{3, nil, S2{}, nil}
+		s4 *S = &S{k: nil, b: new(int), a: 7}
+		s5 *S = makeSPtr()
+		s6 *S = &s
+	)
+	s7 := &S{}
+	s8 := &S{3, nil, S2{}, nil}
+	s9 := &S{k: nil, b: new(int), a: 7}
+	s10 := makeSPtr()
+
+	println(s1.a)
+	println(s2.a)
+	println(s3.a)
+	println(s4.a)
+	println(s5.a)
+	println(s6.a)
+	println(s7.a)
+	println(s8.a)
+	println(s9.a)
+	println(s10.a)
+
+	s1 = s6
+	s1.b = s6.b
+
+	println(s1 == s1)
+	println(s1 == s2)
+	println(s1 == s3)
+	println(s1 == s4)
+	println(s1 == s5)
+	println(s1 == s6)
+}
+
 func makeS()S{
 	return S{a:12}
 }
@@ -102,6 +143,8 @@ func named_struct() {
 	println((&s3).a)
 	println((&s4).a)
 }
+
+func eat_intptr(*int){}
 
 func unnamed_pointer() {
 	var (
@@ -153,10 +196,12 @@ func unnamed_pointer() {
 	println(*p1)
 
 	// use variables
-	_ = p4
+	eat_intptr(p4)
 	_ = p5
 
 }
+
+func eat_int(int){}
 
 func unnamed_basic() {
 	var (
@@ -338,4 +383,5 @@ func unnamed_basic() {
 	println(s4)
 	println(s5)
 
+	eat_int(s5)
 }

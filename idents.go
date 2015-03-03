@@ -48,7 +48,7 @@ func (w *Writer) PutIdent(id *ast.Ident) {
 func IsBlank(e ast.Expr) bool {
 	e = StripParens(e)
 	if id, ok := e.(*ast.Ident); ok {
-		return id.Name == "_"
+		return id == nil || id.Name == "_"
 	}
 	return false
 }

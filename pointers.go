@@ -52,7 +52,12 @@ func (w *Writer) putAddressOfGlobal(id *ast.Ident) {
 }
 
 func (w *Writer) putAddressOfStruct(x ast.Expr) {
-	w.Put(x, ".addr()") // TODO: ".addr" -> const
+	if _, ok := x.(*ast.CompositeLit); ok{
+		// simplification: composite literal is allready new XxxPtr(...)
+		w.Put(x)
+	}else{
+	w.Put(x, ".addr()") 
+	}
 }
 
 func (w *Writer) PutStarExpr(x *ast.StarExpr) {
