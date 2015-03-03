@@ -24,8 +24,89 @@ func GenClasses() {
 	}
 }
 
-func genBasicClass(d *TypeDef) {
+type ClassDef struct {
+	Mod        JModifier
+	Name       string
+	Extends    string
+	Implements []string
+	FieldNames []*ast.Ident
+	FieldTypes []JType
+	Methods    []*ast.FuncDecl
+}
 
+func (c *ClassDef) Gen() {
+
+	w := NewWriterFile(c.Name + ".java")
+	defer w.Close()
+
+	c.genSignature(w)
+	c.genFields(w)
+	c.genConstructors(w)
+	for _, m := range c.Methods {
+		w.PutMethodDecl(m, false)
+	}
+
+	w.indent--
+	w.Putln("}")
+}
+
+func (c *ClassDef) genSignature(w *Writer) {
+	w.Put(c.Mod, "class ", c.Name)
+	if c.Extends != "" {
+		w.Put(" extends ", c.Extends)
+	}
+	if len(c.Implements) != 0 {
+		w.Put(" implements")
+		for _, x := range c.Implements {
+			w.Put(" ", x)
+		}
+	}
+	w.Putln("{\n")
+	w.indent++
+}
+
+func (c *ClassDef) genFields(w *Writer) {
+	for i, n := range c.FieldNames {
+		t := c.FieldTypes[i]
+		w.Put(GlobalModifierFor(n), t, " ", n)
+		if t.NeedsFinal() {
+			w.Put(" = ", ZeroValue(t))
+		}
+		w.Putln(";")
+		// TODO Docs
+	}
+}
+
+func (c *ClassDef) genConstructors(w *Writer) {
+	// empty constructor
+	w.Putln("public ", c.Name, "(){}\n")
+
+	// all fields
+	if len(c.FieldNames) > 0 {
+		w.Put("public ", c.Name, "(")
+		w.PutParams(c.FieldNames, c.FieldTypes)
+		w.Putln("){")
+		w.indent++
+		for i, n := range c.FieldNames {
+			t := c.FieldTypes[i]
+			w.PutJAssign(t, Transpile("this.", n), t, n)
+			w.Putln(";")
+		}
+		w.indent--
+		w.Putln("}")
+	}
+}
+
+func genBasicClass(d *TypeDef) {
+	valueDef := &ClassDef{
+		Name: JTypeOf(d.typeSpec.Name).JName,
+	}
+	valueDef.Gen()
+
+	ptrDef := &ClassDef{
+		Name: javaPointerNameForElem(TypeOf(d.typeSpec.Name)),
+	}
+	ptrDef.Gen()
 }
 
 // Generate java class for Go pointer-to-named-struct type.

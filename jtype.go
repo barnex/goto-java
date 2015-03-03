@@ -25,15 +25,73 @@ func JTypeOf(x ast.Expr) JType {
 		t.Ident = id
 	}
 
-	switch {
-	default:
-		t.JName = javaName(t.Orig)
-	case t.IsEscapedPrimitive():
+	if t.IsEscapedPrimitive() {
 		t.JName = EscapedBasicName(t)
-	case t.IsNamedPrimitive():
-		t.JName = javaName(t.Orig.Underlying())
+	} else {
+		t.JName = javaName(t.Orig)
 	}
+
+	Log(x, t.Orig, "->", t.JName)
 	return t
+}
+
+func javaName(orig types.Type) string {
+	switch orig := orig.(type) {
+	default:
+		panic("cannot handle type " + reflect.TypeOf(orig).String())
+	case *types.Basic:
+		return javaBasicName(orig)
+	case *types.Named:
+		return javaNamedName(orig)
+	case *types.Pointer:
+		return javaPointerName(orig)
+	case *types.Signature:
+		//Log(nil, "TODO: Signature")
+		return "**SIGNATURE**"
+	}
+}
+
+// java type for Go pointer type. E.g.
+// 	*int -> IntPtr
+func javaPointerName(t *types.Pointer) string {
+	return javaPointerNameForElem(t.Elem())
+}
+
+func javaPointerNameForElem(e types.Type) string {
+	if IsPrimitive(e) {
+		return "go." + Export(javaName(e)+"Ptr")
+	} else {
+		return javaName(e) + "Ptr"
+	}
+}
+
+// Java name for named type.
+func javaNamedName(t *types.Named) string {
+	if IsPrimitive(t) {
+		return javaName(t.Underlying())
+	}
+
+	obj := t.Obj()
+	if r, ok := rename[obj]; ok {
+		return r
+	}
+
+	return obj.Name()
+}
+
+// Java name for basic type.
+func javaBasicName(t *types.Basic) string {
+	// remove "untyped "
+	name := t.Name()
+	if t.Info()&types.IsUntyped != 0 {
+		name = name[len("untyped "):]
+	}
+
+	if transl, ok := builtin2java[name]; ok {
+		return transl
+	} else {
+		panic("cannot handle basic type " + t.String())
+	}
 }
 
 func EscapedBasicName(t JType) string {
@@ -60,21 +118,30 @@ func JavaReturnTypeOf(resultTypes []JType) JType {
 // 	IsEscapedBasic(JTypeOf(i)) // true
 // In such case the java primitive (e.g. int) is replaced by a wrapper (e.g. go.Int)
 func (t JType) IsEscapedPrimitive() bool {
-	return t.IsPrimitive() && t.Ident != nil && Escapes(t.Ident)
+	return IsPrimitive(t.Orig) && t.Ident != nil && Escapes(t.Ident)
 }
 
 func (t JType) IsNamedPrimitive() bool {
-	return t.IsPrimitive() && t.IsNamed()
+	return IsPrimitive(t.Orig) && t.IsNamed()
 }
 
-func (t JType) IsPrimitive() bool {
-	_, basic := t.Orig.Underlying().(*types.Basic)
+func IsPrimitive(t types.Type) bool {
+	_, basic := t.Underlying().(*types.Basic)
 	return basic
 }
 
 func (t JType) IsNamed() bool {
 	_, named := t.Orig.(*types.Named)
 	return named
+}
+
+func (t JType) IsPointerToPrimitive() bool {
+	if ptr, ok := t.Orig.(*types.Pointer); ok {
+		_, ok := ptr.Elem().Underlying().(*types.Basic)
+		return ok
+	} else {
+		return false
+	}
 }
 
 // Returns whether t represents a Go struct type (value semantics).
@@ -110,70 +177,6 @@ func (t JType) IsValue() bool {
 		return true
 	case *types.Pointer:
 		return false
-	}
-}
-
-func javaName(orig types.Type) string {
-	switch orig := orig.(type) {
-	default:
-		panic("cannot handle type " + reflect.TypeOf(orig).String())
-	case *types.Basic:
-		return javaBasicName(orig)
-	case *types.Named:
-		return javaNamedName(orig)
-	case *types.Pointer:
-		return javaPointerName(orig)
-	case *types.Signature:
-		Log(nil, "TODO: Signature")
-		return "**SIGNATURE**"
-	}
-}
-
-//func JavaPointerNameForElem(elemExpr ast.Expr) string {
-//	// TODO: what for pointer to already escaped basic?
-//	return JTypeOf(elemExpr).JName + "Ptr"
-//}
-
-func javaPointerNameForElem(e types.Type) string {
-	// TODO: what for pointer to already escaped basic?
-	switch e := e.(type) {
-	default:
-		panic("cannot handle pointer to " + reflect.TypeOf(e).String())
-	case *types.Named, *types.Pointer:
-		return javaName(e) + "Ptr"
-	case *types.Basic:
-		return "go." + Export(javaBasicName(e)+"Ptr")
-	}
-}
-
-// java type for Go pointer type. E.g.
-// 	*int -> IntPtr
-func javaPointerName(t *types.Pointer) string {
-	return javaPointerNameForElem(t.Elem())
-}
-
-// Java name for basic type.
-func javaBasicName(t *types.Basic) string {
-	// remove "untyped "
-	name := t.Name()
-	if t.Info()&types.IsUntyped != 0 {
-		name = name[len("untyped "):]
-	}
-
-	if transl, ok := builtin2java[name]; ok {
-		return transl
-	} else {
-		panic("cannot handle basic type " + t.String())
-	}
-}
-
-// Java name for named type.
-func javaNamedName(t *types.Named) string {
-	obj := t.Obj()
-	if r, ok := rename[obj]; ok {
-		return r
-	} else {
-		return obj.Name()
 	}
 }
 

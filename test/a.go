@@ -2,6 +2,15 @@ package main
 
 type B int
 
+//func (b *B) increment() {
+//	*b++
+//}
+
+func (b B) square() B {
+	b *= b
+	return b
+}
+
 type S struct {
 	a int
 	b *int
@@ -46,23 +55,10 @@ type S2 struct {
 }
 
 func main() {
-
 	unnamed_basic()
 	named_basic()
-
 	named_struct()
-
 	unnamed_pointer()
-
-	//		l_b *int
-	//		l_c B
-	//		l_d *B
-	//		l_e struct{ v int }
-	//		l_g *struct{ v int }
-	//		l_h struct{ int }
-	//		l_i *struct{ int }
-	//		l_j S2
-
 }
 
 func unnamed_struct() {
@@ -594,4 +590,13 @@ func named_basic() {
 	println(s5)
 
 	//eat_int(s5)
+
+	l_a2 = 17
+	e_a2 = 17
+	println(l_a2)
+	println(e_a2)
+	//println(l_a2.square())
+	//println(e_a2.square())
+	println(l_a2)
+	println(e_a2)
 }

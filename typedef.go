@@ -61,6 +61,7 @@ func collectTypeSpec(s *ast.TypeSpec) {
 // 	        Body *BlockStmt    // function body; or nil (forward declaration)
 // 	}
 func collectMethodDecl(s *ast.FuncDecl) {
+	Log(s, s.Name)
 	rl := s.Recv.List
 	assert(len(rl) == 1)
 	recvTyp := rl[0].Type
