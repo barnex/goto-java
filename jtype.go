@@ -28,7 +28,7 @@ func JTypeOf(x ast.Expr) JType {
 	if t.IsEscapedPrimitive() {
 		t.JName = EscapedBasicName(t)
 	} else {
-		t.JName = javaName(t.Orig)
+		t.JName = javaName(t.Orig.Underlying()) //
 	}
 
 	Log(x, t.Orig, "->", t.JName)
@@ -45,10 +45,23 @@ func javaName(orig types.Type) string {
 		return javaNamedName(orig)
 	case *types.Pointer:
 		return javaPointerName(orig)
+	case *types.Struct:
+		return javaStructName(orig)
 	case *types.Signature:
 		//Log(nil, "TODO: Signature")
 		return "**SIGNATURE**"
 	}
+}
+
+func javaStructName(t *types.Struct) string {
+	collectTypes[t] = struct{}{}
+
+	name := "Struct" // TODO: go.
+	for i := 0; i < t.NumFields(); i++ {
+		f := t.Field(i)
+		name += "_" + javaName(f.Type()) + "_" + f.Name()
+	}
+	return name
 }
 
 // java type for Go pointer type. E.g.
@@ -59,7 +72,7 @@ func javaPointerName(t *types.Pointer) string {
 
 func javaPointerNameForElem(e types.Type) string {
 	if IsPrimitive(e) {
-		return "go." + Export(javaName(e)+"Ptr")
+		return Export(javaName(e) + "Ptr") // TODO: go., ...
 	} else {
 		return javaName(e) + "Ptr"
 	}
@@ -94,8 +107,21 @@ func javaBasicName(t *types.Basic) string {
 	}
 }
 
+/*
+struct{v int} -> class Struct0{ int v }
+struct{v int} -> final Struct0
+*struct{v int} -> Struct0
+type S struct{v int} -> class S extends Struct0 implements ... { set(Struct0); get()Struct0; val methods only for iface}
+type S struct{v int} -> class SPtr extends Struct0 implements ... { ptr methods only for iface}
+S -> final Struct0
+*S -> Struct0
+s.meth() -> S.static(this, ...)
+interface{...} x = s -> IntefaceXXX x = new S(Struct0)
+interface{...} x = &s -> IntefaceXXX x = new SPtr(Struct0)
+*/
+
 func EscapedBasicName(t JType) string {
-	return "go." + Export(javaBasicName(t.Orig.Underlying().(*types.Basic)))
+	return Export(javaBasicName(t.Orig.Underlying().(*types.Basic))) // TODO: go., ...
 }
 
 // Java return type for a function that returns given types.

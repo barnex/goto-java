@@ -5,10 +5,19 @@ package gotojava
 import (
 	"go/ast"
 	"reflect"
+
+	"golang.org/x/tools/go/types"
 )
+
+var collectTypes = make(map[types.Type]struct{})
 
 // generate code for all defs in global typedefs variable
 func GenClasses() {
+
+	for t, _ := range collectTypes {
+		GenStorageClass(t)
+	}
+
 	for _, td := range typedefs {
 		Log(nil, td.typeSpec.Name)
 
@@ -22,6 +31,13 @@ func GenClasses() {
 			genBasicClass(td)
 		}
 	}
+}
+
+func GenStorageClass(t types.Type) {
+	def := &ClassDef{
+		Name: javaName(t),
+	}
+	def.Gen()
 }
 
 type ClassDef struct {
