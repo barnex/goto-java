@@ -46,7 +46,7 @@ func namedZeroValue(t *types.Named) string {
 	case *types.Struct:
 		// always load Struct with StructPtr (extends Struct),
 		// so we can take address of value by typecasting.
-		return "new " + javaPointerNameForElem(t) + "()"
+		return "new " + JTypeOfGoType(t).JName + "()"
 	case *types.Basic:
 		return basicZeroValue(u)
 	}

@@ -2,7 +2,10 @@ package gotojava
 
 // Generate java classes based on type/method definitions.
 
-import "go/ast"
+import (
+	"go/ast"
+	"reflect"
+)
 
 // generate code for all defs in global typedefs variable
 func GenClasses() {
@@ -11,19 +14,30 @@ func GenClasses() {
 		GenStorageClass(st)
 	}
 
-	//for _, td := range typedefs {
-	//	Log(nil, td.typeSpec.Name)
+	for _, td := range typedefs {
 
-	//	switch typ := td.typeSpec.Type.(type) {
-	//	default:
-	//		panic("cannot handle: " + reflect.TypeOf(typ).String())
-	//	case *ast.StructType:
-	//		genStructPointerClass(td)
-	//		genStructValueClass(td)
-	//	case *ast.Ident:
-	//		genBasicClass(td)
-	//	}
-	//}
+		switch typ := td.typeSpec.Type.(type) {
+		default:
+			panic("cannot handle: " + reflect.TypeOf(typ).String())
+		case *ast.StructType:
+			GenStructPointerClass(td)
+			GenStructValueClass(td)
+			//case *ast.Ident:
+			//	genBasicClass(td)
+		}
+	}
+}
+
+type ClassDef struct {
+	Mod        JModifier
+	Name       string
+	ValueName  string
+	Extends    string
+	Implements []string
+	FieldNames []*ast.Ident
+	FieldTypes []JType
+	Methods    []*ast.FuncDecl
+	Doc        interface{}
 }
 
 func GenStorageClass(st *ast.StructType) {
@@ -37,29 +51,96 @@ func GenStorageClass(st *ast.StructType) {
 		FieldTypes: types,
 	}
 
+	def.Gen(
+		(*ClassDef).genFields,
+		(*ClassDef).genEmptyConstructor,
+		(*ClassDef).genCompositeConstructor,
+		(*ClassDef).genSetMethod)
+}
+
+// Generate java class for Go named struct type (value semantics).
+func GenStructValueClass(d *TypeDef) {
+	spec := d.typeSpec
+	names, types := FlattenFields(spec.Type.(*ast.StructType).Fields)
+
+	def := &ClassDef{
+		Name:       JTypeOfExpr(spec.Name).JName,
+		Doc:        spec.Doc,
+		Extends:    JTypeOfGoType(TypeOf(spec.Type).Underlying()).JName,
+		FieldNames: names,
+		FieldTypes: types,
+		Methods:    append(d.valMethods, d.ptrMethods...),
+	}
 	def.Gen()
 }
 
-type ClassDef struct {
-	Mod        JModifier
-	Name       string
-	Extends    string
-	Implements []string
-	FieldNames []*ast.Ident
-	FieldTypes []JType
-	Methods    []*ast.FuncDecl
+// Generate java class for Go pointer-to-named-struct type.
+func GenStructPointerClass(d *TypeDef) {
+	spec := d.typeSpec
+	//fields := spec.Type.(*ast.StructType).Fields
+
+	def := &ClassDef{
+		Name:      javaPointerNameForElem(TypeOf(spec.Name)),
+		ValueName: JTypeOfExpr(spec.Name).JName,
+		Methods:   d.ptrMethods,
+	}
+
+	def.Gen(
+		(*ClassDef).genFields,
+		(*ClassDef).genPtrConstructor,
+		(*ClassDef).genMethods)
 }
 
-func (c *ClassDef) Gen() {
+//	// copy method
+//	w.Putf(`
+//	public %s copy(){
+//		return new %s(this);
+//	}
+//`, name, name)
+//
+//	// equals method
+//	w.Putf(`
+//	/** @Override
+//		Deep equality test of all fields. */
+//	public boolean equals(Object o){
+//		if (o instanceof %v){
+//			%v other = (%v)o;
+//`, name, name, name)
+//	w.indent += 2
+//	if len(fieldNames) == 0 {
+//		w.Put("return true") // struct{}{} == struct{}{}
+//	} else {
+//		w.Put("return ")
+//		for i, n := range fieldNames {
+//			if i > 0 {
+//				w.Putln(" &&")
+//				w.Put("\t")
+//			}
+//			w.PutJEquals(JTypeOfExpr(n), Transpile("this.", n), JTypeOfExpr(n), Transpile("other.", n))
+//		}
+//	}
+//	w.Putln(";")
+//	w.indent--
+//	w.Putln(`} else {
+//			return false;
+//		}`)
+//	w.indent--
+//	w.Putln("}")
+//
+//	// todo hashCode
+//
+//	w.indent--
+//	w.Putln("}")
+
+func (c *ClassDef) Gen(f ...func(*ClassDef, *Writer)) {
 
 	w := NewWriterFile(c.Name + ".java")
 	defer w.Close()
 
 	c.genSignature(w)
-	c.genFields(w)
-	c.genConstructors(w)
-	for _, m := range c.Methods {
-		w.PutMethodDecl(m, false)
+
+	for _, f := range f {
+		f(c, w)
 	}
 
 	w.indent--
@@ -82,6 +163,7 @@ func (c *ClassDef) genSignature(w *Writer) {
 }
 
 func (c *ClassDef) genFields(w *Writer) {
+	w.Putln()
 	for i, n := range c.FieldNames {
 		t := c.FieldTypes[i]
 		w.Put(GlobalModifierFor(n), t, " ", n)
@@ -93,12 +175,21 @@ func (c *ClassDef) genFields(w *Writer) {
 	}
 }
 
-func (c *ClassDef) genConstructors(w *Writer) {
-	// empty constructor
-	w.Putln("public ", c.Name, "(){}\n")
+func (c *ClassDef) genMethods(w *Writer) {
+	for _, m := range c.Methods {
+		w.PutMethodDecl(m, false)
+	}
+}
 
+func (c *ClassDef) genEmptyConstructor(w *Writer) {
+	w.Putln()
+	w.Putln("public ", c.Name, "(){}\n")
+}
+
+func (c *ClassDef) genCompositeConstructor(w *Writer) {
 	// all fields
 	if len(c.FieldNames) > 0 {
+		w.Putln()
 		w.Put("public ", c.Name, "(")
 
 		//w.PutParams(c.FieldNames, c.FieldTypes)
@@ -118,6 +209,26 @@ func (c *ClassDef) genConstructors(w *Writer) {
 	}
 }
 
+func (c *ClassDef) genPtrConstructor(w *Writer) {
+	w.Putln()
+	w.Putln("public ", c.Name, "(", c.ValueName, " other){")
+	w.indent++
+	w.indent--
+	w.Putln("}")
+}
+
+func (c *ClassDef) genSetMethod(w *Writer) {
+	w.Putln()
+	w.Put("public void set(", c.Name, "  other){")
+	w.indent++
+	for _, n := range c.FieldNames {
+		w.PutJAssign(JTypeOfExpr(n), Transpile("this.", n), JTypeOfExpr(n), Transpile("other.", n))
+		w.Putln(";")
+	}
+	w.indent--
+	w.Putln("}")
+}
+
 func genBasicClass(d *TypeDef) {
 	valueDef := &ClassDef{
 		Name: JTypeOfExpr(d.typeSpec.Name).JName,
@@ -128,131 +239,6 @@ func genBasicClass(d *TypeDef) {
 		Name: javaPointerNameForElem(TypeOf(d.typeSpec.Name)),
 	}
 	ptrDef.Gen()
-}
-
-// Generate java class for Go pointer-to-named-struct type.
-func genStructPointerClass(d *TypeDef) {
-
-	spec := d.typeSpec
-	name := javaPointerNameForElem(TypeOf(spec.Name))
-	base := JTypeOfExpr(spec.Name)
-	fields := spec.Type.(*ast.StructType).Fields
-
-	w := NewWriterFile(name + ".java")
-	defer w.Close()
-
-	w.Putf("/** %v extends %v with pointer methods. */\n", name, base)
-	w.Putf("public final class %v extends %v {\n", name, base)
-	w.indent++
-
-	w.PutConstructors(name, fields) // TODO: superconstructor
-
-	// Methods on pointer
-	for _, m := range d.ptrMethods {
-		w.PutMethodDecl(m, false)
-	}
-
-	w.indent--
-	w.Putln("}")
-}
-
-// Generate java class for Go named struct type (value semantics).
-func genStructValueClass(d *TypeDef) {
-
-	spec := d.typeSpec
-	name := JTypeOfExpr(spec.Name).JName
-	ptrname := javaPointerNameForElem(TypeOf(spec.Name))
-
-	w := NewWriterFile(name + ".java")
-	defer w.Close()
-
-	w.PutDoc(spec.Doc)
-	w.Putln("public class ", name, "{")
-	w.Putln()
-	w.indent++
-
-	// Fields
-	fields := spec.Type.(*ast.StructType).Fields
-	w.PutStructFields(fields)
-	w.Putln()
-
-	// Constructors:
-	w.PutConstructors(name, fields)
-
-	// (3) copy constructor
-	w.Putf(`
-	public %s(%s other){
-		this.set(other);
-	}
-`, name, name)
-
-	// Methods on value
-	for _, m := range d.valMethods {
-		w.PutMethodDecl(m, true)
-	}
-
-	// TODO: override some for PtrType, panic if they should not be called.
-
-	// copy method
-	w.Putf(`
-	public %s copy(){
-		return new %s(this);
-	}
-`, name, name)
-
-	// addr method
-	w.Putf(`
-	public %s addr(){
-		return (%s)this;
-	}
-`, ptrname, ptrname)
-
-	// set method
-	w.Putf(`
-	public void set(%v other){
-`, name)
-	w.indent++
-	fieldNames, _ := FlattenFields(fields)
-	for _, n := range fieldNames {
-		w.PutJAssign(JTypeOfExpr(n), Transpile("this.", n), JTypeOfExpr(n), Transpile("other.", n))
-		w.Putln(";")
-	}
-	w.indent--
-	w.Putln("}")
-
-	// equals method
-	w.Putf(`
-	/** @Override
-		Deep equality test of all fields. */
-	public boolean equals(Object o){
-		if (o instanceof %v){	
-			%v other = (%v)o;
-`, name, name, name)
-	w.indent += 2
-	if len(fieldNames) == 0 {
-		w.Put("return true") // struct{}{} == struct{}{}
-	} else {
-		w.Put("return ")
-		for i, n := range fieldNames {
-			if i > 0 {
-				w.Putln(" &&")
-				w.Put("\t")
-			}
-			w.PutJEquals(JTypeOfExpr(n), Transpile("this.", n), JTypeOfExpr(n), Transpile("other.", n))
-		}
-	}
-	w.Putln(";")
-	w.indent--
-	w.Putln(`} else {
-			return false;
-		}`)
-	w.indent--
-	w.Putln("}")
-
-	// todo hashCode
-
-	w.indent--
-	w.Putln("}")
 }
 
 func (w *Writer) PutConstructors(name string, fields *ast.FieldList) {

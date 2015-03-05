@@ -176,15 +176,15 @@ func (w *Writer) PutSelectorExpr(e *ast.SelectorExpr) {
 	//	if JTypeOf(e.X).IsPrimitive(){
 	//
 	//	}
-	if JTypeOfExpr(e.X).IsValue() && IsPtrMethod(e.Sel) {
-		// Pointer method on addressable value:
-		// compiler inserts address of receiver.
-		// https://golang.org/doc/effective_go.html#pointers_vs_values
-		w.PutAddressOf(e.X)
-		w.Put(".", e.Sel)
-		return
-	}
-
+	//	if JTypeOfExpr(e.X).IsValue() && IsPtrMethod(e.Sel) {
+	//		// Pointer method on addressable value:
+	//		// compiler inserts address of receiver.
+	//		// https://golang.org/doc/effective_go.html#pointers_vs_values
+	//		w.PutAddressOf(e.X)
+	//		w.Put(".", e.Sel)
+	//		return
+	//	}
+	//
 	w.Put(e.X, ".", e.Sel)
 }
 

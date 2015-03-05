@@ -33,7 +33,7 @@ func JTypeOfExpr(x ast.Expr) JType {
 func JTypeOfGoType(t types.Type) JType {
 	return JType{
 		Orig:  t,
-		JName: javaName(t.Underlying()),
+		JName: javaName(t),
 	}
 }
 
@@ -43,8 +43,8 @@ func javaName(orig types.Type) string {
 		panic("cannot handle type " + reflect.TypeOf(orig).String() + ":" + orig.String())
 	case *types.Basic:
 		return javaBasicName(orig)
-		//	case *types.Named:
-		//		return javaNamedName(orig)
+	case *types.Named:
+		return javaNamedName(orig)
 	case *types.Pointer:
 		return javaPointerName(orig)
 	case *types.Struct:
@@ -79,18 +79,18 @@ func javaPointerNameForElem(e types.Type) string {
 }
 
 // Java name for named type.
-//func javaNamedName(t *types.Named) string {
-//	if IsPrimitive(t) {
-//		return javaName(t.Underlying())
-//	}
-//
-//	obj := t.Obj()
-//	if r, ok := rename[obj]; ok {
-//		return r
-//	}
-//
-//	return obj.Name()
-//}
+func javaNamedName(t *types.Named) string {
+	if IsPrimitive(t) {
+		return javaName(t.Underlying())
+	}
+
+	obj := t.Obj()
+	if r, ok := rename[obj]; ok {
+		return r
+	}
+
+	return obj.Name()
+}
 
 // Java name for basic type.
 func javaBasicName(t *types.Basic) string {
