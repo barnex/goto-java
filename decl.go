@@ -78,7 +78,7 @@ func (w *Writer) PutFunc(mod JModifier, f *ast.FuncDecl) {
 		} else {
 			name = makeNewName(UNUSED)
 		}
-		w.Put(JTypeOf(recv.Type), " ", name)
+		w.Put(JTypeOfExpr(recv.Type), " ", name)
 		if len(argNames) != 0 {
 			w.Put(", ")
 		}
@@ -190,7 +190,7 @@ func (w *Writer) PutValueSpec(mod JModifier, s *ast.ValueSpec) {
 		if i < len(s.Values) {
 			value = s.Values[i]
 		}
-		w.PutJVarDecl(mod, JTypeOf(id), id, value, s.Comment)
+		w.PutJVarDecl(mod, JTypeOfExpr(id), id, value, s.Comment)
 	}
 }
 
@@ -211,9 +211,9 @@ func (w *Writer) putShortDefine(mod JModifier, a *ast.AssignStmt) {
 
 		id := lhs.(*ast.Ident)
 		if isShortRedefine(id) {
-			w.PutJAssign(JTypeOf(id), id, JTypeOf(rhs), RValue(rhs))
+			w.PutJAssign(JTypeOfExpr(id), id, JTypeOfExpr(rhs), RValue(rhs))
 		} else {
-			w.PutJVarDecl(mod, JTypeOf(id), id, rhs, nil)
+			w.PutJVarDecl(mod, JTypeOfExpr(id), id, rhs, nil)
 		}
 	}
 }

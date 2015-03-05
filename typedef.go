@@ -9,6 +9,9 @@ import (
 	"golang.org/x/tools/go/types"
 )
 
+var typedefs map[types.Object]*TypeDef
+var structs map[types.Type]*ast.StructType
+
 // TypeDef represents type+methods definitions.
 // Turned into one or more java classes by classgen.go.
 type TypeDef struct {
@@ -21,6 +24,7 @@ type TypeDef struct {
 // Save them to global typedefs map.
 func CollectDefs(root ast.Node) {
 	typedefs = make(map[types.Object]*TypeDef)
+	structs = make(map[types.Type]*ast.StructType)
 	ast.Inspect(root, func(n ast.Node) bool {
 		switch n := n.(type) {
 		default:
@@ -31,6 +35,8 @@ func CollectDefs(root ast.Node) {
 			if n.Recv != nil {
 				collectMethodDecl(n)
 			}
+		case *ast.StructType:
+			structs[TypeOf(n)] = n
 		}
 		return true
 	})

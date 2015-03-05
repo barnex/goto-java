@@ -84,11 +84,12 @@ func (w *Writer) PutBasicLit(n *ast.BasicLit) {
 func (w *Writer) PutCompositeLit(lit *ast.CompositeLit) {
 
 	if len(lit.Elts) == 0 {
-		w.Put(ZeroValue(JTypeOf(lit.Type)))
+		w.Put(ZeroValue(JTypeOfExpr(lit.Type)))
 		return
 	}
 
-	w.Put("new ", javaPointerNameForElem(TypeOf(lit.Type)))
+	w.Put("new ", JTypeOfExpr(lit.Type))
+
 	if _, ok := lit.Elts[0].(*ast.KeyValueExpr); ok {
 		w.Put("(")
 		tdef := classOf(lit.Type.(*ast.Ident)) // TODO: map java names to tdef?
@@ -175,7 +176,7 @@ func (w *Writer) PutSelectorExpr(e *ast.SelectorExpr) {
 	//	if JTypeOf(e.X).IsPrimitive(){
 	//
 	//	}
-	if JTypeOf(e.X).IsValue() && IsPtrMethod(e.Sel) {
+	if JTypeOfExpr(e.X).IsValue() && IsPtrMethod(e.Sel) {
 		// Pointer method on addressable value:
 		// compiler inserts address of receiver.
 		// https://golang.org/doc/effective_go.html#pointers_vs_values
@@ -227,7 +228,7 @@ func (w *Writer) PutBinaryExpr(b *ast.BinaryExpr) {
 	default:
 		w.Put(x, b.Op.String(), y)
 	case token.EQL:
-		w.PutJEquals(JTypeOf(b.X), x, JTypeOf(b.Y), y)
+		w.PutJEquals(JTypeOfExpr(b.X), x, JTypeOfExpr(b.Y), y)
 	case token.LSS, token.GTR, token.LEQ, token.GEQ, token.QUO, token.REM:
 		if unsigned {
 			w.PutUnsignedOp(b.X, b.Op, b.Y)

@@ -41,7 +41,7 @@ func (w *Writer) putMultiAssign(n *ast.AssignStmt) {
 
 		// blank identifer: it's actually a define. E.g.: int _4 = f(x);
 		if IsBlank(lhs) {
-			w.PutJVarDecl(NONE, JTypeOf(rhs), lhs.(*ast.Ident), rhs, nil)
+			w.PutJVarDecl(NONE, JTypeOfExpr(rhs), lhs.(*ast.Ident), rhs, nil)
 		} else {
 			w.PutAssign(lhs, n.Tok, rhs)
 		}
@@ -63,7 +63,7 @@ func NeedsSetMethod(lvalue ast.Expr) bool {
 	default:
 		panic("unsupported lvalue: " + reflect.TypeOf(lvalue).String())
 	case *ast.Ident:
-		return JTypeOf(lvalue).NeedsSetMethod()
+		return JTypeOfExpr(lvalue).NeedsSetMethod()
 	case *ast.StarExpr:
 		return true
 	case *ast.SelectorExpr:
@@ -131,7 +131,7 @@ func RValue(rhs ast.Expr) interface{} {
 		return ""
 	}
 
-	if JTypeOf(rhs).IsEscapedPrimitive() {
+	if JTypeOfExpr(rhs).IsEscapedPrimitive() {
 		return Transpile(rhs, ".value")
 	}
 

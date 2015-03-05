@@ -19,20 +19,23 @@ type JType struct {
 	JName string
 }
 
-func JTypeOf(x ast.Expr) JType {
-	t := JType{Orig: TypeOf(x)}
+func JTypeOfExpr(x ast.Expr) JType {
+
+	t := JTypeOfGoType(TypeOf(x))
 	if id, ok := x.(*ast.Ident); ok {
 		t.Ident = id
 	}
-
 	if t.IsEscapedPrimitive() {
 		t.JName = EscapedBasicName(t)
-	} else {
-		t.JName = javaName(t.Orig.Underlying()) //
 	}
-
-	Log(x, t.Orig, "->", t.JName)
 	return t
+}
+
+func JTypeOfGoType(t types.Type) JType {
+	return JType{
+		Orig:  t,
+		JName: javaName(t.Underlying()),
+	}
 }
 
 func javaName(orig types.Type) string {
@@ -54,8 +57,6 @@ func javaName(orig types.Type) string {
 }
 
 func javaStructName(t *types.Struct) string {
-	collectTypes[t] = struct{}{}
-
 	name := "Struct" // TODO: go.
 	for i := 0; i < t.NumFields(); i++ {
 		f := t.Field(i)

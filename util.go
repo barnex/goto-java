@@ -16,11 +16,11 @@ func FlattenFields(list *ast.FieldList) (names []*ast.Ident, types []JType) {
 		if f.Names == nil {
 			// unnamed field
 			names = append(names, nil)
-			types = append(types, JTypeOf(f.Type))
+			types = append(types, JTypeOfExpr(f.Type))
 		} else {
 			for _, n := range f.Names {
 				names = append(names, n)
-				types = append(types, JTypeOf(f.Type))
+				types = append(types, JTypeOfExpr(f.Type))
 			}
 		}
 	}

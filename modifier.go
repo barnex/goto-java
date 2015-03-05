@@ -26,7 +26,7 @@ func GlobalModifierFor(ident *ast.Ident) JModifier {
 	if ident.IsExported() {
 		mod |= PUBLIC
 	}
-	if JTypeOf(ident).NeedsFinal() {
+	if JTypeOfExpr(ident).NeedsFinal() {
 		mod |= FINAL
 	}
 	return mod

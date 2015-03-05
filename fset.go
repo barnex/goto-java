@@ -11,12 +11,11 @@ import (
 
 // TODO: global package, use for class gen unless overridden.
 var (
-	fset     *token.FileSet          // accessed through PosOf
-	info     types.Info              // accessed through TypeOf, ObjectOf, ExactValue
-	parent   map[ast.Node]ast.Node   // accessed through ParentOf
-	idents   map[string]int          // holds all identifier names and a counter to create a new, non-conflicting name if needed.
-	rename   map[types.Object]string // maps some objects (typ. identifiers) to a new name for java.
-	typedefs map[types.Object]*TypeDef
+	fset   *token.FileSet          // accessed through PosOf
+	info   types.Info              // accessed through TypeOf, ObjectOf, ExactValue
+	parent map[ast.Node]ast.Node   // accessed through ParentOf
+	idents map[string]int          // holds all identifier names and a counter to create a new, non-conflicting name if needed.
+	rename map[types.Object]string // maps some objects (typ. identifiers) to a new name for java.
 )
 
 func HandleFile(fname string) {
@@ -51,11 +50,12 @@ func HandleFile(fname string) {
 // Outputs a class with given name based on go file.
 func (w *Writer) PutClass(className string, f *ast.File) {
 
-	if !*flagNoPkg {
-		pkg := f.Name.Name
-		w.Putln("package ", pkg, ";")
-		w.Putln()
-	}
+	// TODO: pkg
+	//	if !*flagNoPkg {
+	//		pkg := f.Name.Name
+	//		w.Putln("package ", pkg, ";")
+	//		w.Putln()
+	//	}
 
 	w.Putln("import go.*;")
 	w.Putln()

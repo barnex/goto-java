@@ -2,41 +2,41 @@ package gotojava
 
 // Generate java classes based on type/method definitions.
 
-import (
-	"go/ast"
-	"reflect"
-
-	"golang.org/x/tools/go/types"
-)
-
-var collectTypes = make(map[types.Type]struct{})
+import "go/ast"
 
 // generate code for all defs in global typedefs variable
 func GenClasses() {
 
-	for t, _ := range collectTypes {
-		GenStorageClass(t)
+	for _, st := range structs {
+		GenStorageClass(st)
 	}
 
-	for _, td := range typedefs {
-		Log(nil, td.typeSpec.Name)
+	//for _, td := range typedefs {
+	//	Log(nil, td.typeSpec.Name)
 
-		switch typ := td.typeSpec.Type.(type) {
-		default:
-			panic("cannot handle: " + reflect.TypeOf(typ).String())
-		case *ast.StructType:
-			genStructPointerClass(td)
-			genStructValueClass(td)
-		case *ast.Ident:
-			genBasicClass(td)
-		}
-	}
+	//	switch typ := td.typeSpec.Type.(type) {
+	//	default:
+	//		panic("cannot handle: " + reflect.TypeOf(typ).String())
+	//	case *ast.StructType:
+	//		genStructPointerClass(td)
+	//		genStructValueClass(td)
+	//	case *ast.Ident:
+	//		genBasicClass(td)
+	//	}
+	//}
 }
 
-func GenStorageClass(t types.Type) {
+func GenStorageClass(st *ast.StructType) {
+	assert(!st.Incomplete)
+
+	names, types := FlattenFields(st.Fields)
 	def := &ClassDef{
-		Name: javaName(t),
+		Mod:        PUBLIC,
+		Name:       JTypeOfExpr(st).JName,
+		FieldNames: names,
+		FieldTypes: types,
 	}
+
 	def.Gen()
 }
 
@@ -100,7 +100,12 @@ func (c *ClassDef) genConstructors(w *Writer) {
 	// all fields
 	if len(c.FieldNames) > 0 {
 		w.Put("public ", c.Name, "(")
-		w.PutParams(c.FieldNames, c.FieldTypes)
+
+		//w.PutParams(c.FieldNames, c.FieldTypes)
+		for i := range c.FieldNames {
+			w.Put(comma(i), c.FieldTypes[i], " ", c.FieldNames[i])
+		}
+
 		w.Putln("){")
 		w.indent++
 		for i, n := range c.FieldNames {
@@ -115,7 +120,7 @@ func (c *ClassDef) genConstructors(w *Writer) {
 
 func genBasicClass(d *TypeDef) {
 	valueDef := &ClassDef{
-		Name: JTypeOf(d.typeSpec.Name).JName,
+		Name: JTypeOfExpr(d.typeSpec.Name).JName,
 	}
 	valueDef.Gen()
 
@@ -130,7 +135,7 @@ func genStructPointerClass(d *TypeDef) {
 
 	spec := d.typeSpec
 	name := javaPointerNameForElem(TypeOf(spec.Name))
-	base := JTypeOf(spec.Name)
+	base := JTypeOfExpr(spec.Name)
 	fields := spec.Type.(*ast.StructType).Fields
 
 	w := NewWriterFile(name + ".java")
@@ -155,7 +160,7 @@ func genStructPointerClass(d *TypeDef) {
 func genStructValueClass(d *TypeDef) {
 
 	spec := d.typeSpec
-	name := JTypeOf(spec.Name).JName
+	name := JTypeOfExpr(spec.Name).JName
 	ptrname := javaPointerNameForElem(TypeOf(spec.Name))
 
 	w := NewWriterFile(name + ".java")
@@ -209,7 +214,7 @@ func genStructValueClass(d *TypeDef) {
 	w.indent++
 	fieldNames, _ := FlattenFields(fields)
 	for _, n := range fieldNames {
-		w.PutJAssign(JTypeOf(n), Transpile("this.", n), JTypeOf(n), Transpile("other.", n))
+		w.PutJAssign(JTypeOfExpr(n), Transpile("this.", n), JTypeOfExpr(n), Transpile("other.", n))
 		w.Putln(";")
 	}
 	w.indent--
@@ -233,7 +238,7 @@ func genStructValueClass(d *TypeDef) {
 				w.Putln(" &&")
 				w.Put("\t")
 			}
-			w.PutJEquals(JTypeOf(n), Transpile("this.", n), JTypeOf(n), Transpile("other.", n))
+			w.PutJEquals(JTypeOfExpr(n), Transpile("this.", n), JTypeOfExpr(n), Transpile("other.", n))
 		}
 	}
 	w.Putln(";")
