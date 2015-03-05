@@ -21,4 +21,14 @@ func main() {
 	println(s2.v)
 	println(t1.v)
 	println(t2.v)
+
+	var sptr *S = new(S)
+	var tptr *T = new(T)
+
+	tptr = (*T)(sptr)
+	sptr = (*S)(tptr)
+
+	sptr.v = 17
+	println(sptr.v)
+	println(tptr.v)
 }
