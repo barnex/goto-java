@@ -21,7 +21,7 @@ func InitValue(rhs ast.Expr, typ JType) interface{} {
 // ZeroValue returns the zero value for a new variable of java type jType.
 // E.g.:
 // 	var x int  ->  int x = 0;
-func ZeroValue(t JType) string {
+func ZeroValue(t JType) interface{} {
 	if t.IsEscapedPrimitive() {
 		return "new " + t.JName + "()"
 	}
@@ -34,6 +34,8 @@ func ZeroValue(t JType) string {
 		return namedZeroValue(typ)
 	case *types.Pointer:
 		return "null"
+	case *types.Struct:
+		return "new " + t.JName + "()"
 	}
 }
 
