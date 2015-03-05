@@ -12,7 +12,7 @@ import (
 
 func InitValue(rhs ast.Expr, typ JType) interface{} {
 	if typ.IsEscapedPrimitive() {
-		return "new " + typ.JName + "(" + Transpile(RValue(rhs)) + ")"
+		return "new " + typ.JName() + "(" + Transpile(RValue(rhs)) + ")"
 	} else {
 		return RValue(rhs)
 	}
@@ -23,11 +23,11 @@ func InitValue(rhs ast.Expr, typ JType) interface{} {
 // 	var x int  ->  int x = 0;
 func ZeroValue(t JType) interface{} {
 	if t.IsEscapedPrimitive() {
-		return "new " + t.JName + "()"
+		return "new " + t.JName() + "()"
 	}
 	switch typ := t.Orig.(type) {
 	default:
-		panic("cannot make zero value for " + reflect.TypeOf(typ).String() + ":" + t.JName)
+		panic("cannot make zero value for " + reflect.TypeOf(typ).String() + ":" + t.JName())
 	case *types.Basic:
 		return basicZeroValue(typ)
 	case *types.Named:
@@ -35,7 +35,7 @@ func ZeroValue(t JType) interface{} {
 	case *types.Pointer:
 		return "null"
 	case *types.Struct:
-		return "new " + t.JName + "()"
+		return "new " + t.JName() + "()"
 	}
 }
 
@@ -46,7 +46,7 @@ func namedZeroValue(t *types.Named) string {
 	case *types.Struct:
 		// always load Struct with StructPtr (extends Struct),
 		// so we can take address of value by typecasting.
-		return "new " + JTypeOfGoType(t).JName + "()"
+		return "new " + JTypeOfGoType(t).JName() + "()"
 	case *types.Basic:
 		return basicZeroValue(u)
 	}

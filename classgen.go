@@ -46,7 +46,7 @@ func GenStorageClass(st *ast.StructType) {
 	names, types := FlattenFields(st.Fields)
 	def := &ClassDef{
 		Mod:        PUBLIC,
-		Name:       JTypeOfExpr(st).JName,
+		Name:       JTypeOfExpr(st).JName(),
 		FieldNames: names,
 		FieldTypes: types,
 	}
@@ -64,9 +64,9 @@ func GenStructValueClass(d *TypeDef) {
 	names, types := FlattenFields(spec.Type.(*ast.StructType).Fields)
 
 	def := &ClassDef{
-		Name:       JTypeOfExpr(spec.Name).JName,
+		Name:       JTypeOfExpr(spec.Name).JName(),
 		Doc:        spec.Doc,
-		Extends:    JTypeOfGoType(TypeOf(spec.Type).Underlying()).JName,
+		Extends:    JTypeOfGoType(TypeOf(spec.Type).Underlying()).JName(),
 		FieldNames: names,
 		FieldTypes: types,
 		Methods:    append(d.valMethods, d.ptrMethods...),
@@ -81,7 +81,7 @@ func GenStructPointerClass(d *TypeDef) {
 
 	def := &ClassDef{
 		Name:      javaPointerNameForElem(TypeOf(spec.Name)),
-		ValueName: JTypeOfExpr(spec.Name).JName,
+		ValueName: JTypeOfExpr(spec.Name).JName(),
 		Methods:   d.ptrMethods,
 	}
 
@@ -231,7 +231,7 @@ func (c *ClassDef) genSetMethod(w *Writer) {
 
 func genBasicClass(d *TypeDef) {
 	valueDef := &ClassDef{
-		Name: JTypeOfExpr(d.typeSpec.Name).JName,
+		Name: JTypeOfExpr(d.typeSpec.Name).JName(),
 	}
 	valueDef.Gen()
 

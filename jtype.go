@@ -9,14 +9,13 @@ import (
 	"golang.org/x/tools/go/types"
 )
 
-// JType represents the java type for a Go identifier.
+// JType represents a Java type translated from Go.
 // Go types do not map to java types one-to-one. The java
 // type for a certain Go type may also depend on the context
 // (e.g. local variable whose address is taken.)
 type JType struct {
-	Orig  types.Type
-	Ident *ast.Ident
-	JName string
+	Orig  types.Type // original Go type translated to Java
+	Ident *ast.Ident // identifier having this type, if any (for escape analyis)
 }
 
 func JTypeOfExpr(x ast.Expr) JType {
@@ -24,34 +23,48 @@ func JTypeOfExpr(x ast.Expr) JType {
 	if id, ok := x.(*ast.Ident); ok {
 		t.Ident = id
 	}
-	if t.IsEscapedPrimitive() {
-		t.JName = EscapedBasicName(t)
-	}
 	return t
 }
 
 func JTypeOfGoType(t types.Type) JType {
 	return JType{
 		Orig:  t,
-		JName: javaName(t),
+		Ident: nil,
 	}
 }
 
+func (t JType) JName() string {
+	if t.Orig == nil && t.Ident == nil {
+		return "void"
+	}
+	if t.IsEscapedPrimitive() {
+		return EscapedBasicName(t)
+	}
+	if ptr, ok := t.Orig.(*types.Pointer); ok {
+		return javaName(ptr.Elem().Underlying())
+	}
+	return javaName(t.Orig.Underlying())
+}
+
+func (t JType) ClassName() string {
+
+}
+
 func javaName(orig types.Type) string {
+
 	switch orig := orig.(type) {
 	default:
 		panic("cannot handle type " + reflect.TypeOf(orig).String() + ":" + orig.String())
 	case *types.Basic:
 		return javaBasicName(orig)
+	case *types.Struct:
+		return javaStructName(orig)
 	case *types.Named:
 		return javaNamedName(orig)
 	case *types.Pointer:
 		return javaPointerName(orig)
-	case *types.Struct:
-		return javaStructName(orig)
-	case *types.Signature:
-		//Log(nil, "TODO: Signature")
-		return "**SIGNATURE**"
+		//case *types.Signature: // TODO
+		//	return "**SIGNATURE**"
 	}
 }
 
@@ -71,10 +84,13 @@ func javaPointerName(t *types.Pointer) string {
 }
 
 func javaPointerNameForElem(e types.Type) string {
+	if IsPointer(e) {
+		panic("pointer to pointer")
+	}
 	if IsPrimitive(e) {
-		return Export(javaName(e) + "Ptr") // TODO: go., ...
+		return Export(javaName(e)) // TODO: go., ...
 	} else {
-		return javaName(e) + "Ptr"
+		return javaName(e)
 	}
 }
 
@@ -129,7 +145,7 @@ func EscapedBasicName(t JType) string {
 func JavaReturnTypeOf(resultTypes []JType) JType {
 	switch len(resultTypes) {
 	case 0:
-		return JType{Orig: nil, Ident: nil, JName: "void"}
+		return JType{Orig: nil, Ident: nil}
 	case 1:
 		return resultTypes[0]
 	default:
@@ -168,6 +184,11 @@ func (t JType) IsPointerToPrimitive() bool {
 	} else {
 		return false
 	}
+}
+
+func IsPointer(t types.Type) bool {
+	_, ok := t.(*types.Pointer)
+	return ok
 }
 
 // Returns whether t represents a Go struct type (value semantics).

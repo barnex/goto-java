@@ -53,6 +53,11 @@ func main() {
 	println(ia)
 	println(yy)
 
+	println(i == i)
+	println(&i == &i)
+	println(i == i1)
+	println(&i == &i1)
+
 	// Test that we can still use escaped basics as usual
 	i = 1
 	i++
