@@ -11,7 +11,6 @@ public class Proto{
 		public boolean equals(Object o){return this == o;}
 	};
 
-
 	public static void main(String[] args){
 
 		// basic
@@ -98,5 +97,44 @@ public class Proto{
 		System.out.println(sptr.value() == xs.value());
 		sptr.set(new S(33));
 		System.out.println(xs.v);
+
+		Object any = null;
+
+		any = new go.Int(i);
+		System.out.println(any.equals(new go.Int(3)));
+
+		int _1 = 0;
+		boolean ok=false;
+		if(any instanceof go.Int){
+			_1 = ((go.Int)any).value;
+			ok = true;
+		}
+		System.out.println(ok);
+
+		go.IntPtr _2;
+		ok = false;
+		if(any instanceof go.IntPtr){
+			_2 = ((go.IntPtr)any);
+			ok = true;
+		}
+		System.out.println(ok);
+
+		any = e;
+		System.out.println(any.equals(new go.Int(3)));
+
+		any = eptr;
+		System.out.println(any.equals(new go.Int(3)));
+
+		final go.Int ncalls = new go.Int();
+		go.Func_int_int f = null;
+		f = new go.Func_int_int(){
+			public int call(int x){
+				ncalls.value++;
+				return x*x;
+			}
+		};
+		go.Func_int_int a = f;
+		System.out.println(a.call(3));
+		System.out.println(ncalls.value);
 		
 	}}

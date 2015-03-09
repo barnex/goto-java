@@ -93,6 +93,35 @@ func main() {
 	println(sptr == (*S)(&xs))
 	*sptr = S{33}
 	println(xs.v)
+
+	// interface
+	var any interface{}
+
+	any = i
+	println(any == 3)
+	_, ok := any.(int)
+	println(ok)
+	_, ok = any.(*int)
+	println(ok)
+
+	any = e
+	println(any == 3)
+	any = eptr
+	println(any == 3)
+	//...
+
+	// func
+
+	var ncalls int
+	var f func(int) int
+	f = func(x int) int {
+		ncalls++
+		return x * x
+	}
+	a := f
+	println(a(3))
+	println(ncalls)
+
 }
 
 type MyInt int

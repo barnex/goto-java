@@ -23,7 +23,7 @@ public class Int extends IntPtr{
 		return this;
 	}
 
-	public boolean equals(Object other){
-		return other == this;
+	public boolean equals(Object o){
+		return o instanceof Int && ((Int)o).value == this.value;
 	}
 }
