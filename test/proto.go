@@ -53,7 +53,7 @@ func main() {
 	println(xs == xs2)
 
 	// pointer->struct
-	var xsptr *struct{ v int } = new(struct{ v int })
+	var xsptr *struct{ v int } // = new(struct{ v int })
 	var xsptr2 = &xs2
 
 	println(xsptr2 == &xs2)
@@ -99,10 +99,10 @@ func main() {
 
 	any = i
 	println(any == 3)
-	_, ok := any.(int)
-	println(ok)
-	_, ok = any.(*int)
-	println(ok)
+	//_, ok := any.(int)
+	//println(ok)
+	//_, ok = any.(*int)
+	//println(ok)
 
 	any = e
 	println(any == 3)

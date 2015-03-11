@@ -203,11 +203,7 @@ func (w *Writer) putShortDefine(mod JModifier, a *ast.AssignStmt) {
 	}
 	for i, lhs := range a.Lhs {
 		w.PutSemi(i)
-
-		var rhs ast.Expr = nil
-		if i < len(a.Rhs) {
-			rhs = a.Rhs[i]
-		}
+		rhs := a.Rhs[i]
 
 		id := lhs.(*ast.Ident)
 		if isShortRedefine(id) {
@@ -221,7 +217,7 @@ func (w *Writer) putShortDefine(mod JModifier, a *ast.AssignStmt) {
 // Put a value java variable declaration:
 // 	modifier type ident = value;
 // value may be nil.
-func (w *Writer) PutJVarDecl(mod JModifier, jType JType, id *ast.Ident, value ast.Expr, comment *ast.CommentGroup) {
+func (w *Writer) PutJVarDecl(mod JModifier, jType JType, id interface{}, value ast.Expr, comment *ast.CommentGroup) {
 	if jType.NeedsFinal() {
 		mod |= FINAL
 	}

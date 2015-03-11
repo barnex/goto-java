@@ -137,4 +137,5 @@ public class Proto{
 		System.out.println(a.call(3));
 		System.out.println(ncalls.value);
 		
+
 	}}

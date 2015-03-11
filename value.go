@@ -32,9 +32,9 @@ func ZeroValue(t JType) interface{} {
 		return basicZeroValue(typ)
 	case *types.Named:
 		return namedZeroValue(typ)
-	case *types.Pointer:
+	case *types.Pointer, *types.Interface:
 		return "null"
-	case *types.Struct:
+	case *types.Struct, *types.Signature:
 		return "new " + t.JName() + "()"
 	}
 }

@@ -3,6 +3,7 @@ package gotojava
 // Type conversion from Go to Java.
 
 import (
+	"fmt"
 	"go/ast"
 	"reflect"
 
@@ -10,14 +11,23 @@ import (
 )
 
 // JType represents a Java type translated from Go.
-// Go types do not map to java types one-to-one. The java
-// type for a certain Go type may also depend on the context
-// (e.g. local variable whose address is taken.)
+// The resulting JType depends on the original Go type,
+// and also on the original Go identifier escaping to heap.
 type JType struct {
 	Orig  types.Type // original Go type translated to Java
 	Ident *ast.Ident // identifier having this type, if any (for escape analyis)
 }
 
+// Bijection of Go type to Java type.
+func JTypeOfGoType(t types.Type) JType {
+	return JType{
+		Orig:  t,
+		Ident: nil,
+	}
+}
+
+// Java type as a function of Go type of x,
+// and whether x is an escaping primitive identifier.
 func JTypeOfExpr(x ast.Expr) JType {
 	t := JTypeOfGoType(TypeOf(x))
 	if id, ok := x.(*ast.Ident); ok {
@@ -26,13 +36,9 @@ func JTypeOfExpr(x ast.Expr) JType {
 	return t
 }
 
-func JTypeOfGoType(t types.Type) JType {
-	return JType{
-		Orig:  t,
-		Ident: nil,
-	}
-}
-
+// Java name for this type. E.g.:
+// 	bool -> boolean
+// 	int  -> go.Int   // when it escapes
 func (t JType) JName() string {
 	if t.Orig == nil && t.Ident == nil {
 		return "void"
@@ -44,10 +50,6 @@ func (t JType) JName() string {
 		return javaName(ptr.Elem().Underlying())
 	}
 	return javaName(t.Orig.Underlying())
-}
-
-func (t JType) ClassName() string {
-
 }
 
 func javaName(orig types.Type) string {
@@ -63,13 +65,58 @@ func javaName(orig types.Type) string {
 		return javaNamedName(orig)
 	case *types.Pointer:
 		return javaPointerName(orig)
-		//case *types.Signature: // TODO
-		//	return "**SIGNATURE**"
+	case *types.Interface:
+		return javaInterfaceName(orig)
+	case *types.Signature:
+		return javaSignatureName(orig)
+	case *types.Tuple:
+		return javaTupleName(orig)
 	}
 }
 
+const (
+	STRUCT_PREFIX    = "Struct"
+	POINTER_PREFIX   = "Ptr"
+	INTERFACE_PREFIX = "Interface"
+	FUNC_PREFIX      = "Func"
+)
+
+func javaTupleName(t *types.Tuple) string {
+	if t == nil {
+		return "void"
+	}
+
+	if t.Len() == 1 {
+		return javaName(t.At(0).Type())
+	}
+
+	name := STRUCT_PREFIX
+	for i := 0; i < t.Len(); i++ {
+		v := t.At(i)
+		name += fmt.Sprint("_", javaName(v.Type()), "_v", i)
+	}
+	return name
+}
+
+func javaSignatureName(t *types.Signature) string {
+	return FUNC_PREFIX + javaName(t.Params()) + "_to_" + javaName(t.Results())
+}
+
+func javaInterfaceName(t *types.Interface) string {
+	if t.NumMethods() == 0 {
+		return "Object"
+	}
+	name := INTERFACE_PREFIX
+	for i := 0; i < t.NumMethods(); i++ {
+		m := t.Method(i)
+		name += "_" + javaName(m.Type()) + "_" + m.Name()
+	}
+
+	return name
+}
+
 func javaStructName(t *types.Struct) string {
-	name := "Struct" // TODO: go.
+	name := STRUCT_PREFIX
 	for i := 0; i < t.NumFields(); i++ {
 		f := t.Field(i)
 		name += "_" + javaName(f.Type()) + "_" + f.Name()
@@ -84,21 +131,14 @@ func javaPointerName(t *types.Pointer) string {
 }
 
 func javaPointerNameForElem(e types.Type) string {
-	if IsPointer(e) {
-		panic("pointer to pointer")
-	}
-	if IsPrimitive(e) {
-		return Export(javaName(e)) // TODO: go., ...
-	} else {
-		return javaName(e)
-	}
+	return POINTER_PREFIX + "_" + javaName(e)
 }
 
 // Java name for named type.
 func javaNamedName(t *types.Named) string {
-	if IsPrimitive(t) {
-		return javaName(t.Underlying())
-	}
+	//if IsPrimitive(t) {
+	//	return javaName(t.Underlying())
+	//}
 
 	obj := t.Obj()
 	if r, ok := rename[obj]; ok {
@@ -122,19 +162,6 @@ func javaBasicName(t *types.Basic) string {
 		panic("cannot handle basic type " + t.String())
 	}
 }
-
-/*
-struct{v int} -> class Struct0{ int v }
-struct{v int} -> final Struct0
-*struct{v int} -> Struct0
-type S struct{v int} -> class S extends Struct0 implements ... { set(Struct0); get()Struct0; val methods only for iface}
-type S struct{v int} -> class SPtr extends Struct0 implements ... { ptr methods only for iface}
-S -> final Struct0
-*S -> Struct0
-s.meth() -> S.static(this, ...)
-interface{...} x = s -> IntefaceXXX x = new S(Struct0)
-interface{...} x = &s -> IntefaceXXX x = new SPtr(Struct0)
-*/
 
 func EscapedBasicName(t JType) string {
 	return Export(javaBasicName(t.Orig.Underlying().(*types.Basic))) // TODO: go., ...

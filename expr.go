@@ -31,6 +31,8 @@ func (w *Writer) PutExpr(n ast.Expr) {
 		w.PutBinaryExpr(e)
 	case *ast.CallExpr:
 		w.PutCallExpr(e)
+	case *ast.FuncLit:
+		w.PutFuncLit(e)
 	case *ast.Ident:
 		w.PutIdent(e)
 	case *ast.ParenExpr:
@@ -45,7 +47,22 @@ func (w *Writer) PutExpr(n ast.Expr) {
 		w.PutUnaryExpr(e)
 	case *ast.CompositeLit:
 		w.PutCompositeLit(e)
+	case *ast.StructType:
+		w.PutStructType(e)
 	}
+}
+
+// Emit a function literal. Godoc:
+// 	type FuncLit struct {
+// 	        Type *FuncType  // function type
+// 	        Body *BlockStmt // function body
+// 	}
+func (w *Writer) PutFuncLit(f *ast.FuncLit) {
+
+}
+
+func (w *Writer) PutStructType(st *ast.StructType) {
+	w.Put(JTypeOfExpr(st))
 }
 
 // Emit code for a literal of basic type.

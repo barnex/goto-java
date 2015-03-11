@@ -32,6 +32,8 @@ func (w *Writer) PutIdent(id *ast.Ident) {
 	switch id := ObjectOf(id).(type) {
 	default:
 		panic("cannot handle " + reflect.TypeOf(id).String())
+	case *types.TypeName:
+		w.Put(javaName(id.Type()))
 	case *types.Const:
 		w.Put(id.Name())
 	case *types.Func:

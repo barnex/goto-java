@@ -29,21 +29,33 @@ func (w *Writer) PutAssignStmt(n *ast.AssignStmt) {
 // Emit pure assign statement ('=' token)
 func (w *Writer) putMultiAssign(n *ast.AssignStmt) {
 	if len(n.Lhs) != len(n.Rhs) {
-		Error(n, "assignment count mismatch:", len(n.Lhs), "!=", len(n.Rhs))
-	}
+		//Error(n, "assignment count mismatch:", len(n.Lhs), "!=", len(n.Rhs))
+		assert(len(n.Rhs) == 1)
+		rhs := n.Rhs[0]
 
-	// multiple assign: put one per line
-	for i, lhs := range n.Lhs {
-		w.PutSemi(i)
+		id := "bla" // TODO
+		w.Putln(JTypeOfExpr(rhs), " ", id, "=", rhs)
+		for i, lhs := range n.Lhs {
+			w.PutSemi(i)
+			lhs = StripParens(lhs)
+			w.Putln(lhs, n.Tok, id, ".v", i)
+			// TODO: blank
+		}
+	} else {
 
-		lhs = StripParens(lhs) // border case, go allows "(x) = y" //?
-		rhs := n.Rhs[i]
+		// multiple assign: put one per line
+		for i, lhs := range n.Lhs {
+			w.PutSemi(i)
 
-		// blank identifer: it's actually a define. E.g.: int _4 = f(x);
-		if IsBlank(lhs) {
-			w.PutJVarDecl(NONE, JTypeOfExpr(rhs), lhs.(*ast.Ident), rhs, nil)
-		} else {
-			w.PutAssign(lhs, n.Tok, rhs)
+			lhs = StripParens(lhs) // border case, go allows "(x) = y" //?
+			rhs := n.Rhs[i]
+
+			// blank identifer: it's actually a define. E.g.: int _4 = f(x);
+			if IsBlank(lhs) {
+				w.PutJVarDecl(NONE, JTypeOfExpr(rhs), lhs.(*ast.Ident), rhs, nil)
+			} else {
+				w.PutAssign(lhs, n.Tok, rhs)
+			}
 		}
 	}
 }
