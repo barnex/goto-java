@@ -1,11 +1,10 @@
 package go;
 
-public class Int extends IntPtr{
+public class Int {
 
 	public int value;
 
-	public Int(){
-	}
+	public Int(){ }
 
 	public Int(int value){
 		this.value = value;
@@ -19,8 +18,8 @@ public class Int extends IntPtr{
 		this.value = value;
 	}
 
-	public IntPtr addr(){
-		return this;
+	public Ptr_int addr(){
+		return new IntWrapper(this);
 	}
 
 	public boolean equals(Object o){

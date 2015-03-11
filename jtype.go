@@ -39,15 +39,16 @@ func JTypeOfExpr(x ast.Expr) JType {
 // Java name for this type. E.g.:
 // 	bool -> boolean
 // 	int  -> go.Int   // when it escapes
-func (t JType) JName() string {
+func (t JType) StorageClass() string {
+	return JType{Orig: t.Orig.Underlying(), Ident: t.Ident}.InterfaceClass()
+}
+
+func (t JType) InterfaceClass() string {
 	if t.Orig == nil && t.Ident == nil {
 		return "void"
 	}
 	if t.IsEscapedPrimitive() {
 		return EscapedBasicName(t)
-	}
-	if ptr, ok := t.Orig.(*types.Pointer); ok {
-		return javaName(ptr.Elem().Underlying())
 	}
 	return javaName(t.Orig.Underlying())
 }

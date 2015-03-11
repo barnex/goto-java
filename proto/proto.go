@@ -28,7 +28,7 @@ func main() {
 
 	println(e)
 
-	// pointer->basic
+	println("pointer->basic")
 	eptr := &e
 	println(*eptr)
 
@@ -43,7 +43,7 @@ func main() {
 	gi := &gi
 	println(giptr == gi)
 
-	// struct
+	println("struct")
 	var xs struct{ v int }
 	var xs2 = struct{ v int }{7}
 	xs = xs2
@@ -52,7 +52,7 @@ func main() {
 	println(xs2.v)
 	println(xs == xs2)
 
-	// pointer->struct
+	println("pointer->struct")
 	var xsptr *struct{ v int } = new(struct{ v int })
 	var xsptr2 = &xs2
 
@@ -63,14 +63,14 @@ func main() {
 	*xsptr = xs2
 	println(*xsptr == xs2)
 
-	// named->basic
+	println("named->basic")
 
 	var mi MyInt
 
 	println(mi)
 	println(mi.Square())
 
-	// named->struct
+	println("named->struct")
 
 	var s S
 	println(s.v)
@@ -83,7 +83,7 @@ func main() {
 	var t T = T(s)
 	println(t.v)
 
-	// pointer->named->struct
+	println("pointer->named->struct")
 	sptr := &s
 	s.Inc()
 	println(sptr == &s)
@@ -94,13 +94,15 @@ func main() {
 	*sptr = S{33}
 	println(xs.v)
 
-	// interface
+	println("interface")
 	var any interface{}
 
 	any = i
 	println(any == 3)
+
 	_, ok := any.(int)
 	println(ok)
+
 	_, ok = any.(*int)
 	println(ok)
 
@@ -110,22 +112,29 @@ func main() {
 	println(any == 3)
 	//...
 
-	// func
+	println("func")
 
 	var ncalls int
 	var f func(int) int
 	f = func(x int) int {
 		ncalls++
+		// TODO: access all
 		return x * x
 	}
 	a := f
 	println(a(3))
 	println(ncalls)
+	a = someF
+	println(a(3))
 
-	// named func
-	myf := F(f)
+	println("named->func")
+	myf := MyF(f)
 	println(myf.do(4))
 
+}
+
+func someF(x int) int {
+	return x * (x + 1)
 }
 
 type MyInt int
@@ -139,8 +148,8 @@ func (s *S) Inc()       { s.v++ }
 
 type T S
 
-type F func(int) int
+type MyF func(int) int
 
-func (f F) do(x int) int {
+func (f MyF) do(x int) int {
 	return f(x)
 }

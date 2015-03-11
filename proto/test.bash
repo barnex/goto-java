@@ -1,5 +1,8 @@
 #! /bin/bash
 
+set -e 
+
+rm -f *.class
 go build proto.go
 javac Proto.java
 

@@ -21,7 +21,7 @@ type TypeDef struct {
 }
 
 // Collect all type definitions in the AST rooted at root.
-// Save them to global typedefs map.
+// Save them to global typedefs/structs maps
 func CollectDefs(root ast.Node) {
 	typedefs = make(map[types.Object]*TypeDef)
 	structs = make(map[types.Type]*ast.StructType)
