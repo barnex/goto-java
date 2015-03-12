@@ -16,6 +16,7 @@ var (
 	parent map[ast.Node]ast.Node   // accessed through ParentOf
 	idents map[string]int          // holds all identifier names and a counter to create a new, non-conflicting name if needed.
 	rename map[types.Object]string // maps some objects (typ. identifiers) to a new name for java.
+	// TODO: rename should just map strings to strings
 )
 
 func HandleFile(fname string) {

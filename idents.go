@@ -85,13 +85,19 @@ func RenameReservedIdents(n ast.Node) map[types.Object]string {
 			// Name is keyword: rename it and return new name.
 			// DEBUG: flag -renameall renames all variables for stress testing.
 			if canRename(obj) && (javaKeyword[obj.Name()] || *flagRenameAll) {
-				new := makeNewName(obj.Name())
-				Log(n, obj.Name(), "->", new)
-				rename[obj] = new
+				if _, ok := rename[obj]; !ok {
+					new := makeNewName(obj.Name())
+					Log(n, obj.Name(), "->", new)
+					rename[obj] = new
+				}
 			}
 		}
 		return true
 	})
+
+	for k, v := range rename {
+		Log(n, k, "->", v)
+	}
 
 	return rename
 }
