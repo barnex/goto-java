@@ -4,6 +4,7 @@ package gotojava
 
 import (
 	"go/ast"
+	"reflect"
 
 	"golang.org/x/tools/go/types"
 )
@@ -11,8 +12,23 @@ import (
 // generate code for all defs in global typedefs variable
 func GenClasses() {
 
-	for _, t := range unnamed {
-		GenUnnamed(t)
+	for _, t := range alltypes {
+		switch t := t.(type) {
+		default:
+			panic(reflect.TypeOf(t).String())
+		case *types.Basic:
+			// nothing to do, handwritten.
+		case *types.Pointer:
+			genPointer(t)
+		case *types.Named:
+			genNamed(t)
+		case *types.Signature:
+			genSignature(t)
+		case *types.Struct:
+			genStruct(t)
+		case *types.Tuple:
+			genTuple(t)
+		}
 	}
 
 	//	for _, td := range typedefs {
@@ -42,14 +58,20 @@ type ClassDef struct {
 	Doc        interface{}
 }
 
-func GenUnnamed(t types.Type) {
+func genNamed(p *types.Named) {
 
-	switch t := t.(type) {
-	default:
-		panic(t.String())
-	case *types.Struct:
-		genStruct(t)
-	}
+}
+
+func genPointer(p *types.Pointer) {
+
+}
+
+func genSignature(sig *types.Signature) {
+
+}
+
+func genTuple(t *types.Tuple) {
+
 }
 
 func genStruct(st *types.Struct) {
@@ -330,8 +352,9 @@ func (w *Writer) PutMethodDecl(f *ast.FuncDecl, copyRecv bool) {
 	w.Put(GlobalModifierFor(f.Name))
 
 	// return type
-	_, retTypes := FlattenFields(f.Type.Results)
-	w.Put(JavaReturnTypeOf(retTypes), " ", f.Name)
+	//_, retTypes := FlattenFields(f.Type.Results)
+	returnType := TypeOf(f.Type).(*types.Signature).Results() //TODO: putSignature?
+	w.Put(returnType, " ", f.Name)
 
 	// arguments
 	w.Put("(")
@@ -341,7 +364,7 @@ func (w *Writer) PutMethodDecl(f *ast.FuncDecl, copyRecv bool) {
 	w.indent++
 
 	// body calls static implementation with this as first arg
-	if len(retTypes) > 0 {
+	if returnType.Len() > 0 {
 		w.Put("return ")
 	}
 	w.Put(f.Name, "(", "this")

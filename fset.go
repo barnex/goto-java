@@ -35,7 +35,7 @@ func HandleFile(fname string) {
 	parent = CollectParents(f)
 	idents = CollectIdents(f)
 	rename = RenameReservedIdents(f)
-	CollectDefs(f)
+	CollectTypes(f)
 	EscapeAnalysis(f)
 
 	// transpile primary class

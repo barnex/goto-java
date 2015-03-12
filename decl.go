@@ -6,6 +6,8 @@ import (
 	"go/ast"
 	"go/token"
 	"reflect"
+
+	"golang.org/x/tools/go/types"
 )
 
 // Emit a declaration with optional modifier (like static)
@@ -60,8 +62,8 @@ func (w *Writer) PutFunc(mod JModifier, f *ast.FuncDecl) {
 	w.Put(mod | GlobalModifierFor(f.Name))
 
 	// return type
-	retNames, retTypes := FlattenFields(f.Type.Results)
-	w.Put(JavaReturnTypeOf(retTypes), " ", f.Name)
+	returnType := TypeOf(f.Name).(*types.Signature).Results() //TODO: putSignature?
+	w.Put(JTypeOfGoType(returnType), " ", f.Name)
 
 	// arguments
 	argNames, argTypes := FlattenFields(f.Type.Params)
@@ -89,6 +91,7 @@ func (w *Writer) PutFunc(mod JModifier, f *ast.FuncDecl) {
 	w.indent++
 
 	// declare named return values, if any
+	retNames, retTypes := FlattenFields(f.Type.Results)
 	for i := range retNames {
 		if retNames[i] != nil {
 			w.Putln(retTypes[i], " ", retNames[i], ";")

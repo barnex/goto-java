@@ -41,6 +41,7 @@ func JTypeOfExpr(x ast.Expr) JType {
 // 	int      -> go.Int   // when it escapes
 //  MyStruct -> Struct_int_v
 func (t JType) JName() string {
+	//fmt.Println("JName", t)
 	return JType{Orig: t.Orig.Underlying(), Ident: t.Ident}.InterfaceName()
 }
 
@@ -178,31 +179,30 @@ func EscapedBasicName(t *types.Basic) string {
 
 // Java return type for a function that returns given types.
 // For multiple return types, a Tuple type is returned
-func JavaReturnTypeOf(resultTypes []JType) JType {
-	switch len(resultTypes) {
-	case 0:
-		return JType{Orig: nil, Ident: nil}
-	case 1:
-		return resultTypes[0]
-	default:
-		panic("multiple returns")
-		//return JavaTupleType(resultTypes)
-	}
-}
+//func JavaReturnTypeOf(resultTypes []JType) JType {
+//	switch len(resultTypes) {
+//	case 0:
+//		return JType{Orig: types.NewTu, Ident: nil}
+//	case 1:
+//		return resultTypes[0]
+//	default:
+//		panic("multiple returns")
+//		//return JavaTupleType(resultTypes)
+//	}
+//}
 
 //func IsPrimitive(t types.Type) bool {
 //	_, basic := t.Underlying().(*types.Basic)
 //	return basic
 //}
-//
-// Returns whether t represents a Go basic type that was moved to the heap. E.g.:
-//  i := 0
+
+// Returns whether t represents a Go identifier that was moved to the heap. E.g.:
+//  i := 0  // -> true
 // 	x := &i
-// 	IsEscapedBasic(JTypeOf(i)) // true
-// In such case the java primitive (e.g. int) is replaced by a wrapper (e.g. go.Int)
-//func (t JType) IsEscapedPrimitive() bool {
-//	return IsPrimitive(t.Orig) && t.Ident != nil && Escapes(t.Ident)
-//}
+// In such case the java primitive (e.g. int) is replaced by a wrapper (e.g. Int)
+func (t JType) IsEscaped() bool {
+	return t.Ident != nil && Escapes(t.Ident)
+}
 
 // Is t a Java primitive (e.g. int, not Int)?
 func (t JType) IsPrimitive() bool {

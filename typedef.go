@@ -10,7 +10,7 @@ import (
 )
 
 var typedefs map[types.Object]*TypeDef // collects named type defintions and methods
-var unnamed map[string]types.Type      // collects uses of all unnamed types
+var alltypes map[string]types.Type     // collects uses of all types encountered in the Go source
 
 // TypeDef represents type+methods definitions.
 // Turned into one or more java classes by classgen.go.
@@ -22,25 +22,29 @@ type TypeDef struct {
 
 // Collect all type definitions in the AST rooted at root.
 // Save them to global typedefs/structs maps
-func CollectDefs(root ast.Node) {
+func CollectTypes(root ast.Node) {
 	typedefs = make(map[types.Object]*TypeDef)
-	unnamed = make(map[string]types.Type)
+	alltypes = make(map[string]types.Type)
 	ast.Inspect(root, func(n ast.Node) bool {
+		// Collect named type spec and methods
 		switch n := n.(type) {
-		default:
-			return true
 		case *ast.TypeSpec: // named types
 			collectTypeSpec(n)
 		case *ast.FuncDecl: // methods for named types
 			if n.Recv != nil {
 				collectMethodDecl(n)
 			}
-		case *ast.StructType: // unnamed types
-			// TODO: others
-			if unnamed[TypeOf(n).String()] == nil {
-				Log(n, "discovered:", TypeOf(n).String())
+		}
+		// Collect all types encountered
+
+		if n, ok := n.(ast.Expr); ok {
+			t := info.TypeOf(n)
+			if t != nil {
+				if alltypes[t.String()] == nil {
+					Log(n, "discovered:", t.String())
+				}
+				alltypes[t.String()] = TypeOf(n)
 			}
-			unnamed[TypeOf(n).String()] = TypeOf(n)
 		}
 		return true
 	})

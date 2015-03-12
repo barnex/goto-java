@@ -142,11 +142,11 @@ func RValue(rhs ast.Expr) interface{} {
 		return ""
 	}
 
+	if JTypeOfExpr(rhs).IsEscaped() {
+		return Transpile(rhs, ".value()")
+	}
 	return rhs
 
-	//if !JTypeOfExpr(rhs).IsPrimitive() {
-	//	return Transpile(rhs, ".value()")
-	//}
 	// TODO: cast
 }
 
