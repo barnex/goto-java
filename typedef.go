@@ -9,8 +9,8 @@ import (
 	"golang.org/x/tools/go/types"
 )
 
-var typedefs map[types.Object]*TypeDef
-var structs map[types.Type]*ast.StructType
+var typedefs map[types.Object]*TypeDef // collects named type defintions and methods
+var unnamed map[string]types.Type      // collects uses of all unnamed types
 
 // TypeDef represents type+methods definitions.
 // Turned into one or more java classes by classgen.go.
@@ -18,6 +18,32 @@ type TypeDef struct {
 	typeSpec   *ast.TypeSpec   // type definition
 	valMethods []*ast.FuncDecl // value methods
 	ptrMethods []*ast.FuncDecl // pointer methods
+}
+
+// Collect all type definitions in the AST rooted at root.
+// Save them to global typedefs/structs maps
+func CollectDefs(root ast.Node) {
+	typedefs = make(map[types.Object]*TypeDef)
+	unnamed = make(map[string]types.Type)
+	ast.Inspect(root, func(n ast.Node) bool {
+		switch n := n.(type) {
+		default:
+			return true
+		case *ast.TypeSpec: // named types
+			collectTypeSpec(n)
+		case *ast.FuncDecl: // methods for named types
+			if n.Recv != nil {
+				collectMethodDecl(n)
+			}
+		case *ast.StructType: // unnamed types
+			// TODO: others
+			if unnamed[TypeOf(n).String()] == nil {
+				Log(n, "discovered:", TypeOf(n).String())
+			}
+			unnamed[TypeOf(n).String()] = TypeOf(n)
+		}
+		return true
+	})
 }
 
 // fetches typedef for typeId from global typedefs
@@ -32,28 +58,6 @@ func classOf(typeId *ast.Ident) *TypeDef {
 	}
 }
 
-// Collect all type definitions in the AST rooted at root.
-// Save them to global typedefs/structs maps
-func CollectDefs(root ast.Node) {
-	typedefs = make(map[types.Object]*TypeDef)
-	structs = make(map[types.Type]*ast.StructType)
-	ast.Inspect(root, func(n ast.Node) bool {
-		switch n := n.(type) {
-		default:
-			return true
-		case *ast.TypeSpec:
-			collectTypeSpec(n)
-		case *ast.FuncDecl:
-			if n.Recv != nil {
-				collectMethodDecl(n)
-			}
-		case *ast.StructType:
-			structs[TypeOf(n)] = n
-		}
-		return true
-	})
-}
-
 // CollectTypeSpec sets the type declaration of the corresponding class (in global typedefs variable).
 // Code generation is deferred until all methods are known.
 // 	type TypeSpec struct {
@@ -63,7 +67,7 @@ func CollectDefs(root ast.Node) {
 // 	        Comment *CommentGroup // line comments; or nil
 // 	}
 func collectTypeSpec(s *ast.TypeSpec) {
-	Log(s, s.Name)
+	Log(s, "discovered:", s.Name)
 	cls := classOf(s.Name)
 	assert(cls.typeSpec == nil)
 	cls.typeSpec = s
