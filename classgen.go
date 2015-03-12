@@ -4,6 +4,7 @@ package gotojava
 
 import (
 	"go/ast"
+	"log"
 	"reflect"
 
 	"golang.org/x/tools/go/types"
@@ -11,7 +12,6 @@ import (
 
 // generate code for all defs in global typedefs variable
 func GenClasses() {
-
 	for _, t := range alltypes {
 		switch t := t.(type) {
 		default:
@@ -30,83 +30,102 @@ func GenClasses() {
 			genTuple(t)
 		}
 	}
-
-	//	for _, td := range typedefs {
-	//
-	//		switch typ := td.typeSpec.Type.(type) {
-	//		default:
-	//			println("cannot handle: " + reflect.TypeOf(typ).String() + ":" + types.ExprString(td.typeSpec.Type))
-	//			//panic("cannot handle: " + reflect.TypeOf(typ).String() + ":" + types.ExprString(td.typeSpec.Type))
-	//		case *ast.StructType:
-	//			GenStructPointerClass(td)
-	//			GenStructValueClass(td)
-	//			//case *ast.Ident:
-	//			//	genBasicClass(td)
-	//		}
-	//	}
 }
 
-type ClassDef struct {
-	Mod        JModifier
-	Name       string
-	ValueName  string
-	Extends    string
-	Implements []string
-	FieldNames []string
-	FieldTypes []JType
-	Methods    []*ast.FuncDecl
-	Doc        interface{}
+func genNamed(t *types.Named) {
+	w := OpenClass(javaName(t), "")
+	defer w.CloseClass()
 }
 
-func genNamed(p *types.Named) {
-
+func genPointer(t *types.Pointer) {
+	w := OpenClass(javaName(t), "")
+	defer w.CloseClass()
 }
 
-func genPointer(p *types.Pointer) {
-
-}
-
-func genSignature(sig *types.Signature) {
-
+func genSignature(t *types.Signature) {
+	w := OpenClass(javaName(t), "")
+	defer w.CloseClass()
 }
 
 func genTuple(t *types.Tuple) {
-
+	w := OpenClass(javaName(t), "")
+	defer w.CloseClass()
 }
 
-func genStruct(st *types.Struct) {
-	//assert(!st.Incomplete)
+func genStruct(t *types.Struct) {
+	name := javaName(t)
+	w := OpenClass(name, "")
+	w.PutEmptyConstructor(name)
+	w.PutCompositeConstructor(name)
+	defer w.CloseClass()
+}
 
-	names, types := flattenFields(st)
-	def := &ClassDef{
-		Mod:        PUBLIC,
-		Name:       JTypeOfGoType(st).JName(),
-		FieldNames: names,
-		FieldTypes: types,
+// Open name.java and already write class signature.
+// Then, Writer methods can put class body.
+// Finally, CloseClass() should be called.
+func OpenClass(name, extends string, implements ...string) *Writer {
+	log.Println("Generate class ", name)
+	w := NewWriterFile(name + ".java")
+
+	mod := PUBLIC
+	w.Put(mod, "class ", name)
+	if extends != "" {
+		w.Put(" extends ", extends)
 	}
-
-	def.Gen(
-		(*ClassDef).genFields,
-		(*ClassDef).genEmptyConstructor,
-		(*ClassDef).genCopyConstructor,
-		(*ClassDef).genCompositeConstructor,
-		(*ClassDef).genSetMethod)
-}
-
-type fieldser interface {
-	NumFields() int
-	Field(int) *types.Var
-}
-
-func flattenFields(t fieldser) (names []string, types []JType) {
-	names = make([]string, 0, t.NumFields())
-	types = make([]JType, 0, t.NumFields())
-	for i := 0; i < t.NumFields(); i++ {
-		names = append(names, t.Field(i).Name())                // TODO: rename
-		types = append(types, JTypeOfGoType(t.Field(i).Type())) // TODO: rename
+	if len(implements) != 0 {
+		w.Put(" implements")
+		for _, x := range implements {
+			w.Put(" ", x)
+		}
 	}
-	return names, types
+	w.Putln("{\n")
+	w.indent++
+	return w
 }
+
+func (w *Writer) CloseClass() {
+	w.indent--
+	w.Putln("}")
+	w.Close()
+}
+
+func (w *Writer) PutEmptyConstructor(name string) {
+	w.Putln()
+	w.Putln("public ", name, "(){}\n")
+}
+
+func (w *Writer) PutCompositeConstructor() {
+	// all fields
+	if len(c.FieldNames) > 0 {
+		w.Putln()
+		w.Put("public ", c.Name, "(")
+
+		//w.PutParams(c.FieldNames, c.FieldTypes)
+		for i := range c.FieldNames {
+			w.Put(comma(i), c.FieldTypes[i], " ", c.FieldNames[i])
+		}
+
+		w.Putln("){")
+		w.indent++
+		for i, n := range c.FieldNames {
+			t := c.FieldTypes[i]
+			w.PutJAssign(t, Transpile("this.", n), t, n)
+			w.Putln(";")
+		}
+		w.indent--
+		w.Putln("}")
+	}
+}
+
+//func flattenFields(t fieldser) (names []string, types []JType) {
+//	names = make([]string, 0, t.NumFields())
+//	types = make([]JType, 0, t.NumFields())
+//	for i := 0; i < t.NumFields(); i++ {
+//		names = append(names, t.Field(i).Name())                // TODO: rename
+//		types = append(types, JTypeOfGoType(t.Field(i).Type())) // TODO: rename
+//	}
+//	return names, types
+//}
 
 //// Generate java class for Go named struct type (value semantics).
 //func GenStructValueClass(d *TypeDef) {
@@ -182,117 +201,80 @@ func flattenFields(t fieldser) (names []string, types []JType) {
 ////	w.indent--
 ////	w.Putln("}")
 
-func (c *ClassDef) Gen(f ...func(*ClassDef, *Writer)) {
+//func (c *ClassDef) Gen(f ...func(*ClassDef, *Writer)) {
+//
+//	w := NewWriterFile(c.Name + ".java")
+//	defer w.Close()
+//
+//	c.genSignature(w)
+//
+//	for _, f := range f {
+//		f(c, w)
+//	}
+//
+//	w.indent--
+//	w.Putln("}")
+//}
 
-	w := NewWriterFile(c.Name + ".java")
-	defer w.Close()
-
-	c.genSignature(w)
-
-	for _, f := range f {
-		f(c, w)
-	}
-
-	w.indent--
-	w.Putln("}")
-}
-
-func (c *ClassDef) genSignature(w *Writer) {
-	w.Put(c.Mod, "class ", c.Name)
-	if c.Extends != "" {
-		w.Put(" extends ", c.Extends)
-	}
-	if len(c.Implements) != 0 {
-		w.Put(" implements")
-		for _, x := range c.Implements {
-			w.Put(" ", x)
-		}
-	}
-	w.Putln("{\n")
-	w.indent++
-}
-
-func (c *ClassDef) genFields(w *Writer) {
-	w.Putln()
-	for i, n := range c.FieldNames {
-		t := c.FieldTypes[i]
-		mod := NONE // TODO: GlobalModifierFor(n)
-		w.Put(mod, t, " ", n)
-		if t.NeedsFinal() {
-			w.Put(" = ", ZeroValue(t))
-		}
-		w.Putln(";")
-		// TODO Docs
-	}
-}
-
-func (c *ClassDef) genMethods(w *Writer) {
-	for _, m := range c.Methods {
-		w.PutMethodDecl(m, false)
-	}
-}
-
-func (c *ClassDef) genEmptyConstructor(w *Writer) {
-	w.Putln()
-	w.Putln("public ", c.Name, "(){}\n")
-}
-
-func (c *ClassDef) genCopyConstructor(w *Writer) {
-	w.Putln()
-	w.Putln("public ", c.Name, "(", c.Name, " other){")
-	w.indent++
-	for i, n := range c.FieldNames {
-		t := c.FieldTypes[i]
-		w.PutJAssign(t, Transpile("this.", n), t, Transpile("other.", n))
-		w.Putln(";")
-	}
-	w.indent--
-	w.Putln("}")
-}
-
-func (c *ClassDef) genCompositeConstructor(w *Writer) {
-	// all fields
-	if len(c.FieldNames) > 0 {
-		w.Putln()
-		w.Put("public ", c.Name, "(")
-
-		//w.PutParams(c.FieldNames, c.FieldTypes)
-		for i := range c.FieldNames {
-			w.Put(comma(i), c.FieldTypes[i], " ", c.FieldNames[i])
-		}
-
-		w.Putln("){")
-		w.indent++
-		for i, n := range c.FieldNames {
-			t := c.FieldTypes[i]
-			w.PutJAssign(t, Transpile("this.", n), t, n)
-			w.Putln(";")
-		}
-		w.indent--
-		w.Putln("}")
-	}
-}
-
-func (c *ClassDef) genPtrConstructor(w *Writer) {
-	w.Putln()
-	w.Putln("public ", c.Name, "(", c.ValueName, " other){")
-	w.indent++
-	w.indent--
-	w.Putln("}")
-}
-
-func (c *ClassDef) genSetMethod(w *Writer) {
-	w.Putln()
-	w.Put("public void set(", c.Name, "  other){")
-	w.indent++
-	for i, n := range c.FieldNames {
-		t := c.FieldTypes[i]
-		w.PutJAssign(t, Transpile("this.", n), t, Transpile("other.", n))
-		w.Putln(";")
-	}
-	w.indent--
-	w.Putln("}")
-}
+//func (c *ClassDef) genFields(w *Writer) {
+//	w.Putln()
+//	for i, n := range c.FieldNames {
+//		t := c.FieldTypes[i]
+//		mod := NONE // TODO: GlobalModifierFor(n)
+//		w.Put(mod, t, " ", n)
+//		if t.NeedsFinal() {
+//			w.Put(" = ", ZeroValue(t))
+//		}
+//		w.Putln(";")
+//		// TODO Docs
+//	}
+//}
+//
+//func (c *ClassDef) genMethods(w *Writer) {
+//	for _, m := range c.Methods {
+//		w.PutMethodDecl(m, false)
+//	}
+//}
+//
+//func (c *ClassDef) genEmptyConstructor(w *Writer) {
+//	w.Putln()
+//	w.Putln("public ", c.Name, "(){}\n")
+//}
+//
+//func (c *ClassDef) genCopyConstructor(w *Writer) {
+//	w.Putln()
+//	w.Putln("public ", c.Name, "(", c.Name, " other){")
+//	w.indent++
+//	for i, n := range c.FieldNames {
+//		t := c.FieldTypes[i]
+//		w.PutJAssign(t, Transpile("this.", n), t, Transpile("other.", n))
+//		w.Putln(";")
+//	}
+//	w.indent--
+//	w.Putln("}")
+//}
+//
+//
+//func (c *ClassDef) genPtrConstructor(w *Writer) {
+//	w.Putln()
+//	w.Putln("public ", c.Name, "(", c.ValueName, " other){")
+//	w.indent++
+//	w.indent--
+//	w.Putln("}")
+//}
+//
+//func (c *ClassDef) genSetMethod(w *Writer) {
+//	w.Putln()
+//	w.Put("public void set(", c.Name, "  other){")
+//	w.indent++
+//	for i, n := range c.FieldNames {
+//		t := c.FieldTypes[i]
+//		w.PutJAssign(t, Transpile("this.", n), t, Transpile("other.", n))
+//		w.Putln(";")
+//	}
+//	w.indent--
+//	w.Putln("}")
+//}
 
 //func genBasicClass(d *TypeDef) {
 //	valueDef := &ClassDef{
