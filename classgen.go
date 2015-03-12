@@ -313,13 +313,3 @@ type ClassDef struct {
 //
 //}
 //
-//func classOf(typeId *ast.Ident) *TypeDef {
-//	cls := ObjectOf(typeId)
-//	if def, ok := typedefs[cls]; ok {
-//		return def
-//	} else {
-//		def := new(TypeDef)
-//		typedefs[cls] = def
-//		return def
-//	}
-//}

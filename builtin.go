@@ -4,7 +4,6 @@ package gotojava
 
 import (
 	"go/ast"
-	"reflect"
 
 	"golang.org/x/tools/go/types"
 )
@@ -57,15 +56,16 @@ func (w *Writer) PutBuiltinCall(c *ast.CallExpr) {
 func (w *Writer) putNewCall(c *ast.CallExpr) {
 	assert(len(c.Args) == 1)
 	arg := c.Args[0]
+	w.PutNew(javaPointerNameForElem(TypeOf(arg)))
+}
 
-	switch t := TypeOf(arg).(type) {
-	default:
-		panic("cannot handle new " + reflect.TypeOf(t).String())
-	case *types.Basic:
-		w.Put("new ", EscapedBasicName(JTypeOfExpr(arg)), "()")
-	case *types.Named, *types.Pointer:
-		w.Put("new ", javaPointerNameForElem(TypeOf(arg)), "()") // ?
+func (w *Writer) PutNew(typ interface{}, args ...interface{}) {
+	w.Put("new ", typ, "(")
+	for i, a := range args {
+		w.Put(comma(i))
+		w.Put(a)
 	}
+	w.Put(")")
 }
 
 // Emit code for built-in print, prinln calls.

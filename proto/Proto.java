@@ -107,21 +107,21 @@ public class Proto{
 		any = new go.Int(i);
 		System.out.println(any.equals(new go.Int(3)));
 
-		int _1 = 0;
-		boolean ok=false;
-		if(any instanceof go.Int){
-			_1 = ((go.Int)any).value;
-			ok = true;
-		}
-		System.out.println(ok);
+		//int _1 = 0;
+		//boolean ok=false;
+		//if(any instanceof go.Int){
+		//	_1 = ((go.Int)any).value;
+		//	ok = true;
+		//}
+		//System.out.println(ok);
 
-		go.Ptr_int _2;
-		ok = false;
-		if(any instanceof go.Ptr_int){
-			_2 = ((go.Ptr_int)any);
-			ok = true;
-		}
-		System.out.println(ok);
+		//go.Ptr_int _2;
+		//ok = false;
+		//if(any instanceof go.Ptr_int){
+		//	_2 = ((go.Ptr_int)any);
+		//	ok = true;
+		//}
+		//System.out.println(ok);
 
 		any = e;
 		System.out.println(any.equals(new go.Int(3)));
@@ -138,7 +138,7 @@ public class Proto{
 				return x*x;
 			}
 		});
-		final go.Func_int_int a = new go.Func_int_int(f.func);
+		final go.Func_int_int a = new go.Func_int_int(f);
 		System.out.println(a.call(3));
 		System.out.println(ncalls.value);
 		a.set(new go.Interface_call_int_int(){public int call(int x){return someF(x);}});

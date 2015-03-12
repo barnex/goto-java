@@ -100,11 +100,11 @@ func main() {
 	any = i
 	println(any == 3)
 
-	_, ok := any.(int)
-	println(ok)
+	//_, ok := any.(int)
+	//println(ok)
 
-	_, ok = any.(*int)
-	println(ok)
+	//_, ok = any.(*int)
+	//println(ok)
 
 	any = e
 	println(any == 3)

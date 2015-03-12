@@ -313,7 +313,7 @@ func (w *Writer) PutJEquals(ltyp JType, lhs interface{}, rtyp JType, rhs interfa
 	switch {
 	default:
 		w.Put(lhs, " == ", rhs) // TODO: panic
-	case ltyp.IsStructValue() && rtyp.IsStructValue():
+	case ltyp.NeedsMethods():
 		w.Put(lhs, ".equals(", rhs, ")")
 	}
 }

@@ -11,10 +11,10 @@ import (
 )
 
 func InitValue(rhs ast.Expr, typ JType) interface{} {
-	if typ.IsEscapedPrimitive() {
-		return "new " + typ.JName() + "(" + Transpile(RValue(rhs)) + ")"
-	} else {
+	if typ.IsPrimitive() {
 		return RValue(rhs)
+	} else {
+		return "new " + typ.JName() + "(" + Transpile(RValue(rhs)) + ")"
 	}
 }
 
@@ -22,19 +22,9 @@ func InitValue(rhs ast.Expr, typ JType) interface{} {
 // E.g.:
 // 	var x int  ->  int x = 0;
 func ZeroValue(t JType) interface{} {
-	if t.IsEscapedPrimitive() {
-		return "new " + t.JName() + "()"
-	}
-	switch typ := t.Orig.(type) {
-	default:
-		panic("cannot make zero value for " + reflect.TypeOf(typ).String() + ":" + t.JName())
-	case *types.Basic:
-		return basicZeroValue(typ)
-	case *types.Named:
-		return namedZeroValue(typ)
-	case *types.Pointer, *types.Interface:
-		return "null"
-	case *types.Struct, *types.Signature:
+	if t.IsPrimitive() {
+		return basicZeroValue(t.Orig.Underlying().(*types.Basic))
+	} else {
 		return "new " + t.JName() + "()"
 	}
 }

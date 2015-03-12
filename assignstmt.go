@@ -73,11 +73,10 @@ func (w *Writer) PutAssign(lhs ast.Expr, op token.Token, rhs ast.Expr) {
 func NeedsSetMethod(lvalue ast.Expr) bool {
 	switch lvalue := lvalue.(type) {
 	default:
-		panic("unsupported lvalue: " + reflect.TypeOf(lvalue).String())
-	case *ast.Ident:
-		return JTypeOfExpr(lvalue).NeedsSetMethod()
-	case *ast.StarExpr:
 		return true
+		//panic("unsupported lvalue: " + reflect.TypeOf(lvalue).String())
+	case *ast.Ident:
+		return JTypeOfExpr(lvalue).NeedsMethods()
 	case *ast.SelectorExpr:
 		return NeedsSetMethod(lvalue.Sel)
 	}
@@ -143,8 +142,8 @@ func RValue(rhs ast.Expr) interface{} {
 		return ""
 	}
 
-	if JTypeOfExpr(rhs).IsEscapedPrimitive() {
-		return Transpile(rhs, ".value")
+	if !JTypeOfExpr(rhs).IsPrimitive() {
+		return Transpile(rhs, ".value()")
 	}
 
 	return rhs
@@ -173,7 +172,7 @@ func (w *Writer) PutJAssign(ltyp JType, lhs interface{}, rtyp JType, rhs interfa
 	switch {
 	default:
 		w.Put(lhs, " = ", rhs)
-	case ltyp.NeedsSetMethod():
+	case ltyp.NeedsMethods():
 		w.Put(lhs, ".set(", rhs, ")")
 	}
 }

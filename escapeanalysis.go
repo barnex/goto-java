@@ -32,5 +32,8 @@ func EscapeAnalysis(root ast.Node) {
 }
 
 func Escapes(id *ast.Ident) bool {
+	if id == nil {
+		return false
+	}
 	return escapes[ObjectOf(id)]
 }

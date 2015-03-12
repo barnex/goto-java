@@ -20,6 +20,18 @@ type TypeDef struct {
 	ptrMethods []*ast.FuncDecl // pointer methods
 }
 
+// fetches typedef for typeId from global typedefs
+func classOf(typeId *ast.Ident) *TypeDef {
+	cls := ObjectOf(typeId)
+	if def, ok := typedefs[cls]; ok {
+		return def
+	} else {
+		def := new(TypeDef)
+		typedefs[cls] = def
+		return def
+	}
+}
+
 // Collect all type definitions in the AST rooted at root.
 // Save them to global typedefs/structs maps
 func CollectDefs(root ast.Node) {
