@@ -21,12 +21,12 @@ const (
 // 	x -> NONE   (package private)
 // 	X -> PUBLIC (exported)
 // Modifier is also final for struct types (implemented as final java references)
-func GlobalModifierFor(ident *ast.Ident) JModifier {
+func GlobalModifierFor(ident string, typ JType) JModifier {
 	mod := NONE
-	if ident.IsExported() {
+	if ast.IsExported(ident) {
 		mod |= PUBLIC
 	}
-	if JTypeOfExpr(ident).NeedsFinal() {
+	if typ.NeedsFinal() {
 		mod |= FINAL
 	}
 	return mod

@@ -59,7 +59,7 @@ func (w *Writer) PutFunc(mod JModifier, f *ast.FuncDecl) {
 	w.PutDoc(f.Doc)
 
 	// modifier
-	w.Put(mod | GlobalModifierFor(f.Name))
+	w.Put(mod | GlobalModifierFor(f.Name.String(), JTypeOfExpr(f.Name)))
 
 	// return type
 	returnType := TypeOf(f.Name).(*types.Signature).Results() //TODO: putSignature?

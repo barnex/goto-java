@@ -3,6 +3,7 @@ package gotojava
 // Generate java classes based on type/method definitions.
 
 import (
+	"fmt"
 	"go/ast"
 	"log"
 	"reflect"
@@ -53,11 +54,23 @@ func genTuple(t *types.Tuple) {
 }
 
 func genStruct(t *types.Struct) {
-	name := javaName(t)
-	w := OpenClass(name, "")
-	w.PutEmptyConstructor(name)
-	w.PutCompositeConstructor(name)
+	class := javaName(t)
+	w := OpenClass(class, "")
 	defer w.CloseClass()
+
+	var fNames []interface{}
+	var fTypes []JType
+	for i := 0; i < t.NumFields(); i++ {
+		v := t.Field(i)
+		fNames = append(fNames, v.Name())
+		fTypes = append(fTypes, JTypeOfGoType(v.Type()))
+	}
+
+	w.PutFields(fNames, fTypes)
+	w.PutEmptyConstructor(class)
+	w.PutCompositeConstructor(class, fNames, fTypes)
+	w.PutCopyConstructor(class, fNames, fTypes)
+	w.PutSetMethod(class, fNames, fTypes)
 }
 
 // Open name.java and already write class signature.
@@ -94,27 +107,59 @@ func (w *Writer) PutEmptyConstructor(name string) {
 	w.Putln("public ", name, "(){}\n")
 }
 
-func (w *Writer) PutCompositeConstructor() {
+func (w *Writer) PutCompositeConstructor(name string, fieldNames []interface{}, fieldTypes []JType) {
 	// all fields
-	if len(c.FieldNames) > 0 {
+	if len(fieldNames) > 0 {
 		w.Putln()
-		w.Put("public ", c.Name, "(")
+		w.Put("public ", name, "(")
 
-		//w.PutParams(c.FieldNames, c.FieldTypes)
-		for i := range c.FieldNames {
-			w.Put(comma(i), c.FieldTypes[i], " ", c.FieldNames[i])
+		for i := range fieldNames {
+			w.Put(comma(i), fieldTypes[i], " ", fieldNames[i])
 		}
 
 		w.Putln("){")
 		w.indent++
-		for i, n := range c.FieldNames {
-			t := c.FieldTypes[i]
+		for i, n := range fieldNames {
+			t := fieldTypes[i]
 			w.PutJAssign(t, Transpile("this.", n), t, n)
 			w.Putln(";")
 		}
 		w.indent--
 		w.Putln("}")
 	}
+}
+
+func (w *Writer) PutCopyConstructor(name string, fieldNames []interface{}, fieldTypes []JType) {
+	w.Putln("public ", name, "(", name, " other){")
+	w.indent++
+	for i, n := range fieldNames {
+		t := fieldTypes[i]
+		w.PutJAssign(t, Transpile("this.", n), t, Transpile("other.", n))
+		w.Putln(";")
+	}
+	w.indent--
+	w.Putln("}")
+}
+
+func (w *Writer) PutSetMethod(name string, fieldNames []interface{}, fieldTypes []JType) {
+	w.Putln("public void set(", name, " other){")
+	w.indent++
+	for i, n := range fieldNames {
+		t := fieldTypes[i]
+		w.PutJAssign(t, Transpile("this.", n), t, Transpile("other.", n))
+		w.Putln(";")
+	}
+	w.indent--
+	w.Putln("}")
+}
+
+func (w *Writer) PutFields(fieldNames []interface{}, fieldTypes []JType) {
+	w.Putln()
+	for i, n := range fieldNames {
+		t := fieldTypes[i]
+		w.Putln(GlobalModifierFor(fmt.Sprint(n), t), t, " ", n, ";")
+	}
+	w.indent--
 }
 
 //func flattenFields(t fieldser) (names []string, types []JType) {
@@ -331,7 +376,7 @@ func (w *Writer) PutMethodDecl(f *ast.FuncDecl, copyRecv bool) {
 
 	// (2) Put method, calling static implementation
 	w.PutDoc(f.Doc)
-	w.Put(GlobalModifierFor(f.Name))
+	w.Put(GlobalModifierFor(f.Name.String(), JTypeOfExpr(f.Name)))
 
 	// return type
 	//_, retTypes := FlattenFields(f.Type.Results)
