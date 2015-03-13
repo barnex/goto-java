@@ -39,8 +39,43 @@ func genNamed(t *types.Named) {
 }
 
 func genPointer(t *types.Pointer) {
-	w := OpenClass(javaName(t), "")
+	class := javaName(t)
+	w := OpenClass(class, "")
 	defer w.CloseClass()
+
+	el := JTypeOfGoType(t.Elem())
+	elemT := el.JName()
+	if el.IsPrimitive() {
+		elemT = "Ref_" + elemT
+	}
+
+	w.Putf(`
+	%v value;
+
+	public %v(){}
+
+	public %v(%v value){
+		this.value = value;
+	}
+
+
+	public %v(%v other){
+		this.value = other.value;
+	}
+
+	public %v value(){
+		return this.value;
+	}
+
+	public void set(%v other){
+		this.value = other.value;
+	}
+`,
+		elemT,
+		class,
+		class, elemT,
+		class, class,
+		elemT, class)
 }
 
 func genSignature(t *types.Signature) {

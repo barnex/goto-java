@@ -23,11 +23,10 @@ func (w *Writer) putAddressOfBasic(x ast.Expr) {
 	default:
 		panic("cannot take address of " + reflect.TypeOf(x).String())
 	case *ast.Ident:
-		if IsLocal(x) {
-			w.putAddressOfLocal(x)
-		} else {
-			w.putAddressOfGlobal(x)
-		}
+		w.Putf(`new %v(){
+			public int value(){return %s;}
+			public void set(int v){%s = v;} // TODO: name collision
+		}`, id, id)
 	}
 }
 
@@ -39,21 +38,12 @@ func IsLocal(id *ast.Ident) bool {
 	return !global
 }
 
-func (w *Writer) putAddressOfLocal(id *ast.Ident) {
-	w.putAddressOfStruct(id) // id implemented as struct value
+func (w *Writer) putAddressOf(id *ast.Ident) {
 }
 
-func (w *Writer) putAddressOfGlobal(id *ast.Ident) {
-	// TODO: indent
-	w.Putf(`new go.IntPtr(){
-			public int value(){return %s;}
-			public void set(int v){%s = v;} // TODO: name collision
-		}`, id, id)
-}
-
-func (w *Writer) putAddressOfStruct(x ast.Expr) {
-	w.Put("new ", javaPointerNameForElem(TypeOf(x)), "(", x, ")")
-}
+//func (w *Writer) putAddressOfStruct(x ast.Expr) {
+//	w.Put("new ", javaPointerNameForElem(TypeOf(x)), "(", x, ")")
+//}
 
 func (w *Writer) PutStarExpr(x *ast.StarExpr) {
 	w.Put(x.X, ".value()")

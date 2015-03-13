@@ -41,7 +41,6 @@ func JTypeOfExpr(x ast.Expr) JType {
 // 	int      -> go.Int   // when it escapes
 //  MyStruct -> Struct_int_v
 func (t JType) JName() string {
-	//fmt.Println("JName", t)
 	return JType{Orig: t.Orig.Underlying(), Ident: t.Ident}.InterfaceName()
 }
 
