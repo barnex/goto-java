@@ -35,6 +35,8 @@ func (w *Writer) PutExpr(n ast.Expr) {
 		w.PutFuncLit(e)
 	case *ast.Ident:
 		w.PutIdent(e)
+	case *ast.IndexExpr:
+		w.PutIndexExpr(e)
 	case *ast.ParenExpr:
 		w.PutParenExpr(e)
 	case *ast.SelectorExpr:
@@ -52,13 +54,17 @@ func (w *Writer) PutExpr(n ast.Expr) {
 	}
 }
 
+func (w *Writer) PutIndexExpr(e *ast.IndexExpr) {
+	w.Put(e.X, "[", e.Index, "]")
+}
+
 // Emit a function literal. Godoc:
 // 	type FuncLit struct {
 // 	        Type *FuncType  // function type
 // 	        Body *BlockStmt // function body
 // 	}
 func (w *Writer) PutFuncLit(f *ast.FuncLit) {
-
+	panic("TODO")
 }
 
 func (w *Writer) PutStructType(st *ast.StructType) {
@@ -98,34 +104,58 @@ func (w *Writer) PutBasicLit(n *ast.BasicLit) {
 // 	        Elts   []Expr    // list of composite elements; or nil
 // 	        Rbrace token.Pos // position of "}"
 // 	}
-func (w *Writer) PutCompositeLit(lit *ast.CompositeLit) {
+func (w *Writer) PutCompositeLit(l *ast.CompositeLit) {
 
-	if len(lit.Elts) == 0 {
-		w.Put(ZeroValue(JTypeOfExpr(lit.Type)))
-		return
+	switch t := TypeOf(l.Type).Underlying().(type) {
+	default:
+		panic(reflect.TypeOf(t))
+	case *types.Struct:
+		w.putStructLit(l)
+	}
+}
+
+func (w *Writer) putStructLit(l *ast.CompositeLit) {
+
+	t := TypeOf(l.Type).Underlying().(*types.Struct)
+
+	haveKeyValue := false
+	if len(l.Elts) > 0 {
+		_, haveKeyValue = l.Elts[0].(*ast.KeyValueExpr)
 	}
 
-	w.Put("new ", JTypeOfExpr(lit.Type))
+	class := javaName(t)
+	if haveKeyValue {
+		w.Put("new ", class, "(")
 
-	if _, ok := lit.Elts[0].(*ast.KeyValueExpr); ok {
-		w.Put("(")
-		tdef := classOf(lit.Type.(*ast.Ident)) // TODO: map java names to tdef?
-		names, types := FlattenFields(tdef.typeSpec.Type.(*ast.StructType).Fields)
+		names, types := flattenStructFields(t)
 		values := make(map[string]interface{})
 		for i, n := range names {
-			values[n.Name] = ZeroValue(types[i])
+			values[n] = ZeroValue(types[i])
 		}
-		for _, e := range lit.Elts {
+		for _, e := range l.Elts {
 			e := e.(*ast.KeyValueExpr)
 			values[e.Key.(*ast.Ident).Name] = e.Value
 		}
 		for i, n := range names {
-			w.Put(comma(i), values[n.Name])
+			w.Put(comma(i), values[n])
 		}
 		w.Put(")")
+
 	} else {
-		w.PutArgs(lit.Elts, 0)
+		w.Put("new ", class)
+		w.PutArgs(l.Elts, 0)
 	}
+
+}
+
+func flattenStructFields(t *types.Struct) (names []string, types []JType) {
+	names = make([]string, 0, t.NumFields())
+	types = make([]JType, 0, t.NumFields())
+	for i := 0; i < t.NumFields(); i++ {
+		names = append(names, t.Field(i).Name())                // TODO: rename
+		types = append(types, JTypeOfGoType(t.Field(i).Type())) // TODO: rename
+	}
+	return names, types
 }
 
 // Emit a unary expression, execpt unary "*".

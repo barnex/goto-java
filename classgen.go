@@ -17,14 +17,20 @@ func GenClasses() {
 		switch t := t.(type) {
 		default:
 			panic(reflect.TypeOf(t).String())
+		case *types.Array:
+			genArray(t)
 		case *types.Basic:
 			// nothing to do, handwritten.
 		case *types.Pointer:
 			genPointer(t)
+		case *types.Map:
+			genMap(t)
 		case *types.Named:
 			genNamed(t)
 		case *types.Signature:
 			genSignature(t)
+		case *types.Slice:
+			genSlice(t)
 		case *types.Struct:
 			genStruct(t)
 		case *types.Tuple:
@@ -33,9 +39,38 @@ func GenClasses() {
 	}
 }
 
+func genMap(t *types.Map) {
+	class := javaName(t)
+	w := OpenClass(class, "")
+	defer w.CloseClass()
+
+	K := javaName(t.Key())
+	V := javaName(t.Elem())
+	elemT := "java.util.Hashtable<" + K + "," + V + ">"
+	w.putWrapper(class, elemT)
+}
+
+func genSlice(t *types.Slice) {
+	class := javaName(t)
+	w := OpenClass(class, "")
+	defer w.CloseClass()
+
+	elemT := javaName(t.Elem()) + "[]"
+	w.putWrapper(class, elemT)
+}
+
 func genNamed(t *types.Named) {
 	w := OpenClass(javaName(t), "")
 	defer w.CloseClass()
+}
+
+func genArray(t *types.Array) {
+	class := javaName(t)
+	w := OpenClass(class, "")
+	defer w.CloseClass()
+
+	elemT := javaName(t.Elem()) + "[]"
+	w.putWrapper(class, elemT)
 }
 
 func genPointer(t *types.Pointer) {
@@ -46,8 +81,13 @@ func genPointer(t *types.Pointer) {
 	el := JTypeOfGoType(t.Elem())
 	elemT := el.JName()
 	if el.IsPrimitive() {
-		elemT = "Ref_" + elemT
+		elemT = "LValue_" + elemT
 	}
+
+	w.putWrapper(class, elemT)
+}
+
+func (w *Writer) putWrapper(class, elemT string) {
 
 	w.Putf(`
 	%v value;
@@ -196,16 +236,6 @@ func (w *Writer) PutFields(fieldNames []interface{}, fieldTypes []JType) {
 	}
 	w.indent--
 }
-
-//func flattenFields(t fieldser) (names []string, types []JType) {
-//	names = make([]string, 0, t.NumFields())
-//	types = make([]JType, 0, t.NumFields())
-//	for i := 0; i < t.NumFields(); i++ {
-//		names = append(names, t.Field(i).Name())                // TODO: rename
-//		types = append(types, JTypeOfGoType(t.Field(i).Type())) // TODO: rename
-//	}
-//	return names, types
-//}
 
 //// Generate java class for Go named struct type (value semantics).
 //func GenStructValueClass(d *TypeDef) {

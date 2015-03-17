@@ -66,16 +66,22 @@ func javaName(orig types.Type) string {
 	switch orig := orig.(type) {
 	default:
 		panic("cannot handle type " + reflect.TypeOf(orig).String() + ":" + orig.String())
+	case *types.Array:
+		return javaArrayName(orig)
 	case *types.Basic:
 		return javaBasicName(orig)
 	case *types.Struct:
 		return javaStructName(orig)
+	case *types.Map:
+		return javaMapName(orig)
 	case *types.Named:
 		return javaNamedName(orig)
 	case *types.Pointer:
 		return javaPointerName(orig)
 	case *types.Interface:
 		return javaInterfaceName(orig)
+	case *types.Slice:
+		return javaSliceName(orig)
 	case *types.Signature:
 		return javaSignatureName(orig)
 	case *types.Tuple:
@@ -84,11 +90,26 @@ func javaName(orig types.Type) string {
 }
 
 const (
-	STRUCT_PREFIX    = "Struct"
-	POINTER_PREFIX   = "Ptr"
-	INTERFACE_PREFIX = "Interface"
+	ARRAY_PREFIX     = "Array"
 	FUNC_PREFIX      = "Func"
+	INTERFACE_PREFIX = "Interface"
+	MAP_PREFIX       = "Map"
+	POINTER_PREFIX   = "Ptr"
+	SLICE_PREFIX     = "Slice"
+	STRUCT_PREFIX    = "Struct"
 )
+
+func javaMapName(t *types.Map) string {
+	return MAP_PREFIX + "_" + javaName(t.Key()) + "_" + javaName(t.Elem())
+}
+
+func javaSliceName(t *types.Slice) string {
+	return fmt.Sprint(SLICE_PREFIX, "_", javaName(t.Elem()))
+}
+
+func javaArrayName(t *types.Array) string {
+	return fmt.Sprint(ARRAY_PREFIX, "_", t.Len(), "_", javaName(t.Elem()))
+}
 
 func javaTupleName(t *types.Tuple) string {
 	if t == nil {

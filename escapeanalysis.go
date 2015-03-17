@@ -21,7 +21,7 @@ func EscapeAnalysis(root ast.Node) {
 		case *ast.UnaryExpr:
 			// check address of local identifier
 			if id, ok := n.X.(*ast.Ident); ok && n.Op == token.AND {
-				if IsLocal(id) {
+				if isLocal(id) {
 					Log(id, id.Name, "escapes to java heap")
 					escapes[ObjectOf(id)] = true
 				}
@@ -36,4 +36,12 @@ func Escapes(id *ast.Ident) bool {
 		return false
 	}
 	return escapes[ObjectOf(id)]
+}
+
+// Checks whether the identifier is locally defined.
+// E.g., for escape analysis: address of local variable etc.
+func isLocal(id *ast.Ident) bool {
+	scope := ObjectOf(id).Parent()
+	global := scope.Parent() == types.Universe
+	return !global
 }
