@@ -70,17 +70,26 @@ func (w *Writer) PutNew(typ interface{}, args ...interface{}) {
 
 // Emit code for built-in print, prinln calls.
 func (w *Writer) putPrintCall(c *ast.CallExpr) {
+	assert(c.Ellipsis == 0) // ... not allowed in print/println call
 	name := StripParens(c.Fun).(*ast.Ident).Name
+
 	switch name {
 	default:
-		Error(c, "bug: not a print/println call:", name)
+		panic("not a print/println call:" + name)
 	case "print":
 		name = "System.out.print"
 	case "println":
 		name = "System.out.println"
 	}
-	w.Put(name)
-	w.PutArgs(c.Args, c.Ellipsis)
+
+	for i, a := range c.Args {
+		if i == len(c.Args)-1 {
+			w.Put(name, "(", a, ")")
+		} else {
+			w.Putln("System.out.print(", a, ");")
+			w.Putln("System.out.print(\" \");")
+		}
+	}
 }
 
 // Generate code for len(x)
