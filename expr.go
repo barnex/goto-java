@@ -111,7 +111,22 @@ func (w *Writer) PutCompositeLit(l *ast.CompositeLit) {
 		panic(reflect.TypeOf(t))
 	case *types.Struct:
 		w.putStructLit(l)
+	case *types.Map:
+		w.putMapLit(l)
 	}
+}
+
+func (w *Writer) putMapLit(l *ast.CompositeLit) {
+	t := TypeOf(l.Type).Underlying().(*types.Map)
+	class := javaName(t)
+
+	w.Put("new ", class, "()")
+
+	for _, e := range l.Elts {
+		e := e.(*ast.KeyValueExpr)
+		w.Put(".add(", e.Key, ", ", e.Value, ")")
+	}
+
 }
 
 func (w *Writer) putStructLit(l *ast.CompositeLit) {
