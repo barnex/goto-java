@@ -3,7 +3,6 @@ package gotojava
 import (
 	"go/ast"
 	"go/token"
-	"reflect"
 )
 
 // Emit an assignment or a short variable declaration. Godoc:
@@ -136,33 +135,6 @@ var opToMeth = map[token.Token]string{
 //func (w *Writer) PutAutoCast(rhs ast.Expr, lhs JType, inmethod bool) {
 //	w.PutExpr(rhs)
 //}
-
-func RValue(rhs ast.Expr) interface{} {
-	if rhs == nil {
-		return ""
-	}
-
-	if JTypeOfExpr(rhs).IsEscaped() {
-		return Transpile(rhs, ".value()")
-	}
-	return rhs
-
-	// TODO: cast
-}
-
-func LValue(lhs ast.Expr) interface{} {
-	lhs = StripParens(lhs)
-	switch lhs := lhs.(type) {
-	default:
-		panic("cannot make LValue: " + reflect.TypeOf(lhs).String())
-	case *ast.Ident:
-		return lhs
-	case *ast.StarExpr:
-		return lhs.X
-	case *ast.SelectorExpr:
-		return Transpile(lhs.X, ".", lhs.Sel)
-	}
-}
 
 // Emit code for Go's "lhs = rhs", with given java types for both sides.
 // May emit, e.g.:
