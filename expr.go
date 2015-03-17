@@ -128,14 +128,26 @@ func (w *Writer) PutCompositeLit(l *ast.CompositeLit) {
 }
 
 func (w *Writer) putSliceLit(l *ast.CompositeLit) {
-	t := TypeOf(l.Type).Underlying().(*types.Array)
-	//w.Put("new ", 
-	...
+	t := TypeOf(l.Type).Underlying().(*types.Slice)
+	class := javaName(t)
+	el := javaName(t.Elem())
+	w.putArrayOrSliceLit(class, el, l)
 }
 
-func (w *Writer) putSliceLit(l *ast.CompositeLit) {
-	t := TypeOf(l.Type).Underlying().(*types.Slice)
-	...
+func (w *Writer) putArrayLit(l *ast.CompositeLit) {
+	t := TypeOf(l.Type).Underlying().(*types.Array)
+	class := javaName(t)
+	el := javaName(t.Elem())
+	w.putArrayOrSliceLit(class, el, l)
+}
+
+func (w *Writer) putArrayOrSliceLit(class, el string, l *ast.CompositeLit) {
+	w.Put("new ", class, "(new ", el, "[]{")
+	for i, e := range l.Elts {
+		w.Put(comma(i))
+		w.Put(e)
+	}
+	w.Put("})")
 }
 
 func (w *Writer) putMapLit(l *ast.CompositeLit) {
