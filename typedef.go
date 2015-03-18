@@ -40,6 +40,7 @@ func CollectTypes(root ast.Node) {
 		if n, ok := n.(ast.Expr); ok {
 			t := info.TypeOf(n)
 			if t != nil {
+				// TODO: filter (), untyped nil, ...
 				if alltypes[t.String()] == nil {
 					Log(n, "discovered:", t.String())
 				}

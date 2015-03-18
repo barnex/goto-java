@@ -44,10 +44,18 @@ func genMap(t *types.Map) {
 	w := OpenClass(class, "")
 	defer w.CloseClass()
 
-	K := javaName(t.Key())
-	V := javaName(t.Elem())
-	elemT := "java.util.Hashtable<" + K + "," + V + ">"
+	K := t.Key()
+	V := t.Elem()
+	elemT := "java.util.Hashtable<" + javaWrapperName(K) + "," + javaWrapperName(V) + ">"
 	w.putWrapper(class, elemT)
+
+	// TODO: Transpile interface assign. turns int->Int
+	w.Putf(`
+		public %v add(%v k, %v v){
+			value.put(k, v);
+			return this;
+		}
+		`, class, javaName(K), javaName(V))
 }
 
 func genSlice(t *types.Slice) {

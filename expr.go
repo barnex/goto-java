@@ -55,7 +55,14 @@ func (w *Writer) PutExpr(n ast.Expr) {
 }
 
 func (w *Writer) PutIndexExpr(e *ast.IndexExpr) {
-	w.Put(e.X, "[", e.Index, "]")
+	switch t := TypeOf(e.X).(type) {
+	default:
+		panic(reflect.TypeOf(t))
+	case *types.Array, *types.Slice:
+		w.Put(e.X, ".value[", e.Index, "]")
+	case *types.Map:
+		w.Put(e.X, ".get(", e.Index, ")")
+	}
 }
 
 // Emit a function literal. Godoc:
@@ -109,11 +116,26 @@ func (w *Writer) PutCompositeLit(l *ast.CompositeLit) {
 	switch t := TypeOf(l.Type).Underlying().(type) {
 	default:
 		panic(reflect.TypeOf(t))
-	case *types.Struct:
-		w.putStructLit(l)
+	case *types.Array:
+		w.putArrayLit(l)
 	case *types.Map:
 		w.putMapLit(l)
+	case *types.Slice:
+		w.putSliceLit(l)
+	case *types.Struct:
+		w.putStructLit(l)
 	}
+}
+
+func (w *Writer) putSliceLit(l *ast.CompositeLit) {
+	t := TypeOf(l.Type).Underlying().(*types.Array)
+	//w.Put("new ", 
+	...
+}
+
+func (w *Writer) putSliceLit(l *ast.CompositeLit) {
+	t := TypeOf(l.Type).Underlying().(*types.Slice)
+	...
 }
 
 func (w *Writer) putMapLit(l *ast.CompositeLit) {

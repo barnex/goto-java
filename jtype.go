@@ -197,6 +197,14 @@ func EscapedBasicName(t *types.Basic) string {
 	return Export(javaBasicName(t))
 }
 
+func javaWrapperName(t types.Type) string {
+	if t, ok := t.(*types.Basic); ok {
+		return EscapedBasicName(t)
+	} else {
+		return javaName(t)
+	}
+}
+
 // Java return type for a function that returns given types.
 // For multiple return types, a Tuple type is returned
 //func JavaReturnTypeOf(resultTypes []JType) JType {
@@ -292,7 +300,7 @@ func (t JType) NeedsMethods() bool {
 // JavaTupleType returns the java type used to wrap a tuple of go types for multiple return values. E.g.:
 // 	return 1, 2 -> return new Tuple_int_int(1, 2)
 // Calling this function also ensure code for the tuple has been generated.
-// TODO: JType
+// TODO: remove, use JType on types.Tuple
 func JavaTupleType(types []JType) string {
 	name := "Tuple"
 	for _, t := range types {
