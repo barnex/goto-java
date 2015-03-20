@@ -29,20 +29,24 @@ func (w *Writer) PutIdent(id *ast.Ident) {
 		return
 	}
 
-	switch id := ObjectOf(id).(type) {
+	switch obj := ObjectOf(id).(type) {
 	default:
-		panic("cannot handle " + reflect.TypeOf(id).String())
+		panic("cannot handle " + reflect.TypeOf(obj).String())
 	case *types.TypeName:
-		w.Put(javaName(id.Type()))
+		w.Put(javaName(obj.Type()))
 	case *types.Const:
-		w.Put(id.Name())
+		w.Put(obj.Name())
 	case *types.Func:
-		w.Put(id.Name())
+		w.Put(obj.Name())
 	case *types.Nil:
-		w.Put("null")
+		w.PutNil(id)
 	case *types.Var:
-		w.Put(id.Name())
+		w.Put(obj.Name())
 	}
+}
+
+func (w *Writer) PutNil(id *ast.Ident) {
+	w.Put("null")
 }
 
 // Is e the blank identifier?

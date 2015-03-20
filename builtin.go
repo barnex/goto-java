@@ -55,7 +55,12 @@ func (w *Writer) PutBuiltinCall(c *ast.CallExpr) {
 func (w *Writer) putNewCall(c *ast.CallExpr) {
 	assert(len(c.Args) == 1)
 	arg := c.Args[0]
-	w.PutNew(javaPointerNameForElem(TypeOf(arg)), NewAddress())
+
+	ptrType := javaPointerNameForElem(TypeOf(arg))
+	elemType := JTypeOfExpr(arg).WrapperName()
+	addr := NewAddress()
+	w.Put("new ", ptrType, "(new ", elemType, "(", addr, ")", ")")
+
 }
 
 func (w *Writer) PutNew(typ interface{}, args ...interface{}) {
@@ -136,5 +141,4 @@ var builtin2java = map[string]string{
 
 	"true":  "true",
 	"false": "false",
-	"nil":   "null",
 }

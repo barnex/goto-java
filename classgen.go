@@ -92,11 +92,13 @@ func genPointer(t *types.Pointer) {
 		elemT = "LValue_" + elemT
 	}
 
-	w.putWrapper(class, elemT)
-
 	w.Putf(`
 
 	%v value;
+
+	public %v(){
+		this.value = null;
+	}
 
 	public %v(%v value){
 		this.value = value;
@@ -127,6 +129,9 @@ func genPointer(t *types.Pointer) {
 	}
 
 	public boolean equals(Object o){
+		if (o == null){
+			return this.value == null;
+		}
 		if (o instanceof %v){
 			return addr() == ((%v)o).addr();
 		}else{
@@ -138,7 +143,8 @@ func genPointer(t *types.Pointer) {
 		class,
 		class, elemT,
 		class, class,
-		elemT, class,
+		elemT,
+		class,
 		class, class)
 }
 

@@ -61,6 +61,18 @@ func (t JType) InterfaceName() string {
 	return javaName(t.Orig)
 }
 
+// Returns the Java type used to wrap t.
+// Used for wrappers like pointer or interfaces. E.g.:
+// 	int      -> Int
+//  struct{} -> Struct
+func (t JType) WrapperName() string {
+	if basic, ok := t.Orig.(*types.Basic); ok {
+		return EscapedBasicName(basic)
+	} else {
+		return javaName(t.Orig)
+	}
+}
+
 func javaName(orig types.Type) string {
 
 	switch orig := orig.(type) {

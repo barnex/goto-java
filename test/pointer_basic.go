@@ -25,7 +25,9 @@ func testDeclare() {
 	l4 := new(int)
 	l5 := &i
 
-	println(l1 == nil, l2 == nil, *l3, *l4, *l5)
+	println(l1 == nil, l2 == nil)
+	println(nil == l1, nil == l2)
+	println(*l3, *l4, *l5)
 }
 
 func testAssign() {
