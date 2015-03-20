@@ -219,10 +219,10 @@ func javaWrapperName(t types.Type) string {
 //	}
 //}
 
-//func IsPrimitive(t types.Type) bool {
-//	_, basic := t.Underlying().(*types.Basic)
-//	return basic
-//}
+func (t JType) IsBasic() bool {
+	_, basic := t.Orig.Underlying().(*types.Basic)
+	return basic
+}
 
 // Returns whether t represents a Go identifier that was moved to the heap. E.g.:
 //  i := 0  // -> true
@@ -244,7 +244,11 @@ func (t JType) NeedsFinal() bool {
 	return !t.IsPrimitive()
 }
 
-func (t JType) NeedsMethods() bool {
+func (t JType) NeedsEqualsMethod() bool {
+	return !t.IsBasic()
+}
+
+func (t JType) NeedsSetMethod() bool {
 	return t.NeedsFinal()
 }
 

@@ -75,7 +75,7 @@ func NeedsSetMethod(lvalue ast.Expr) bool {
 		return true
 		//panic("unsupported lvalue: " + reflect.TypeOf(lvalue).String())
 	case *ast.Ident:
-		return JTypeOfExpr(lvalue).NeedsMethods()
+		return JTypeOfExpr(lvalue).NeedsFinal()
 	case *ast.SelectorExpr:
 		return NeedsSetMethod(lvalue.Sel)
 	}
@@ -144,7 +144,7 @@ func (w *Writer) PutJAssign(ltyp JType, lhs interface{}, rtyp JType, rhs interfa
 	switch {
 	default:
 		w.Put(lhs, " = ", rhs)
-	case ltyp.NeedsMethods():
+	case ltyp.NeedsSetMethod():
 		w.Put(lhs, ".set(", rhs, ")")
 	}
 }

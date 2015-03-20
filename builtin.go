@@ -48,7 +48,6 @@ func (w *Writer) PutBuiltinCall(c *ast.CallExpr) {
 		w.putNewCall(c)
 	case "print", "println":
 		w.putPrintCall(c)
-		// IsType(c): cast
 	}
 }
 
@@ -83,6 +82,7 @@ func (w *Writer) putPrintCall(c *ast.CallExpr) {
 	}
 
 	for i, a := range c.Args {
+		a := RValue(a)
 		if i == len(c.Args)-1 {
 			w.Put(name, "(", a, ")")
 		} else {

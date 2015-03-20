@@ -52,7 +52,7 @@ func (w *Writer) PutJEquals(ltyp JType, lhs interface{}, rtyp JType, rhs interfa
 	switch {
 	default:
 		w.Put(lhs, " == ", rhs) // TODO: panic
-	case ltyp.NeedsMethods():
+	case ltyp.NeedsEqualsMethod():
 		w.Put(lhs, ".equals(", rhs, ")")
 	}
 }
