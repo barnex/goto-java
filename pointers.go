@@ -44,19 +44,24 @@ func (w *Writer) PutAddressOfGlobalBasic(x *ast.Ident) {
 }
 
 var (
-	fakeAddr            = map[types.Object]int{}
-	fakeAddrCounter int = 1
+	fakeAddr        = map[types.Object]string{}
+	fakeAddrCounter int
 )
 
 func FakeAddressFor(x *ast.Ident) string {
 	obj := ObjectOf(x)
 	if addr, ok := fakeAddr[obj]; ok {
-		return fmt.Sprint(addr)
+		return addr
 	} else {
-		fakeAddr[obj] = fakeAddrCounter
-		fakeAddrCounter++
-		return fmt.Sprint(fakeAddr[obj])
+		fakeAddr[obj] = NewAddress()
+		Log(x, "fake address for ", types.ExprString(x), ": ", fakeAddr[obj])
+		return fakeAddr[obj]
 	}
+}
+
+func NewAddress() string {
+	fakeAddrCounter++
+	return fmt.Sprintf("0x%x", fakeAddrCounter)
 }
 
 //func (w *Writer) putAddressOf(id *ast.Ident) {

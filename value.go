@@ -3,6 +3,7 @@ package gotojava
 // Generate zero values (initial values) for each type.
 
 import (
+	"fmt"
 	"reflect"
 
 	"go/ast"
@@ -14,7 +15,14 @@ func InitValue(rhs ast.Expr, typ JType) interface{} {
 	if typ.IsPrimitive() {
 		return RValue(rhs)
 	} else {
-		return "new " + typ.JName() + "(" + Transpile(RValue(rhs)) + ")"
+		v := "new " + typ.JName() + "("
+
+		if typ.NeedsAddress() {
+			v += fmt.Sprint(FakeAddressFor(typ.Ident), ", ")
+		}
+
+		v += Transpile(RValue(rhs)) + ")"
+		return v
 	}
 }
 
@@ -25,7 +33,12 @@ func ZeroValue(t JType) interface{} {
 	if t.IsPrimitive() {
 		return basicZeroValue(t.Orig.Underlying().(*types.Basic))
 	} else {
-		return "new " + t.JName() + "()"
+		v := "new " + t.JName() + "("
+		if t.NeedsAddress() {
+			v += fmt.Sprint(FakeAddressFor(t.Ident))
+		}
+		v += ")"
+		return v
 	}
 }
 

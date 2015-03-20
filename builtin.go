@@ -55,7 +55,7 @@ func (w *Writer) PutBuiltinCall(c *ast.CallExpr) {
 func (w *Writer) putNewCall(c *ast.CallExpr) {
 	assert(len(c.Args) == 1)
 	arg := c.Args[0]
-	w.PutNew(javaPointerNameForElem(TypeOf(arg)))
+	w.PutNew(javaPointerNameForElem(TypeOf(arg)), NewAddress())
 }
 
 func (w *Writer) PutNew(typ interface{}, args ...interface{}) {

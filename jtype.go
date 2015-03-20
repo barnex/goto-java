@@ -252,6 +252,10 @@ func (t JType) NeedsSetMethod() bool {
 	return t.NeedsFinal()
 }
 
+func (t JType) NeedsAddress() bool {
+	return t.IsEscaped() && t.IsBasic()
+}
+
 //func (t JType) IsNamedPrimitive() bool {
 //	return IsPrimitive(t.Orig) && t.IsNamed()
 //}

@@ -93,6 +93,53 @@ func genPointer(t *types.Pointer) {
 	}
 
 	w.putWrapper(class, elemT)
+
+	w.Putf(`
+
+	%v value;
+
+	public %v(%v value){
+		this.value = value;
+	}
+
+	public %v(%v other){
+		this.value = other.value;
+	}
+
+	public %v value(){
+		return this.value;
+	}
+
+	public void set(%v other){
+		if (other == null){
+			this.value = null;
+		} else {
+			this.value = other.value;
+		}
+	}
+
+	public int addr(){
+		if (this.value == null){
+			return 0;
+		}else{
+			return this.value.addr();
+		}
+	}
+
+	public boolean equals(Object o){
+		if (o instanceof %v){
+			return addr() == ((%v)o).addr();
+		}else{
+			return false;
+		}
+	}
+	`,
+		elemT,
+		class,
+		class, elemT,
+		class, class,
+		elemT, class,
+		class, class)
 }
 
 func (w *Writer) putWrapper(class, elemT string) {
@@ -106,7 +153,6 @@ func (w *Writer) putWrapper(class, elemT string) {
 		this.value = value;
 	}
 
-
 	public %v(%v other){
 		this.value = other.value;
 	}
@@ -116,7 +162,11 @@ func (w *Writer) putWrapper(class, elemT string) {
 	}
 
 	public void set(%v other){
-		this.value = other.value;
+		if (other == null){
+			this.value = null;
+		} else {
+			this.value = other.value;
+		}
 	}
 `,
 		elemT,
