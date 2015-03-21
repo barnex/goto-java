@@ -21,7 +21,7 @@ func (w *Writer) PutAssignStmt(n *ast.AssignStmt) {
 		w.putMultiAssign(n)
 	default:
 		assert(len(lhs) == 1 && len(rhs) == 1)
-		w.PutAssign(lhs[0], n.Tok, rhs[0])
+		w.putAssignOp(lhs[0], n.Tok, rhs[0])
 	}
 }
 
