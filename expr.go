@@ -99,7 +99,7 @@ func (w *Writer) PutBasicLit(n *ast.BasicLit) {
 		w.Put(n.Value)
 	case info&types.IsString != 0:
 		str, err := strconv.Unquote(n.Value)
-		checkUserErr(err)
+		Check(err)
 		w.Put(fmt.Sprintf("%q", str)) // TODO: flag for "%q"?
 	}
 }

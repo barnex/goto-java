@@ -65,9 +65,3 @@ func (w *Writer) PutSemi(i int) {
 		w.Putln(";")
 	}
 }
-
-func assert(test bool) {
-	if !test {
-		panic("assertion failed")
-	}
-}

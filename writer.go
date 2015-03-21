@@ -39,7 +39,7 @@ type Writer struct {
 
 func NewWriterFile(fname string) *Writer {
 	f, err := os.Create(fname)
-	checkUserErr(err)
+	Check(err)
 	//out := bufio.NewWriter(f)
 	return &Writer{out: f}
 }
@@ -51,7 +51,7 @@ func NewWriter(out io.Writer) *Writer {
 func (w *Writer) Close() {
 	if closer, ok := w.out.(io.Closer); ok {
 		err := closer.Close()
-		checkUserErr(err)
+		Check(err)
 	}
 }
 
