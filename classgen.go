@@ -12,35 +12,35 @@ import (
 )
 
 // Outputs a class with given name based on go file.
-func (w *Writer) PutClass(className string, f *ast.File) {
-
-	// TODO: pkg
-	//	if !*flagNoPkg {
-	//		pkg := f.Name.Name
-	//		w.Putln("package ", pkg, ";")
-	//		w.Putln()
-	//	}
-
-	w.Putln("import go.*;")
-	w.Putln()
-
-	w.Putln("public final class ", className, " {")
-	w.Putln()
-	w.indent++
-
-	for _, d := range f.Decls {
-		w.PutDecl(STATIC, d)
-
-		switch d.(type) {
-		default: // no semi
-		case *ast.GenDecl:
-			w.Putln(";")
-		}
-	}
-
-	w.indent--
-	w.Putln("}")
-}
+//func (w *Writer) PutClass(className string, f *ast.File) {
+//
+//	// TODO: pkg
+//	//	if !*flagNoPkg {
+//	//		pkg := f.Name.Name
+//	//		w.Putln("package ", pkg, ";")
+//	//		w.Putln()
+//	//	}
+//
+//	w.Putln("import go.*;")
+//	w.Putln()
+//
+//	w.Putln("public final class ", className, " {")
+//	w.Putln()
+//	w.indent++
+//
+//	for _, d := range f.Decls {
+//		w.PutDecl(STATIC, d)
+//
+//		switch d.(type) {
+//		default: // no semi
+//		case *ast.GenDecl:
+//			w.Putln(";")
+//		}
+//	}
+//
+//	w.indent--
+//	w.Putln("}")
+//}
 
 // generate code for all defs in global typedefs variable
 func GenClasses() {

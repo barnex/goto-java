@@ -9,10 +9,8 @@ import (
 
 // Walk the ast rooted at n and populate the global parents map,
 // mapping each node to its parent.
-func CollectParents(n Node) map[Node]Node {
-	parents := make(map[Node]Node)
-	walk(&parentCollector{parents: parents}, n)
-	return parents
+func CollectParents(n Node) {
+	walk(&parentCollector{parents: parent}, n)
 }
 
 // Visitor that collects parents

@@ -6,7 +6,6 @@ import (
 	"go/parser"
 	"go/token"
 	"log"
-	"path"
 
 	"golang.org/x/tools/go/types"
 )
@@ -24,61 +23,9 @@ var (
 )
 
 var (
-	fset   *token.FileSet          // accessed through PosOf
-	info   types.Info              // accessed through TypeOf, ObjectOf, ExactValue
-	parent map[ast.Node]ast.Node   // accessed through ParentOf
-	idents map[string]int          // holds all identifier names and a counter to create a new, non-conflicting name if needed.
-	rename map[types.Object]string // maps some objects (typ. identifiers) to a new name for java. TODO: strings->strings
-)
-
-func Main() {
-	log.SetFlags(0)
-	flag.Parse()
-	UNUSED = *flagBlank
-
-	for _, f := range flag.Args() {
-		HandleFile(f)
-	}
-}
-
-func HandleFile(fname string) {
-	// (1) Parse
-	var f *ast.File
-	fset, f = parseFile(fname)
-	if *flagPrint {
-		ast.Print(fset, f)
-	}
-
-	// (2) Determine types
-	info = typeCheck(fname, fset, f)
-
-	// (3) Pre-processing: collect parents and declarations
-	parent = CollectParents(f)
-	idents = CollectIdents(f)
-	rename = RenameReservedIdents(f)
-	CollectTypes(f)
-	EscapeAnalysis(f)
-
-	// transpile primary class
-	className := fname[:len(fname)-len(path.Ext(fname))]
-	w := NewWriterFile(className + ".java")
-	defer w.Close()
-	w.PutClass(className, f)
-
-	// generate additional classes from type/method definitions encountered along the way
-	GenClasses()
-}
-
-func parseFile(fname string) (*token.FileSet, *ast.File) {
-	fset := token.NewFileSet()
-	f, err := parser.ParseFile(fset, fname, nil, parser.ParseComments)
-	Check(err)
-	return fset, f
-}
-
-func typeCheck(fname string, fset *token.FileSet, f *ast.File) types.Info {
-	var config types.Config
-	info := types.Info{
+	fset  = token.NewFileSet() // accessed through PosOf
+	files []*ast.File
+	info  = types.Info{ // accessed through TypeOf, ObjectOf, ExactValue
 		Types:      make(map[ast.Expr]types.TypeAndValue),
 		Defs:       make(map[*ast.Ident]types.Object),
 		Uses:       make(map[*ast.Ident]types.Object),
@@ -86,9 +33,55 @@ func typeCheck(fname string, fset *token.FileSet, f *ast.File) types.Info {
 		Selections: make(map[*ast.SelectorExpr]*types.Selection),
 		Scopes:     make(map[ast.Node]*types.Scope),
 	}
+	parent = map[ast.Node]ast.Node{}   // accessed through ParentOf
+	idents = map[string]int{}          // holds all identifier names and a counter to create a new, non-conflicting name if needed.
+	rename = map[types.Object]string{} // maps some objects (typ. identifiers) to a new name for java. TODO: strings->strings
+)
+
+var (
+	jFiles JFileSet
+)
+
+func Main() {
+	log.SetFlags(0)
+	flag.Parse()
+	UNUSED = *flagBlank
+
+	fnames := flag.Args()
+	for _, f := range fnames {
+		ParseFile(f)
+	}
+
+	if *flagPrint {
+		for _, f := range files {
+			ast.Print(fset, f)
+		}
+	}
+
+	for i, f := range files {
+		TypeCheck(fnames[i], f)
+		CollectParents(f)
+		CollectIdents(f)
+		RenameReservedIdents(f)
+		CollectTypes(f)
+		EscapeAnalysis(f)
+	}
+
+	//jFiles.Compile()
+}
+
+// Parse file, add position info to global fset, add AST to global files.
+func ParseFile(fname string) {
+	f, err := parser.ParseFile(fset, fname, nil, parser.ParseComments)
+	Check(err)
+	files = append(files, f)
+}
+
+// Typecheck file and add type information to global info variable.
+func TypeCheck(fname string, f *ast.File) {
+	var config types.Config
 	_, err := config.Check(fname, fset, []*ast.File{f}, &info)
 	if !*flagNoTypeCheck {
 		Check(err)
 	}
-	return info
 }

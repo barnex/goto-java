@@ -12,6 +12,22 @@ import (
 	"golang.org/x/tools/go/types"
 )
 
+// Collect the names of all identifiers in the AST and maps them to a counter set to 0.
+// Later this counter can be incremented to create an new, unused, identifier name.
+// In principle new names only need to be unique in their scope,
+// but we make them globally unique to avoid potential scope subtleties.
+func CollectIdents(n ast.Node) map[string]int {
+	idents := make(map[string]int) // init here ensures CollectIdents has been called
+	ast.Inspect(n, func(n ast.Node) bool {
+		if id, ok := n.(*ast.Ident); ok {
+			idents[id.Name] = 0
+		}
+		return true
+	})
+	idents[UNUSED] = idents[UNUSED] // make sure it's in the map for makeNewName(UNUSED) to work.
+	return idents
+}
+
 // Emit an identifier, honoring the global rename map. Godoc:
 // 	type Ident struct {
 // 	        NamePos token.Pos // identifier position
@@ -57,22 +73,6 @@ func IsBlank(e ast.Expr) bool {
 		return id == nil || id.Name == "_"
 	}
 	return false
-}
-
-// Collect the names of all identifiers in the AST and maps them to a counter set to 0.
-// Later this counter can be incremented to create an new, unused, identifier name.
-// In principle new names only need to be unique in their scope,
-// but we make them globally unique to avoid potential scope subtleties.
-func CollectIdents(n ast.Node) map[string]int {
-	idents := make(map[string]int) // init here ensures CollectIdents has been called
-	ast.Inspect(n, func(n ast.Node) bool {
-		if id, ok := n.(*ast.Ident); ok {
-			idents[id.Name] = 0
-		}
-		return true
-	})
-	idents[UNUSED] = idents[UNUSED] // make sure it's in the map for makeNewName(UNUSED) to work.
-	return idents
 }
 
 func RenameReservedIdents(n ast.Node) map[types.Object]string {

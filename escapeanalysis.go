@@ -7,11 +7,10 @@ import (
 	"golang.org/x/tools/go/types"
 )
 
-// Rudimentary escape analysis detects:
-// 	address of local variable
-
 var escapes = make(map[types.Object]bool)
 
+// Rudimentary escape analysis detects:
+// 	address of local variable
 func EscapeAnalysis(root ast.Node) {
 	ast.Inspect(root, func(n ast.Node) bool {
 
