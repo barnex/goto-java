@@ -4,47 +4,9 @@ package gotojava
 
 import (
 	"go/ast"
-	"go/token"
-	"reflect"
 
 	"golang.org/x/tools/go/types"
 )
-
-// Emit a declaration with optional modifier (like static)
-func (w *Writer) PutDecl(mod JModifier, d ast.Decl) {
-	switch d := d.(type) {
-	default:
-		panic("unhandled memeber type: " + reflect.TypeOf(d).String())
-	case *ast.FuncDecl:
-		w.PutFuncDecl(mod, d)
-	case *ast.GenDecl:
-		w.PutGenDecl(mod, d)
-	}
-}
-
-// Emit code for a top-level function/method declaration, e.g.:
-// 	func f(a, b int) { ... }
-// 	func (x *T) f() { ... }
-// ast.FuncDecl godoc:
-// 	type FuncDecl struct {
-// 	    Doc  *CommentGroup // associated documentation; or nil
-// 	    Recv *FieldList    // receiver (methods); or nil (functions)
-// 	    Name *Ident        // function/method name
-// 	    Type *FuncType     // function signature: parameters, results, and position of "func" keyword
-// 	    Body *BlockStmt    // function body; or nil (forward declaration)
-// 	}
-func (w *Writer) PutFuncDecl(mod JModifier, n *ast.FuncDecl) {
-	if n.Recv == nil {
-		// main is special: need String[] args
-		if n.Name.Name == "main" {
-			w.PutMainDecl(n)
-		} else {
-			w.PutFunc(mod, n)
-		}
-	} else {
-		// ignore method, handled by CollectDefs.
-	}
-}
 
 // Emit the main function. Special case in PutFuncDecl.
 func (w *Writer) PutMainDecl(n *ast.FuncDecl) {
@@ -111,60 +73,6 @@ func (w *Writer) PutFunc(mod JModifier, f *ast.FuncDecl) {
 func (w *Writer) PutParams(names []*ast.Ident, types []JType) {
 	for i := range names {
 		w.Put(comma(i), types[i], " ", names[i])
-	}
-}
-
-// Emit a generic declaration (import, constant, type or variable)
-// with optional modifier
-// godoc:
-// 	type GenDecl struct {
-// 	    Doc    *CommentGroup // associated documentation; or nil
-// 	    TokPos token.Pos     // position of Tok
-// 	    Tok    token.Token   // IMPORT, CONST, TYPE, VAR
-// 	    Lparen token.Pos     // position of '(', if any
-// 	    Specs  []Spec
-// 	    Rparen token.Pos     // position of ')', if any
-// 	}
-// A GenDecl node (generic declaration node) represents an import,
-// constant, type or variable declaration. A valid Lparen position
-// (Lparen.Line > 0) indicates a parenthesized declaration.
-//
-// Relationship between Tok value and Specs element type:
-//
-// 	token.IMPORT  *ImportSpec
-// 	token.CONST   *ValueSpec
-// 	token.TYPE    *TypeSpec
-// 	token.VAR     *ValueSpec
-//
-func (w *Writer) PutGenDecl(mod JModifier, d *ast.GenDecl) {
-	switch d.Tok {
-	default:
-		Error(d, "cannot handle "+d.Tok.String())
-	case token.TYPE:
-		// do nothing. already handled by CollectDefs
-	case token.CONST:
-		w.PutValueSpecs(mod|FINAL, d.Specs)
-	case token.VAR:
-		w.PutValueSpecs(mod, d.Specs)
-	}
-}
-
-// Emit a list of *ast.ValueSpecs, e.g.:
-// 	var(
-// 		a int
-// 		b, c int
-// 	)
-// or
-// 	const(
-// 		a = 1
-// 		b, c = 2, 3
-// 	)
-// with optional modifier (e.g. "static", "final", "static final").
-// The concrete type of specs elements must be *ast.ValueSpec.
-func (w *Writer) PutValueSpecs(mod JModifier, specs []ast.Spec) {
-	for i, spec := range specs {
-		w.PutSemi(i)
-		w.PutValueSpec(mod, spec.(*ast.ValueSpec)) // doc says it's a valueSpec for Tok == VAR, CONST
 	}
 }
 

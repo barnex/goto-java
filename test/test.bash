@@ -3,6 +3,7 @@
 # test script for source files with main()
 # runs go and java sources and compares output
 
+GOPATH=$GOPATH:$(pwd)
 
 ./clean.bash
 failed=0
