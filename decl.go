@@ -48,9 +48,10 @@ func (w *writer) putSpec(s ast.Spec) {
 }
 
 func (w *writer) putValueSpec(s *ast.ValueSpec) {
-
+	// var with explicit type:
+	// put everything on one line, e.g.:
+	// 	int a = 1, b = 2
 	if s.Type != nil {
-		// explicit type
 		w.put(w.typeConv(w.typeOf(s.Type)))
 		for i, n := range s.Names {
 			w.put(" ", n.Name, " = ")
@@ -68,7 +69,10 @@ func (w *writer) putValueSpec(s *ast.ValueSpec) {
 		w.putInlineComment(s.Comment)
 		w.putln()
 	} else {
-		// infered type
+		// var with infered type:
+		// put specs on separate line, e.g.:
+		// 	int a = 1;
+		// 	String b = "";
 		for i, n := range s.Names {
 			w.put(w.typeConv(w.typeOf(n)))
 

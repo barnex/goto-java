@@ -58,7 +58,7 @@ func (w *writer) putAssignStmt(n *ast.AssignStmt) {
 			w.put(" ")
 		}
 		w.putExpr(n.Lhs[i])
-		w.put(tok)
+		w.put(" ", tok, " ")
 		w.putExpr(n.Rhs[i])
 		w.putln(";")
 	}
