@@ -5,20 +5,20 @@ import (
 	"reflect"
 )
 
-func (w *writer) putExpr(n ast.Expr) {
+func (w *writer) PutExpr(n ast.Expr) {
 	switch e := n.(type) {
 	default:
 		w.error(n, "cannot handle ", reflect.TypeOf(e))
 	case *ast.CallExpr:
-		w.putCallExpr(e)
+		w.PutCallExpr(e)
 	case *ast.Ident:
-		w.putIdent(e)
+		w.PutIdent(e)
 	case *ast.BasicLit:
-		w.putBasicLit(e)
+		w.PutBasicLit(e)
 	case *ast.BinaryExpr:
-		w.putBinaryExpr(e)
+		w.PutBinaryExpr(e)
 	case *ast.ParenExpr:
-		w.putParenExpr(e)
+		w.PutParenExpr(e)
 	}
 }
 
@@ -27,51 +27,51 @@ var keywordMap = map[string]string{
 	"print":   "System.out.print",
 }
 
-func (w *writer) putIdent(n *ast.Ident) {
+func (w *writer) PutIdent(n *ast.Ident) {
 	name := n.Name
 	// translate name if keyword
 	if trans, ok := keywordMap[name]; ok {
 		name = trans
 	}
-	w.put(name)
+	w.Put(name)
 }
 
-func (w *writer) putParenExpr(e *ast.ParenExpr) {
-	w.put("(")
-	w.putExpr(e.X)
-	w.put(")")
+func (w *writer) PutParenExpr(e *ast.ParenExpr) {
+	w.Put("(")
+	w.PutExpr(e.X)
+	w.Put(")")
 }
 
-func (w *writer) putBinaryExpr(b *ast.BinaryExpr) {
+func (w *writer) PutBinaryExpr(b *ast.BinaryExpr) {
 	// TODO: check unsupported ops
-	w.putExpr(b.X)
-	w.put(b.Op)
-	w.putExpr(b.Y)
+	w.PutExpr(b.X)
+	w.Put(b.Op)
+	w.PutExpr(b.Y)
 }
 
-func (w *writer) putCallExpr(n *ast.CallExpr) {
+func (w *writer) PutCallExpr(n *ast.CallExpr) {
 	if isBuiltinExpr(n.Fun) {
-		w.putBuiltinCall(n)
+		w.PutBuiltinCall(n)
 		return
 	}
 
-	w.putExpr(n.Fun)
+	w.PutExpr(n.Fun)
 
-	w.put("(")
+	w.Put("(")
 	for i, a := range n.Args {
 		if i != 0 {
-			w.put(",")
+			w.Put(",")
 		}
-		w.putExpr(a)
+		w.PutExpr(a)
 	}
-	w.put(")")
+	w.Put(")")
 
 	if n.Ellipsis != 0 {
 		w.error(n, "cannot handle ellipsis")
 	}
 }
 
-func (w *writer) putBasicLit(n *ast.BasicLit) {
-	w.put(n.Value)
+func (w *writer) PutBasicLit(n *ast.BasicLit) {
+	w.Put(n.Value)
 	// TODO: translate backquotes, complex etc.
 }

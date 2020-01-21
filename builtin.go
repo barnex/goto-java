@@ -13,17 +13,17 @@ func isBuiltinExpr(n ast.Expr) bool {
 	return false
 }
 
-func (w *writer) putBuiltinCall(n *ast.CallExpr) {
+func (w *writer) PutBuiltinCall(n *ast.CallExpr) {
 	name := n.Fun.(*ast.Ident).Name
 	switch name {
 	default:
 		w.error(n, "cannot handle builtin: ", name)
 	case "len":
-		w.putLenExpr(n)
+		w.PutLenExpr(n)
 	}
 }
 
-func (w *writer) putLenExpr(n *ast.CallExpr) {
+func (w *writer) PutLenExpr(n *ast.CallExpr) {
 	if len(n.Args) != 1 {
 		w.error(n, "too many arguments to len")
 	}

@@ -61,7 +61,7 @@ func handleFile(fname string) {
 		ast.Print(fset, f)
 	}
 
-	//// prepare output file
+	//// prepare outPut file
 	outFile := fname[:len(fname)-len(path.Ext(fname))]
 	out_, errOut := os.Create(outFile + ".java")
 	checkUserErr(errOut)
@@ -71,5 +71,5 @@ func handleFile(fname string) {
 
 	// transpile
 	w := &writer{out: out, fset: fset, info: info}
-	w.putClass(outFile, f)
+	w.PutClass(outFile, f)
 }

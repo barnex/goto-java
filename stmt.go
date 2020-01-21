@@ -6,42 +6,42 @@ import (
 	"reflect"
 )
 
-func (w *writer) putStmt(n ast.Stmt) {
+func (w *writer) PutStmt(n ast.Stmt) {
 	switch s := n.(type) {
 	default:
 		w.error(n, "cannot handle ", reflect.TypeOf(s))
 	case *ast.ExprStmt:
-		w.putExprStmt(s)
+		w.PutExprStmt(s)
 	case *ast.DeclStmt:
-		w.putDeclStmt(s)
+		w.PutDeclStmt(s)
 	case *ast.AssignStmt:
-		w.putAssignStmt(s)
+		w.PutAssignStmt(s)
 	}
 }
 
-func (w *writer) putBlockStmt(n *ast.BlockStmt) {
-	w.putln("{")
+func (w *writer) PutBlockStmt(n *ast.BlockStmt) {
+	w.Putln("{")
 	w.indent++
 
 	for _, n := range n.List {
-		w.putStmt(n)
+		w.PutStmt(n)
 	}
 
 	w.indent--
-	w.putln("}")
+	w.Putln("}")
 }
 
-func (w *writer) putDeclStmt(d *ast.DeclStmt) {
-	w.putDecl(d.Decl)
+func (w *writer) PutDeclStmt(d *ast.DeclStmt) {
+	w.PutDecl(d.Decl)
 }
 
-func (w *writer) putExprStmt(n *ast.ExprStmt) {
-	w.putExpr(n.X)
-	w.putln(";")
-	//w.putComment(n.Comment)
+func (w *writer) PutExprStmt(n *ast.ExprStmt) {
+	w.PutExpr(n.X)
+	w.Putln(";")
+	//w.PutComment(n.Comment)
 }
 
-func (w *writer) putAssignStmt(n *ast.AssignStmt) {
+func (w *writer) PutAssignStmt(n *ast.AssignStmt) {
 	if len(n.Lhs) != len(n.Rhs) {
 		w.error(n, "assignment count mismatch:", len(n.Lhs), "!=", len(n.Rhs))
 	}
@@ -54,11 +54,11 @@ func (w *writer) putAssignStmt(n *ast.AssignStmt) {
 
 	for i := range n.Lhs {
 		if n.Tok == token.DEFINE {
-			w.put(w.javaTypeOf(n.Rhs[i]), " ")
+			w.Put(w.javaTypeOf(n.Rhs[i]), " ")
 		}
-		w.putExpr(n.Lhs[i])
-		w.put(" ", tok, " ")
-		w.putExpr(n.Rhs[i])
-		w.putln(";")
+		w.PutExpr(n.Lhs[i])
+		w.Put(" ", tok, " ")
+		w.PutExpr(n.Rhs[i])
+		w.Putln(";")
 	}
 }

@@ -9,7 +9,7 @@ import (
 	"golang.org/x/tools/go/types"
 )
 
-// A writer takes AST nodes and outputs java source
+// A writer takes AST nodes and outPuts java source
 type writer struct {
 	out        io.Writer
 	indent     int
@@ -22,36 +22,36 @@ func NewWriter(out io.Writer) *writer {
 	return &writer{out: out}
 }
 
-// outputs a class with given name based on go file.
-func (w *writer) putClass(className string, f *ast.File) {
-	w.putln("package ", f.Name.Name, ";")
-	w.putln()
+// outPuts a class with given name based on go file.
+func (w *writer) PutClass(className string, f *ast.File) {
+	w.Putln("package ", f.Name.Name, ";")
+	w.Putln()
 
-	w.putln("public final class ", className, " {")
-	w.putln()
+	w.Putln("public final class ", className, " {")
+	w.Putln()
 	w.indent++
 
 	for _, d := range f.Decls {
-		w.putDecl(d)
+		w.PutDecl(d)
 	}
 
 	w.indent--
-	w.putln("}")
+	w.Putln("}")
 }
 
-func (w *writer) putln(tokens ...interface{}) {
-	w.put(append(tokens, "\n")...)
+func (w *writer) Putln(tokens ...interface{}) {
+	w.Put(append(tokens, "\n")...)
 	w.needIndent = true
 }
 
-func (w *writer) put(tokens ...interface{}) {
-	w.putIndent()
+func (w *writer) Put(tokens ...interface{}) {
+	w.PutIndent()
 	for _, t := range tokens {
 		fmt.Fprint(w.out, t)
 	}
 }
 
-func (w *writer) putIndent() {
+func (w *writer) PutIndent() {
 	if w.needIndent == false {
 		return
 	}

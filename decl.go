@@ -5,88 +5,88 @@ import (
 	"reflect"
 )
 
-func (w *writer) putDecl(d ast.Decl) {
+func (w *writer) PutDecl(d ast.Decl) {
 	switch d := d.(type) {
 	default:
 		panic("unhandled memeber type: " + reflect.TypeOf(d).String())
 	case *ast.FuncDecl:
-		w.putFuncDecl(d)
+		w.PutFuncDecl(d)
 	case *ast.GenDecl:
-		w.putGenDecl(d)
+		w.PutGenDecl(d)
 	}
 }
 
-func (w *writer) putFuncDecl(n *ast.FuncDecl) {
-	w.putDoc(n.Doc)
+func (w *writer) PutFuncDecl(n *ast.FuncDecl) {
+	w.PutDoc(n.Doc)
 	if n.Name.Name == "main" {
-		w.putMainDecl(n)
+		w.PutMainDecl(n)
 		return
 	}
 
 	panic("todo")
 }
 
-func (w *writer) putMainDecl(n *ast.FuncDecl) {
-	w.put("public static void ", n.Name.Name, "(String[] args)")
-	w.putBlockStmt(n.Body)
-	w.putln()
+func (w *writer) PutMainDecl(n *ast.FuncDecl) {
+	w.Put("public static void ", n.Name.Name, "(String[] args)")
+	w.PutBlockStmt(n.Body)
+	w.Putln()
 }
 
-func (w *writer) putGenDecl(d *ast.GenDecl) {
+func (w *writer) PutGenDecl(d *ast.GenDecl) {
 	for _, s := range d.Specs {
-		w.putSpec(s)
+		w.PutSpec(s)
 	}
 }
 
-func (w *writer) putSpec(s ast.Spec) {
+func (w *writer) PutSpec(s ast.Spec) {
 	switch s := s.(type) {
 	default:
 		w.error(s, "cannot handle ", reflect.TypeOf(s))
 	case *ast.ValueSpec:
-		w.putValueSpec(s)
+		w.PutValueSpec(s)
 	}
 }
 
-func (w *writer) putValueSpec(s *ast.ValueSpec) {
+func (w *writer) PutValueSpec(s *ast.ValueSpec) {
 	// var with explicit type:
-	// put everything on one line, e.g.:
+	// Put everything on one line, e.g.:
 	// 	int a = 1, b = 2
 	if s.Type != nil {
-		w.put(w.javaTypeOf(s.Type))
+		w.Put(w.javaTypeOf(s.Type))
 		for i, n := range s.Names {
-			w.put(" ", n.Name, " = ")
+			w.Put(" ", n.Name, " = ")
 			if i < len(s.Values) {
-				w.putExpr(s.Values[i])
+				w.PutExpr(s.Values[i])
 			} else {
-				w.put(n.Obj.Data) // TODO
+				w.Put(n.Obj.Data) // TODO
 			}
 
 			if i != len(s.Names)-1 {
-				w.put(", ")
+				w.Put(", ")
 			}
 		}
-		w.put(";")
-		w.putInlineComment(s.Comment)
-		w.putln()
+		w.Put(";")
+		w.PutInlineComment(s.Comment)
+		w.Putln()
 	} else {
 		// var with infered type:
-		// put specs on separate line, e.g.:
+		// Put specs on separate line, e.g.:
 		// 	int a = 1;
 		// 	String b = "";
 		for i, n := range s.Names {
-			w.put(w.javaTypeOf(n))
+			w.Put(w.javaTypeOf(n))
 
-			w.put(" ", n.Name, " = ")
+			w.Put(" ", n.Name, " = ")
 			if i < len(s.Values) {
-				w.putExpr(s.Values[i])
+				w.PutExpr(s.Values[i])
 			} else {
-				w.put(n.Obj.Data)
+				w.Put(n.Obj.Data)
 			}
-			w.put(";")
+			w.Put(";")
 			if i == 0 {
-				w.putInlineComment(s.Comment)
+				w.PutInlineComment(s.Comment)
 			}
-			w.putln()
+			w.Putln()
 		}
 	}
 }
