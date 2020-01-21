@@ -27,7 +27,7 @@ func (w *writer) putLenExpr(n *ast.CallExpr) {
 	if len(n.Args) != 1 {
 		w.error(n, "too many arguments to len")
 	}
-	argT := w.typeConv(w.typeOf(n.Args[0]))
+	argT := w.javaTypeOf(n.Args[0])
 	switch argT {
 	default:
 		w.error(n, "invalid argument (type ", argT, ")for len")

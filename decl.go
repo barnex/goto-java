@@ -52,13 +52,13 @@ func (w *writer) putValueSpec(s *ast.ValueSpec) {
 	// put everything on one line, e.g.:
 	// 	int a = 1, b = 2
 	if s.Type != nil {
-		w.put(w.typeConv(w.typeOf(s.Type)))
+		w.put(w.javaTypeOf(s.Type))
 		for i, n := range s.Names {
 			w.put(" ", n.Name, " = ")
 			if i < len(s.Values) {
 				w.putExpr(s.Values[i])
 			} else {
-				w.put(n.Obj.Data)
+				w.put(n.Obj.Data) // TODO
 			}
 
 			if i != len(s.Names)-1 {
@@ -74,7 +74,7 @@ func (w *writer) putValueSpec(s *ast.ValueSpec) {
 		// 	int a = 1;
 		// 	String b = "";
 		for i, n := range s.Names {
-			w.put(w.typeConv(w.typeOf(n)))
+			w.put(w.javaTypeOf(n))
 
 			w.put(" ", n.Name, " = ")
 			if i < len(s.Values) {

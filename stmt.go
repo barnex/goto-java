@@ -54,8 +54,7 @@ func (w *writer) putAssignStmt(n *ast.AssignStmt) {
 
 	for i := range n.Lhs {
 		if n.Tok == token.DEFINE {
-			w.put(w.typeConv(w.typeOf(n.Rhs[i])))
-			w.put(" ")
+			w.put(w.javaTypeOf(n.Rhs[i]), " ")
 		}
 		w.putExpr(n.Lhs[i])
 		w.put(" ", tok, " ")

@@ -6,17 +6,16 @@ import (
 	"golang.org/x/tools/go/types"
 )
 
-func (w *writer) typeOf(n ast.Expr) types.Type {
+func (w *writer) goTypeOf(n ast.Expr) types.Type {
 	t := w.info.TypeOf(n)
 	if t == nil {
 		w.error(n, "cannot infer type")
 	}
 	return t
-
 }
 
-func (w *writer) putTypeOf(n ast.Expr) {
-	w.put(w.typeConv(w.typeOf(n)))
+func (w *writer) javaTypeOf(n ast.Expr) string {
+	return w.toJavaType(w.goTypeOf(n))
 }
 
 var typeMap = map[string]string{
@@ -25,7 +24,7 @@ var typeMap = map[string]string{
 	"string":  "String",
 }
 
-func (w *writer) typeConv(t types.Type) string {
+func (w *writer) toJavaType(t types.Type) string {
 	orig := t.String()
 	if conv, ok := typeMap[orig]; ok {
 		return conv
